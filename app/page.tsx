@@ -92,9 +92,8 @@ const formatDate = (value: string) => {
 function PromoCard({ align }: { align: 'left' | 'right' }) {
   return (
     <div
-      className={`relative hidden w-full max-w-[340px] overflow-hidden rounded-[26px] border border-white/5 bg-gradient-to-b from-[#0f1b3e] via-[#0c1a3a] to-[#0b1a2f] p-6 text-white shadow-[0_20px_60px_rgba(9,15,30,0.65)] lg:block ${
-        align === 'right' ? 'lg:order-3' : 'lg:order-1'
-      }`}
+      className={`relative hidden w-full max-w-[340px] overflow-hidden rounded-[26px] border border-white/5 bg-gradient-to-b from-[#0f1b3e] via-[#0c1a3a] to-[#0b1a2f] p-6 text-white shadow-[0_20px_60px_rgba(9,15,30,0.65)] lg:block ${align === 'right' ? 'lg:order-3' : 'lg:order-1'
+        }`}
     >
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-24 top-10 h-56 w-56 rounded-full bg-cyan-400/20 blur-[90px]" />
@@ -254,7 +253,7 @@ export default function Home() {
       setSuccess('')
 
       try {
-        const response = await fetch('/api/auth/telegram', {
+        const response = await fetch('/api/auth/telegram-oauth', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -264,13 +263,13 @@ export default function Home() {
 
         const data = await response.json()
         if (!response.ok) {
-          throw new Error(data?.error || 'Telegram authentication failed.')
+          throw new Error(data?.error || 'Telegram OAuth authentication failed.')
         }
 
         await refreshUser()
         setSuccess(`Welcome, ${data?.user?.username || data?.user?.email || 'friend'}!`)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Telegram authentication failed.')
+        setError(err instanceof Error ? err.message : 'Telegram OAuth authentication failed.')
       } finally {
         setLoading(false)
       }
@@ -682,11 +681,10 @@ export default function Home() {
                         <button
                           key={tag.value}
                           type="button"
-                          className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${
-                            active
+                          className={`rounded-full border px-4 py-2 text-xs font-semibold transition ${active
                               ? 'border-primary bg-primary text-black'
                               : 'border-white/10 bg-white/5 text-white/60 hover:border-white/30'
-                          }`}
+                            }`}
                           onClick={() => toggleTag(tag.value)}
                         >
                           {tag.label}
