@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
   const menuItems = ['Agency', 'Blog', 'Conferences', 'Services', 'Forum', 'Partnership', 'Jobs'];
 
   return (
-    <footer className="w-full flex flex-col justify-center items-center gap-[32px] bg-[#0D0D0D] px-[100px] py-[32px] relative border-t border-[#666]">
+    <footer className="w-full max-w-[1280px] mx-auto flex flex-col justify-center items-center gap-[32px] bg-[#0D0D0D] px-5 relative border-t border-[#666]">
       <div className="flex justify-between items-start self-stretch py-[120px] pb-[56px] border-b border-[#666]">
         {/* Logo Section */}
         <div className="flex flex-col items-start gap-[56px]">

@@ -63,9 +63,13 @@ const ServicesPage: React.FC = () => {
             brand: 'Dolphin',
             logo: (
                 <div className="relative w-[56px] h-[56px] flex items-center justify-center">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 5C11.7157 5 5 11.7157 5 20C5 28.2843 11.7157 35 20 35C28.2843 35 35 28.2843 35 20C35 11.7157 28.2843 5 20 5ZM28 22H12V18H28V22Z" fill="#06DF73" />
-                    </svg>
+                    <Image
+                        src="/dolphin.svg"
+                        alt="Dolphin{anty}"
+                        width={56}
+                        height={56}
+                        className="object-contain"
+                    />
                 </div>
             )
         }

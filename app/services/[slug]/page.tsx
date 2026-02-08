@@ -53,7 +53,7 @@ const ServiceDetailPage: React.FC = () => {
             price: '10',
             period: '/month',
             description: 'Dolphin{anty} is a next-generation anti-detection browser built to simplify and protect multi-accounting. It replaces…',
-            logo: '/images/dolphin-logo.webp'
+            logo: '/dolphin.svg'
         },
         {
             id: 2,

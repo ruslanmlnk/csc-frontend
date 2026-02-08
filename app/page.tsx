@@ -6,6 +6,8 @@ import CoreValues from './components/CoreValues';
 import LatestPosts from './components/LatestPosts';
 import UsefulServices from './components/UsefulServices';
 import PartnershipPrograms from './components/PartnershipPrograms';
+import Vacancies from './components/Vacancies';
+import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 
 const Home: React.FC = () => {
@@ -18,6 +20,8 @@ const Home: React.FC = () => {
       <LatestPosts />
       <UsefulServices />
       <PartnershipPrograms />
+      <Vacancies />
+      <ContactForm />
       <Footer />
     </main>
   );

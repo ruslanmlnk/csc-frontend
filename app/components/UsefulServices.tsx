@@ -18,8 +18,8 @@ const UsefulServices: React.FC = () => {
                     <path d="M61.6879 32.5137V22.9041L62.931 26.1968L52.5823 8.99365H58.3614L66.291 22.1985H62.9647L70.9279 8.99365H76.2703L65.9214 26.1968L67.131 22.9041V32.5137H61.6879Z" fill="white" />
                 </svg>
             ),
-            pricing: '10/week, 28/month',
-            offer: 'CLICKSTORM offers a 15% discount on...',
+            pricing: '$ 10/week, 28/month',
+            offer: '(CLICKSTORM offers a 15% discount on...)',
             offerBrand: 'Clickstorm'
         },
         {
@@ -38,9 +38,9 @@ const UsefulServices: React.FC = () => {
                     <path d="M4.07954 23.7825C3.73898 23.7825 3.41033 23.8256 3.09357 23.9C1.196 24.3461 -0.218262 26.0459 -0.218262 28.0803C-0.218262 29.9734 1.00713 31.5765 2.70692 32.1505C3.13818 32.2963 3.59919 32.3781 4.08102 32.3781C6.45448 32.3781 8.37882 30.4537 8.37882 28.0803C8.37882 25.7068 6.45448 23.7825 4.07954 23.7825Z" fill="white" />
                 </svg>
             ),
-            pricing: '10/week, 28/month',
-            offer: 'CLICKSTORM offers a 15% discount on...',
-            offerBrand: 'CLICKSTORM'
+            pricing: '$ 1,65/month',
+            offer: '(CSC - 15% discount on RU versions)',
+            offerBrand: 'CSC'
         },
         {
             name: 'Dolphin{anty}',
@@ -48,58 +48,74 @@ const UsefulServices: React.FC = () => {
             description: 'Dolphin{anty} is a next-generation anti-detection browser built to simplify and protect multi-accounting.',
             logo: (
                 <div className="relative w-[56px] h-[56px] flex items-center justify-center">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M20 5C11.7157 5 5 11.7157 5 20C5 28.2843 11.7157 35 20 35C28.2843 35 35 28.2843 35 20C35 11.7157 28.2843 5 20 5ZM28 22H12V18H28V22Z" fill="#06DF73" />
-                    </svg>
+                    <Image
+                        src="/dolphin.svg"
+                        alt="Dolphin{anty}"
+                        width={56}
+                        height={56}
+                        className="object-contain"
+                    />
                 </div>
             ),
-            pricing: '10/month',
+            pricing: '$ 10/month',
             offer: '',
             offerBrand: 'Dolphin'
         }
     ];
 
     return (
-        <section className="w-full py-[120px] px-[100px] flex flex-col gap-16 bg-[#0D0D0D]">
-            <div className="flex justify-between items-center w-full">
-                <h2 className="font-['Poppins'] text-[80px] font-medium leading-[88px] tracking-[-3.2px] text-transparent bg-clip-text bg-gradient-to-b from-white to-[#999]">
+        <section className="w-full px-5 flex flex-col gap-16 bg-[#0D0D0D] max-w-[1280px] mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center w-full gap-8">
+                <h2 className="font-['Poppins'] text-[32px] md:text-[56px] font-medium leading-tight md:leading-[72px] tracking-[-1.28px] md:tracking-[-2.24px] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-[#999] text-center md:text-left">
                     Useful Services
                 </h2>
-                <button className="flex py-[18px] px-[32px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[18px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all">
+                <button className="flex py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95">
                     See More
                 </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
                 {services.map((service, index) => (
-                    <div key={index} className="flex p-8 flex-col justify-center items-start gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group hover:border-[#F29F04] transition-all">
-                        <div className="flex justify-between items-center w-full h-[56px]">
-                            {service.logo}
-                            <div className="px-3 py-1.5 rounded-[80px] border border-[#B3B3B3] text-[#B3B3B3] text-[14px] uppercase">
+                    <div key={index} className="flex p-[32px] flex-col gap-[32px] rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group hover:border-[#F29F04] transition-all">
+                        <div className="flex items-center w-full justify-between h-[56px]">
+                            <div className="flex items-center">
+                                {service.logo}
+                            </div>
+                            <div className="flex px-[12px] py-[6px] justify-center items-center gap-[10px] rounded-[80px] border border-[rgba(179,179,179,0.5)] text-[#B3B3B3] text-[14px] font-normal leading-[16px]">
                                 {service.category}
                             </div>
                         </div>
 
-                        <div className="flex flex-col gap-4 self-stretch">
-                            <h3 className="text-white text-[24px] font-semibold leading-[32px]">{service.name}</h3>
-                            <p className="text-[#BDBDBD] text-[16px] leading-[26px] h-20 line-clamp-3">
+                        <div className="flex flex-col gap-[12px] self-stretch">
+                            <h3 className="text-white text-[20px] font-medium leading-[32px]">{service.name}</h3>
+                            <p className="text-[#BDBDBD] text-[16px] font-normal leading-[26px]">
                                 {service.description}
                             </p>
                         </div>
 
-                        <div className="flex flex-col gap-4 pt-4 border-t border-white/10 self-stretch">
-                            <div className="flex items-center gap-2">
-                                <span className="text-white text-[24px] font-semibold">{service.pricing.split('/')[0]}</span>
-                                <span className="text-[#666] text-[20px]">/{service.pricing.split('/')[1]}</span>
+                        <div className="flex flex-col gap-[30px] self-stretch">
+                            <div className="flex items-center gap-1 flex-wrap ml-[3px]">
+                                {service.pricing.split(', ').map((part, i) => {
+                                    const [amount, period] = part.split('/');
+                                    return (
+                                        <React.Fragment key={i}>
+                                            {i > 0 && <span className="text-white text-[20px] font-semibold leading-[32px]">, </span>}
+                                            <span className="text-white text-[20px] font-semibold leading-[32px]">{amount}</span>
+                                            {period && (
+                                                <span className="text-[#666] text-[20px] font-semibold leading-[32px]">/{period}</span>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
                             </div>
 
-                            {service.offer && (
-                                <div className="flex justify-between items-center">
-                                    <div className="px-3 py-1 rounded-[80px] border border-[#06DF73] text-[#06DF73] text-[14px] uppercase tracking-wider font-semibold">
+                            {service.offerBrand && (
+                                <div className="flex justify-between items-center gap-4 w-full">
+                                    <div className="flex h-[32px] px-[12px] justify-center items-center gap-[10px] rounded-[80px] border border-[#06DF73] text-[#06DF73] text-[14px] font-normal leading-[16px] uppercase shrink-0">
                                         {service.offerBrand}
                                     </div>
-                                    <span className="text-[#BDBDBD] text-[14px] text-right max-w-[200px] italic">
-                                        ({service.offer})
+                                    <span className="text-[#BDBDBD] text-[14px] font-normal leading-[16px] text-right">
+                                        {service.offer || ''}
                                     </span>
                                 </div>
                             )}
