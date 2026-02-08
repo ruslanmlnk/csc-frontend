@@ -109,3 +109,14 @@ body {
 .animate-fade-in {
   animation: fadeIn 0.8s ease forwards;
 }
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
