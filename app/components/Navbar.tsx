@@ -19,12 +19,12 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav className="flex w-full items-center justify-between px-6 py-8 md:px-20 relative z-50 bg-[#0D0D0D]">
+    <nav className="flex w-full max-w-[1320px] mx-auto items-center justify-between px-[20px] py-8 relative z-50 bg-[#0D0D0D]">
       {/* Logo */}
       <Link href="/" className="flex items-center gap-3 flex-shrink-0 cursor-pointer">
         <svg width="40" height="30" viewBox="0 0 40 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M10 5L20 25L30 5" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-          <circle cx="20" cy="15" r="3" fill="#F29F04"/>
+          <path d="M10 5L20 25L30 5" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="20" cy="15" r="3" fill="#F29F04" />
         </svg>
         <span className="text-xl font-semibold tracking-wide text-white hidden sm:block">Inferra</span>
       </Link>
@@ -35,9 +35,8 @@ const Navbar: React.FC = () => {
           <Link
             key={link.name}
             href={link.path}
-            className={`text-base font-normal transition-colors duration-300 ${
-              link.active ? 'text-white' : 'text-[#BDBDBD] hover:text-white'
-            }`}
+            className={`text-base font-normal transition-colors duration-300 ${link.active ? 'text-white' : 'text-[#BDBDBD] hover:text-white'
+              }`}
           >
             {link.name}
           </Link>

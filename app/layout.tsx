@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
-import { Manrope, Space_Grotesk } from "next/font/google";
+import { Poppins, Poltawski_Nowy } from "next/font/google";
 import "./globals.css";
-import Footer from "./components/Footer";
-import Navbar from "./components/Navbar";
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-display",
+const poppins = Poppins({
+  variable: "--font-poppins",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
-const manrope = Manrope({
-  variable: "--font-body",
+const poltawskiNowy = Poltawski_Nowy({
+  variable: "--font-poltawski",
   subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
-  title: "CSC Agency | Performance Marketing",
-  description: "Scaling traffic with data-driven decisions.",
+  title: "Inferra | Scaling traffic with data-driven decisions",
+  description: "We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics.",
 };
 
 export default function RootLayout({
@@ -27,12 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${spaceGrotesk.variable} ${manrope.variable} antialiased`}
+        className={`${poppins.variable} ${poltawskiNowy.variable} antialiased font-poppins bg-[#0D0D0D] text-white`}
       >
-        <Navbar />
         {children}
-
-        <Footer />
       </body>
     </html>
   );
