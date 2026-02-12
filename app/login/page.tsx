@@ -6,17 +6,13 @@ import Image from "next/image";
 import { Eye, EyeOff, Send } from "lucide-react";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import BackgroundEffects from "../components/BackgroundEffects";
 
-const RegisterPage = () => {
+const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const [formData, setFormData] = useState({
-        login: "",
         email: "",
         password: "",
-        confirmPassword: "",
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,8 +22,7 @@ const RegisterPage = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        console.log("Registration attempt with:", formData);
-        // Add registration logic here
+        console.log("Login attempt with:", formData);
     };
 
     return (
@@ -69,10 +64,10 @@ const RegisterPage = () => {
             <Header />
 
             {/* Main Content */}
-            <section className="relative pt-[162.49px] pb-[80px] flex flex-col items-center px-5 min-h-screen z-10">
+            <section className="relative pt-[120px] pb-[80px] flex flex-col items-center px-5 min-h-screen z-10">
                 <div className="w-full max-w-[1320px] flex flex-col items-center">
 
-                    <div className="flex flex-col xl:flex-row w-full items-center xl:items-start justify-center gap-[34px]">
+                    <div className="flex flex-col xl:flex-row w-full items-center xl:items-start justify-center gap-10">
                         {/* Sidebar Image Left - Desktop Only */}
                         <div className="hidden xl:block w-[386px] h-[732px] relative rounded-[20px] overflow-hidden border border-white/10 group">
                             <Image
@@ -83,34 +78,18 @@ const RegisterPage = () => {
                             />
                         </div>
 
-                        {/* Registration Card - Precise Figma Implementation */}
+                        {/* Login Card - Precise Figma Implementation */}
                         <div className="w-full max-w-[440px] p-8 md:p-[34px_32px] rounded-2xl border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] animate-fadeIn">
                             <div className="flex flex-col gap-2 mb-8">
                                 <h1 className="text-[24px] font-medium text-white font-poppins leading-[32px]">
-                                    Create an account
+                                    Welcome back!
                                 </h1>
                                 <p className="text-[14px] text-white/60 font-poppins leading-[16px]">
-                                    Enter details to create an account
+                                    Sign in to continue to your account
                                 </p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                                {/* Login Input */}
-                                <div className="flex flex-col gap-4">
-                                    <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Login</label>
-                                    <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center">
-                                        <input
-                                            type="text"
-                                            name="login"
-                                            value={formData.login}
-                                            onChange={handleChange}
-                                            placeholder="Mellaile"
-                                            className="w-full bg-transparent text-white font-poppins text-base focus:outline-none"
-                                            required
-                                        />
-                                    </div>
-                                </div>
-
                                 {/* Email Input */}
                                 <div className="flex flex-col gap-4">
                                     <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Email</label>
@@ -129,7 +108,12 @@ const RegisterPage = () => {
 
                                 {/* Password Input */}
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Password</label>
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Password</label>
+                                        <Link href="/forgot-password" className="text-[14px] text-white font-medium font-poppins hover:underline">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
                                     <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center justify-between">
                                         <input
                                             type={showPassword ? "text" : "password"}
@@ -149,44 +133,22 @@ const RegisterPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Confirm Password Input */}
-                                <div className="flex flex-col gap-4">
-                                    <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Confirm Password</label>
-                                    <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center justify-between">
-                                        <input
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            name="confirmPassword"
-                                            value={formData.confirmPassword}
-                                            onChange={handleChange}
-                                            className="w-full bg-transparent text-white font-poppins text-base focus:outline-none pr-4"
-                                            required
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="text-[#757575] hover:text-white transition-colors"
-                                        >
-                                            {showConfirmPassword ? <EyeOff size={24} /> : <Eye size={24} />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <button type="submit" className="w-full h-[50px] rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-medium font-poppins text-base hover:opacity-90 transition-opacity">
-                                    Create Account
+                                <button type="submit" className="w-full h-[50px] rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-medium font-poppins text-base hover:opacity-90 transition-opacity mt-2">
+                                    Sign In
                                 </button>
                             </form>
 
                             <div className="mt-8 text-center text-sm">
-                                <span className="text-white/80 font-poppins">Already have an account? </span>
-                                <Link href="/login" className="text-[#F29F04] font-medium hover:underline font-poppins">
-                                    Log In
+                                <span className="text-white/80 font-poppins">Don't have an account? </span>
+                                <Link href="/register" className="text-[#F29F04] font-medium hover:underline font-poppins">
+                                    Sign Up
                                 </Link>
                             </div>
 
                             {/* Precise Figma OR Divider */}
-                            <div className="flex items-center gap-5 my-8 leading-[20px]">
+                            <div className="flex items-center gap-5 my-8">
                                 <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(90deg, #0D0D0D -14.69%, #FCC660 100%)" }} />
-                                <span className="text-sm text-white/60 font-poppins uppercase leading-[20px]">OR</span>
+                                <span className="text-sm text-white/60 font-poppins uppercase">OR</span>
                                 <div className="flex-1 h-[1px]" style={{ background: "linear-gradient(270deg, #0D0D0D -14.69%, #FCC660 100%)" }} />
                             </div>
 
@@ -194,7 +156,7 @@ const RegisterPage = () => {
                             <button className="w-full h-[50px] rounded-[80px] flex items-center justify-center gap-[10px] text-white font-poppins text-sm hover:opacity-90 transition-opacity border border-[rgba(74,74,74,0.7)]"
                                 style={{ background: "linear-gradient(90deg, #4B8AFF 0%, #0F1F3E 100%)" }}>
                                 <Send size={20} className="fill-white" />
-                                Sign up via Telegram
+                                Continue with Telegram
                             </button>
                         </div>
 
@@ -226,4 +188,4 @@ const RegisterPage = () => {
     );
 };
 
-export default RegisterPage;
+export default LoginPage;
