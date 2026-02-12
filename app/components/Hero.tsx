@@ -1,13 +1,29 @@
 import React from 'react';
 import Image from 'next/image';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  data?: {
+    badgeText?: string;
+    title?: string;
+    subtitle?: string;
+    primaryButtonText?: string;
+    secondaryButtonText?: string;
+    backgroundImage?: {
+      url?: string;
+    };
+    bottomGraphic?: {
+      url?: string;
+    };
+  };
+}
+
+const Hero: React.FC<HeroProps> = ({ data }) => {
   return (
     <section className="relative w-full min-h-[907px] bg-[#1A1A1A] flex flex-col items-center overflow-hidden">
       {/* --- Background Image & Effects --- */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/hero-bg.png"
+          src={data?.backgroundImage?.url || "/images/hero-bg.png"}
           alt="Hero Background"
           fill
           className="object-cover object-center brightness-[0.8] !h-auto"
@@ -30,7 +46,7 @@ const Hero: React.FC = () => {
               style={{ width: '345px', height: '48px', padding: '12px 18px 12px 12px' }}
             >
               <span className="text-white font-poppins font-normal text-[14px] leading-[16px] whitespace-nowrap">
-                Inferra — built on data, driven by profit
+                {data?.badgeText || "Inferra — built on data, driven by profit"}
               </span>
             </div>
 
@@ -42,7 +58,7 @@ const Hero: React.FC = () => {
               text-transparent bg-clip-text bg-gradient-to-b from-white to-[#999] 
               drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]
             ">
-              Scaling traffic with data-driven decisions
+              {data?.title || "Scaling traffic with data-driven decisions"}
             </h1>
 
             {/* Subheadline */}
@@ -52,18 +68,18 @@ const Hero: React.FC = () => {
               leading-[26px] text-[#BDBDBD] 
               drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]
             ">
-              We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics. Our focus is on stable ROI, scalable funnels, and long-term results — not short-term hacks.
+              {data?.subtitle || "We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics. Our focus is on stable ROI, scalable funnels, and long-term results — not short-term hacks."}
             </p>
           </div>
 
           {/* Button Container (Gap 24 from Figma) */}
           <div className="flex flex-col sm:flex-row items-center gap-[24px]">
             <button className="flex items-center justify-center w-[180px] h-[50px] bg-[#F29F04] rounded-[80px] text-[#0D0D0D] font-medium text-[16px] leading-[26px] transition-all hover:brightness-110 active:scale-95 shadow-[0_0_20px_rgba(242,159,4,0.4)]">
-              Become a partner
+              {data?.primaryButtonText || "Become a partner"}
             </button>
 
             <button className="flex items-center justify-center w-[180px] h-[50px] border border-[#FCC660] rounded-[80px] text-[#FCC660] font-medium text-[16px] leading-[26px] transition-all hover:bg-[#FCC660]/10 active:scale-95">
-              Join the team
+              {data?.secondaryButtonText || "Join the team"}
             </button>
           </div>
         </div>
@@ -71,7 +87,7 @@ const Hero: React.FC = () => {
         {/* Bottom Hero Image (Image 7 in Figma) */}
         <div className="relative mt-[137.93px] w-full max-w-[1240px] h-[158px] rounded-[40px] overflow-hidden shadow-2xl">
           <Image
-            src="/images/hero-graphic.webp"
+            src={data?.bottomGraphic?.url || "/images/hero-graphic.webp"}
             alt="Hero Graphic"
             fill
             className="object-cover"
