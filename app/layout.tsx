@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   description: "We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics.",
 };
 
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +32,9 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${poltawskiNowy.variable} antialiased font-poppins bg-[#0D0D0D] text-white`}
       >
+        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

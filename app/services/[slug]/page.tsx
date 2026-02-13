@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -73,7 +71,6 @@ const ServiceDetailPage: React.FC = () => {
 
     return (
         <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins">
-            <Header />
 
             <div className="flex flex-col pt-32 px-[100px] gap-20">
                 {/* Back Link */}
@@ -240,7 +237,6 @@ const ServiceDetailPage: React.FC = () => {
                 </div>
             </div>
 
-            <Footer />
         </main>
     );
 };

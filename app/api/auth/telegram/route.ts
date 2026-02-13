@@ -1,6 +1,8 @@
-﻿import crypto from 'crypto'
+import crypto from 'crypto'
 import { NextResponse } from 'next/server'
-import { getBackendUrl, setAuthCookie } from '@/lib/auth-server'
+import { setAuthCookie } from '@/lib/auth-server'
+import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { createUser, loginUser } from '@/lib/backend/users'
 import { isValidUsername } from '@/lib/validators'
 
 type TelegramPayload = {
@@ -77,70 +79,43 @@ export async function POST(request: Request) {
   const email = `tg_${telegramId}@telegram.local`
   const username = payload.username && isValidUsername(payload.username) ? payload.username : `tg${telegramId}`
 
-  const loginResponse = await fetch(`${getBackendUrl()}/api/users/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
+  let loginResult = await loginUser({ email, password })
 
-  let loginData = await loginResponse.json().catch(() => null)
-
-  if (!loginResponse.ok) {
-    const createResponse = await fetch(`${getBackendUrl()}/api/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        username,
-        authProvider: 'telegram',
-        telegramId,
-        telegramUsername: payload.username,
-        telegramFirstName: payload.first_name,
-        telegramLastName: payload.last_name,
-        telegramPhotoUrl: payload.photo_url,
-      }),
+  if (!loginResult.ok) {
+    const createResult = await createUser({
+      email,
+      password,
+      username,
+      authProvider: 'telegram',
+      telegramId,
+      telegramUsername: payload.username,
+      telegramFirstName: payload.first_name,
+      telegramLastName: payload.last_name,
+      telegramPhotoUrl: payload.photo_url,
     })
 
-    const createData = await createResponse.json().catch(() => null)
-
-    if (!createResponse.ok) {
+    if (!createResult.ok) {
       return NextResponse.json(
         {
-          error:
-            createData?.errors?.[0]?.message ||
-            createData?.message ||
-            'Unable to create Telegram account.',
+          error: getBackendErrorMessage(createResult.data, 'Unable to create Telegram account.'),
         },
-        { status: createResponse.status }
+        { status: createResult.status },
       )
     }
 
-    const retryLogin = await fetch(`${getBackendUrl()}/api/users/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    })
+    loginResult = await loginUser({ email, password })
 
-    loginData = await retryLogin.json().catch(() => null)
-
-    if (!retryLogin.ok) {
+    if (!loginResult.ok) {
       return NextResponse.json(
-        { error: loginData?.errors?.[0]?.message || loginData?.message || 'Telegram login failed.' },
-        { status: retryLogin.status }
+        { error: getBackendErrorMessage(loginResult.data, 'Telegram login failed.') },
+        { status: loginResult.status },
       )
     }
   }
 
-  const res = NextResponse.json({ user: loginData?.user ?? null })
-  if (loginData?.token) {
-    setAuthCookie(res, loginData.token)
+  const res = NextResponse.json({ user: loginResult.data?.user ?? null })
+  if (loginResult.data?.token) {
+    setAuthCookie(res, loginResult.data.token)
   }
   return res
 }

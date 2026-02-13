@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff, Send } from "lucide-react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+
 import BackgroundEffects from "../components/BackgroundEffects";
 
 const RegisterPage = () => {
@@ -89,7 +88,6 @@ const RegisterPage = () => {
                 </div>
             </div>
 
-            <Header />
 
             {/* Main Content */}
             <section className="relative pt-[162.49px] pb-[80px] flex flex-col items-center px-5 min-h-screen z-10">
@@ -244,7 +242,7 @@ const RegisterPage = () => {
                 </div>
             </section>
 
-            <Footer />
+
         </main>
     );
 };

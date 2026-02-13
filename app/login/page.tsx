@@ -4,8 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, EyeOff, Send } from "lucide-react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+
 
 const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -80,7 +79,6 @@ const LoginPage = () => {
                 </div>
             </div>
 
-            <Header />
 
             {/* Main Content */}
             <section className="relative pt-[120px] pb-[80px] flex flex-col items-center px-5 min-h-screen z-10">
@@ -202,7 +200,7 @@ const LoginPage = () => {
                 </div>
             </section>
 
-            <Footer />
+
         </main>
     );
 };

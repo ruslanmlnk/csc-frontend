@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { Search, MapPin, Briefcase, User, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import Footer from '../components/Footer';
 import BackgroundEffects from '../components/BackgroundEffects';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -165,7 +164,7 @@ const Jobs: React.FC = () => {
           Build your career in performance marketing
         </h1>
         <p className="text-[#BDBDBD] text-base md:text-lg max-w-[720px] font-light leading-[26px]">
-          Join a team working with real traffic, real budgets, and real impact. 
+          Join a team working with real traffic, real budgets, and real impact.
           We’re looking for media buyers, analysts, creatives, and tech specialists ready to grow fast.
         </p>
       </div>
@@ -189,8 +188,8 @@ const Jobs: React.FC = () => {
             <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#9E9E9E]">
               <Search className="w-6 h-6" />
             </div>
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by job vacancy"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -239,9 +238,8 @@ const Jobs: React.FC = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-12 h-12 rounded-full flex items-center justify-center font-medium text-xl transition-colors ${
-                    currentPage === i + 1 ? 'bg-[#F29F04] text-[#070707]' : 'border-2 border-[#4A4A4A]/70 text-[#A5A5A5] hover:border-[#F29F04] hover:text-[#F29F04]'
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center font-medium text-xl transition-colors ${currentPage === i + 1 ? 'bg-[#F29F04] text-[#070707]' : 'border-2 border-[#4A4A4A]/70 text-[#A5A5A5] hover:border-[#F29F04] hover:text-[#F29F04]'
+                    }`}
                 >
                   {i + 1}
                 </button>

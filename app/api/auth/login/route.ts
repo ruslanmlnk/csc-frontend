@@ -1,5 +1,7 @@
-﻿import { NextResponse } from 'next/server'
-import { getBackendUrl, setAuthCookie } from '@/lib/auth-server'
+import { NextResponse } from 'next/server'
+import { setAuthCookie } from '@/lib/auth-server'
+import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { loginUser } from '@/lib/backend/users'
 import { isValidEmail, isValidPassword } from '@/lib/validators'
 
 export async function POST(request: Request) {
@@ -11,25 +13,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid email or password.' }, { status: 400 })
   }
 
-  const response = await fetch(`${getBackendUrl()}/api/users/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
+  const { ok, status, data } = await loginUser({ email, password })
 
-  const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
+  if (!ok) {
     return NextResponse.json(
       {
-        error:
-          data?.errors?.[0]?.message ||
-          data?.message ||
-          'Invalid email or password.',
+        error: getBackendErrorMessage(data, 'Invalid email or password.'),
       },
-      { status: response.status }
+      { status },
     )
   }
 

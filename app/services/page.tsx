@@ -1,8 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import Image from 'next/image';
 
 const ServicesPage: React.FC = () => {
@@ -77,7 +75,6 @@ const ServicesPage: React.FC = () => {
 
     return (
         <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins">
-            <Header />
 
             {/* Top Section */}
             <section className="relative w-full h-[646px] flex flex-col items-center pt-[120px] px-[100px] overflow-hidden">
@@ -235,7 +232,6 @@ const ServicesPage: React.FC = () => {
                 </div>
             </section>
 
-            <Footer />
         </main>
     );
 };

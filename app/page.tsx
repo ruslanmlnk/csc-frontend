@@ -1,5 +1,4 @@
 import React from 'react';
-import Header from './components/Header';
 import Hero from './components/Hero';
 import AboutUs from './components/AboutUs';
 import CoreValues from './components/CoreValues';
@@ -8,7 +7,6 @@ import UsefulServices from './components/UsefulServices';
 import PartnershipPrograms from './components/PartnershipPrograms';
 import Vacancies from './components/Vacancies';
 import ContactForm from './components/ContactForm';
-import Footer from './components/Footer';
 import { client } from './lib/graphql';
 import { gql } from 'graphql-request';
 import { Metadata } from 'next';
@@ -55,7 +53,6 @@ const Home: React.FC = async () => {
 
   return (
     <main className="flex flex-col w-full min-h-screen">
-      <Header />
       <Hero data={sections?.hero} />
       <AboutUs />
       <CoreValues />
@@ -64,7 +61,6 @@ const Home: React.FC = async () => {
       <PartnershipPrograms />
       <Vacancies />
       <ContactForm />
-      <Footer />
     </main>
   );
 };

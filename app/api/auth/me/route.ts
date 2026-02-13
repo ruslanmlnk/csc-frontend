@@ -1,6 +1,6 @@
-﻿import { cookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getBackendUrl } from '@/lib/auth-server'
+import { getCurrentUser, normalizeMeUser } from '@/lib/backend/users'
 
 export async function GET() {
   const cookieStore = await cookies()
@@ -10,18 +10,11 @@ export async function GET() {
     return NextResponse.json({ user: null }, { status: 200 })
   }
 
-  const response = await fetch(`${getBackendUrl()}/api/users/me`, {
-    headers: {
-      Authorization: `JWT ${token}`,
-    },
-    cache: 'no-store',
-  })
+  const { ok, status, data } = await getCurrentUser(token)
 
-  const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    return NextResponse.json({ user: null }, { status: response.status })
+  if (!ok) {
+    return NextResponse.json({ user: null }, { status })
   }
 
-  return NextResponse.json({ user: data?.user ?? data ?? null })
+  return NextResponse.json({ user: normalizeMeUser(data) })
 }

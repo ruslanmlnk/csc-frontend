@@ -1,6 +1,7 @@
-﻿import { cookies } from 'next/headers'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getBackendUrl } from '@/lib/auth-server'
+import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { createThread, getThreads } from '@/lib/backend/threads'
 
 type ThreadPayload = {
   title: string
@@ -14,14 +15,10 @@ export async function GET(request: Request) {
   const page = searchParams.get('page') || '1'
   const limit = searchParams.get('limit') || '12'
 
-  const response = await fetch(`${getBackendUrl()}/api/threads?page=${page}&limit=${limit}&sort=-createdAt`, {
-    cache: 'no-store',
-  })
+  const { ok, status, data } = await getThreads({ page, limit })
 
-  const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    return NextResponse.json({ error: data?.message || 'Unable to load threads.' }, { status: response.status })
+  if (!ok) {
+    return NextResponse.json({ error: getBackendErrorMessage(data, 'Unable to load threads.') }, { status })
   }
 
   return NextResponse.json(data)
@@ -40,24 +37,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'All required fields must be filled.' }, { status: 400 })
   }
 
-  const response = await fetch(`${getBackendUrl()}/api/threads`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `JWT ${token}`,
-    },
-    body: JSON.stringify({
-      title: body.title,
-      category: body.category,
-      tags: body.tags || [],
-      content: body.content,
-    }),
+  const { ok, status, data } = await createThread(token, {
+    title: body.title,
+    category: body.category,
+    tags: body.tags || [],
+    content: body.content,
   })
 
-  const data = await response.json().catch(() => null)
-
-  if (!response.ok) {
-    return NextResponse.json({ error: data?.errors?.[0]?.message || data?.message || 'Unable to create thread.' }, { status: response.status })
+  if (!ok) {
+    return NextResponse.json(
+      { error: getBackendErrorMessage(data, 'Unable to create thread.') },
+      { status },
+    )
   }
 
   return NextResponse.json(data)

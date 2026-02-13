@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
-import { getBackendUrl, setAuthCookie } from '@/lib/auth-server'
+import { setAuthCookie } from '@/lib/auth-server'
+import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { createUser, loginUser } from '@/lib/backend/users'
 import { isValidEmail, isValidPassword } from '@/lib/validators'
 
 export async function POST(request: Request) {
@@ -19,53 +21,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
   }
 
-  const createResponse = await fetch(`${getBackendUrl()}/api/users`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      email,
-      password,
-    }),
+  const createResult = await createUser({
+    email,
+    password,
   })
 
-  const createData = await createResponse.json().catch(() => null)
-
-  if (!createResponse.ok) {
+  if (!createResult.ok) {
     return NextResponse.json(
       {
-        error:
-          createData?.errors?.[0]?.message ||
-          createData?.message ||
-          'Unable to create account.',
+        error: getBackendErrorMessage(createResult.data, 'Unable to create account.'),
       },
-      { status: createResponse.status }
+      { status: createResult.status },
     )
   }
 
-  const loginResponse = await fetch(`${getBackendUrl()}/api/users/login`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
+  const loginResult = await loginUser({ email, password })
 
-  const loginData = await loginResponse.json().catch(() => null)
-
-  if (!loginResponse.ok) {
+  if (!loginResult.ok) {
     return NextResponse.json(
       {
-        error: loginData?.errors?.[0]?.message || loginData?.message || 'Login failed after registration.',
+        error: getBackendErrorMessage(loginResult.data, 'Login failed after registration.'),
       },
-      { status: loginResponse.status }
+      { status: loginResult.status },
     )
   }
 
-  const res = NextResponse.json({ user: loginData?.user ?? createData?.doc ?? null })
-  if (loginData?.token) {
-    setAuthCookie(res, loginData.token)
+  const res = NextResponse.json({ user: loginResult.data?.user ?? createResult.data?.doc ?? null })
+  if (loginResult.data?.token) {
+    setAuthCookie(res, loginResult.data.token)
   }
 
   return res

@@ -4,16 +4,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { LogOut, Pencil, Plus, UserRound, Users, FileText } from 'lucide-react';
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-
 type MeResponse = {
   user?: {
     email?: string;
   } | null;
 };
-
-
 
 const ProfilePage: React.FC = () => {
   const [threadsCount, setThreadsCount] = useState(0);
@@ -72,9 +67,7 @@ const ProfilePage: React.FC = () => {
         backgroundBlendMode: 'soft-light, normal'
       }}
     >
-      <Header />
-
-      <main className="relative z-10 w-full max-w-[1320px] px-5 pt-[128px] lg:pt-[150px] pb-[90px] flex flex-col gap-6 mx-auto">
+      <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[90px] pt-[128px] md:pt-[202.69px] flex flex-col gap-6 mx-auto">
         {/* Profile Info Section */}
         <section className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-[30px_40px_60px_40px] flex flex-col items-end gap-6 relative overflow-hidden">
           <div className="flex items-center gap-[30px]">
@@ -248,8 +241,6 @@ const ProfilePage: React.FC = () => {
           </button>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 };
