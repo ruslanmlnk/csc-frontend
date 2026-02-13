@@ -8,6 +8,16 @@ import SearchModal from './SearchModal';
 const Header: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+    const handleUserClick = async () => {
+        try {
+            const response = await fetch('/api/auth/me', { cache: 'no-store' });
+            const data = await response.json().catch(() => null);
+            window.location.href = data?.user ? '/profile' : '/login';
+        } catch {
+            window.location.href = '/login';
+        }
+    };
+
     const menuItems = [
         { label: 'Blog', active: true },
         { label: 'Conferences', active: false },
@@ -80,7 +90,10 @@ const Header: React.FC = () => {
                     </button>
 
                     {/* User Button */}
-                    <button className="relative w-[50px] h-[50px] group cursor-pointer border-none bg-transparent p-0 outline-none">
+                    <button
+                        onClick={handleUserClick}
+                        className="relative w-[50px] h-[50px] group cursor-pointer border-none bg-transparent p-0 outline-none"
+                    >
                         {/* Background Circle with Gradient Strokes */}
                         <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute inset-0 w-full h-full">
                             <circle cx="25" cy="25" r="25" fill="#F29F04" fillOpacity="0.08" />

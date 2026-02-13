@@ -58,7 +58,7 @@ export default function PartnershipDetailPage({
                 {/* Logo & Title */}
                 <div className="flex items-center gap-6">
                   <img
-                    src="https://api.builder.io/api/v1/image/assets/TEMP/e214f10f8ccea234ee75378ae7f4254c5379c1d1?width=488"
+                    src="/images/cpagetti-logo-detail.png"
                     alt="CPAgetti Logo"
                     className="w-[244px] h-[56px] object-contain object-left"
                   />
@@ -131,7 +131,7 @@ export default function PartnershipDetailPage({
               {/* Banner Image */}
               <div className="w-full rounded-[40px] overflow-hidden">
                 <img
-                  src="https://api.builder.io/api/v1/image/assets/TEMP/5ab014ad3d5b056d0d33566b8e498d6542377c17?width=700"
+                  src="/images/affiliate-dashboard.png"
                   alt="Affiliate Dashboard"
                   className="w-full h-auto object-cover aspect-[350/196]"
                 />
@@ -261,7 +261,7 @@ export default function PartnershipDetailPage({
           <div className="w-full lg:w-[350px] flex-shrink-0 flex flex-col gap-10">
             <div className="w-full rounded-[40px] overflow-hidden bg-[#1A1A1A] sticky top-8">
               <img
-                src="https://api.builder.io/api/v1/image/assets/TEMP/2988357c8aebb04a53096b229985e49ab8b3c3f0?width=700"
+                src="/images/partnership-sidebar-promo.png"
                 alt="Sidebar Promotion"
                 className="w-full h-auto object-cover"
               />

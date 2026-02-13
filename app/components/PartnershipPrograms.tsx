@@ -9,7 +9,7 @@ const PartnershipPrograms: React.FC = () => {
             name: 'CPAgetti',
             rating: '4.8',
             founded: '2014',
-            logo: 'https://api.builder.io/api/v1/image/assets/TEMP/f5b7842631dc85a64cf164746865d8bc136255d5?width=488',
+            logo: '/images/cpagetti-logo.png',
             models: ['CPA'],
             minPayment: '$100',
             offers: ['Betting', 'Nutra'],
@@ -19,7 +19,7 @@ const PartnershipPrograms: React.FC = () => {
             name: 'Ping.Partners',
             rating: '4.8',
             founded: '2023',
-            logo: 'https://api.builder.io/api/v1/image/assets/TEMP/73c053d96fb760885c6de58379803adf28578121?width=349',
+            logo: '/images/ping-partners-logo.png',
             models: ['CPA'],
             minPayment: '$20',
             offers: ['Gambling'],
@@ -29,7 +29,7 @@ const PartnershipPrograms: React.FC = () => {
             name: 'Magic Click',
             rating: '4.8',
             founded: '2021',
-            logo: 'https://api.builder.io/api/v1/image/assets/TEMP/2ba927135b186ade041b54e947786ca73a0b8706?width=112',
+            logo: '/images/magic-click-logo.png',
             models: ['CPA', 'CPL', 'RevShare'],
             minPayment: '$10',
             offers: ['Betting', 'Gambling'],
@@ -140,7 +140,7 @@ const PartnershipPrograms: React.FC = () => {
             <div className="w-full max-w-[1240px] mt-[55px]">
                 <div className="relative w-full aspect-[675/86] rounded-[40px] overflow-hidden">
                     <img
-                        src="https://api.builder.io/api/v1/image/assets/TEMP/a054ce70ad60240eaf70ba8cef054c55d0d69acd?width=2480"
+                        src="/images/partnership-banner.png"
                         alt="Partnership Banner"
                         className="object-cover w-full h-full"
                     />

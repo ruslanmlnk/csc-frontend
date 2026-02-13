@@ -23,21 +23,6 @@ const HOME_QUERY = gql`
           url
         }
       }
-      sections {
-        hero {
-          badgeText
-          title
-          subtitle
-          primaryButtonText
-          secondaryButtonText
-          backgroundImage {
-            url
-          }
-          bottomGraphic {
-            url
-          }
-        }
-      }
     }
   }
 `;
@@ -65,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const Home: React.FC = async () => {
-  const data: any = await client.request(HOME_QUERY);
+  const data: any = await client.request(HOME_QUERY).catch(() => null);
   const sections = data?.Home?.sections;
 
   return (

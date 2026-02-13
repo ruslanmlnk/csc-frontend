@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server'
 import { getBackendUrl } from '@/lib/auth-server'
 
 export async function GET() {
-  const token = cookies().get('csc_auth')?.value
+  const cookieStore = await cookies()
+  const token = cookieStore.get('csc_auth')?.value
 
   if (!token) {
     return NextResponse.json({ user: null }, { status: 200 })

@@ -28,7 +28,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const token = cookies().get('csc_auth')?.value
+  const cookieStore = await cookies()
+  const token = cookieStore.get('csc_auth')?.value
   if (!token) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

@@ -1,14 +1,13 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getBackendUrl, setAuthCookie } from '@/lib/auth-server'
-import { isValidEmail, isValidPassword, isValidUsername } from '@/lib/validators'
+import { isValidEmail, isValidPassword } from '@/lib/validators'
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null)
   const email = body?.email?.toString().trim()
   const password = body?.password?.toString()
-  const username = body?.username?.toString().trim()
 
-  if (!email || !password || !username) {
+  if (!email || !password) {
     return NextResponse.json({ error: 'All fields are required.' }, { status: 400 })
   }
 
@@ -20,13 +19,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 })
   }
 
-  if (!isValidUsername(username)) {
-    return NextResponse.json(
-      { error: 'Username must be 3-24 characters and use letters, numbers, dot, underscore or dash.' },
-      { status: 400 }
-    )
-  }
-
   const createResponse = await fetch(`${getBackendUrl()}/api/users`, {
     method: 'POST',
     headers: {
@@ -35,8 +27,6 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       email,
       password,
-      username,
-      authProvider: 'local',
     }),
   })
 
