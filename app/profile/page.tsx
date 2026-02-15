@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import { LogOut, Pencil, Plus, UserRound, Users, FileText } from 'lucide-react';
+import CreateThreadModal from './CreateThreadModal';
 
 type MeResponse = {
   user?: {
@@ -32,6 +33,7 @@ const UserIcon = () => (
 const ProfilePage: React.FC = () => {
   const [threadsCount, setThreadsCount] = useState(0);
   const [displayName, setDisplayName] = useState('Mellaile');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -291,7 +293,7 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <button
-            onClick={() => setThreadsCount((prev) => prev + 1)}
+            onClick={() => setIsCreateModalOpen(true)}
             className="h-[58px] px-6 rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] flex items-center justify-center gap-[5px] hover:bg-[#FCC660] hover:text-[#0D0D0D] transition-all"
           >
             <Plus size={24} />
@@ -299,6 +301,11 @@ const ProfilePage: React.FC = () => {
           </button>
         </section>
       </main>
+
+      <CreateThreadModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      />
     </div>
   );
 };
