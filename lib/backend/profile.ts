@@ -41,8 +41,8 @@ export const updateProfile = (userId: string | number, data: ProfileUpdateInput,
  */
 export const uploadProfilePhoto = async (file: File, token: string, alt: string = 'Profile photo') => {
     const formData = new FormData()
-    formData.append('file', file)
-    formData.append('alt', alt)
+    formData.append('altText', alt)
+    formData.append('file', file, file.name)
 
     const response = await fetch(`${getBackendUrl()}/api/media`, {
         method: 'POST',
@@ -53,4 +53,20 @@ export const uploadProfilePhoto = async (file: File, token: string, alt: string 
     })
 
     return response.json()
+}
+
+/**
+ * Deletes a media item by ID
+ * @param mediaId ID of the media to delete
+ * @param token Authentication token
+ */
+export const deleteMedia = async (mediaId: string | number, token: string) => {
+    const response = await fetch(`${getBackendUrl()}/api/media/${mediaId}`, {
+        method: 'DELETE',
+        headers: {
+            Authorization: `JWT ${token}`,
+        },
+    })
+
+    return response.ok
 }

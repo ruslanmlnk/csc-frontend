@@ -157,8 +157,11 @@ const SettingsPage: React.FC = () => {
         if (!file) return;
 
         const uploadFormData = new FormData();
+        const altText = user?.name || user?.email || 'User avatar';
+        uploadFormData.append('altText', altText);
         uploadFormData.append('file', file);
 
+        setIsSaving(true);
         try {
             const uploadRes = await fetch('/api/profile/avatar', {
                 method: 'POST',
@@ -173,6 +176,9 @@ const SettingsPage: React.FC = () => {
 
             const uploadData = await uploadRes.json();
             if (uploadData?.id) {
+                // Delete old avatar if it exists to clean up backend
+                const oldAvatarId = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as any).id : null;
+
                 // Now update the user doc with the new avatar ID
                 const updateRes = await fetch('/api/profile', {
                     method: 'PATCH',
@@ -181,11 +187,19 @@ const SettingsPage: React.FC = () => {
                 });
 
                 if (updateRes.ok) {
+                    // Try to delete old media after successful update
+                    if (oldAvatarId) {
+                        try {
+                            await fetch(`/api/profile/avatar?id=${oldAvatarId}`, { method: 'DELETE' });
+                        } catch (e) {
+                            console.error('Failed to delete old avatar', e);
+                        }
+                    }
                     setShowSuccess(true);
+                    // Hide after a short delay and then reload
                     setTimeout(() => {
-                        setShowSuccess(false);
                         window.location.reload();
-                    }, 2000);
+                    }, 1500);
                 } else {
                     const err = await updateRes.json();
                     alert(err.message || 'Failed to update user profile with new photo.');
@@ -196,6 +210,8 @@ const SettingsPage: React.FC = () => {
         } catch (err) {
             console.error('Photo upload failed', err);
             alert('An error occurred during photo upload.');
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -212,7 +228,7 @@ const SettingsPage: React.FC = () => {
     const ActionButtons = () => (
         <div className="flex flex-col gap-10 w-full mb-10 last:mb-0">
             {showSuccess && (
-                <div className="flex flex-col items-center justify-center w-full py-12 rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] animate-in fade-in zoom-in-95 duration-500 transition-all">
+                <div className="flex flex-col items-center justify-center w-full py-12 rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] animate-in fade-in zoom-in-95 out-fade-out out-zoom-out-95 duration-500 fill-mode-forwards transition-all">
                     <div className="w-[100px] h-[100px] relative mb-4">
                         <Image
                             src="/images/success-icon.svg"
