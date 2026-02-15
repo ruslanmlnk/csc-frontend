@@ -29,6 +29,14 @@ export const GET_ARTICLE_BY_SLUG = gql`
         title
         slug
         publishedDate
+        author {
+          id
+          name
+          bio
+          avatar {
+            url
+          }
+        }
         content
         blockquote
         image {

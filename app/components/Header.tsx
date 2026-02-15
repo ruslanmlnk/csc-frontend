@@ -32,7 +32,7 @@ const Header: React.FC = () => {
             <header className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1320px] z-50 flex justify-between items-center px-[20px] py-[32px] bg-transparent">
                 {/* Logo Container */}
                 <div className="flex items-center gap-[12px] shrink-0">
-                    <Link href="/" className="relative w-[77px] h-[59px] block">
+                    <Link href="/" className="relative w-[77px] h-[58.69px] block">
                         <Image
                             src="/images/logo.png"
                             alt="Logo"

@@ -8,7 +8,7 @@ type ArticleBackLinkProps = {
 
 const ArticleBackLink: React.FC<ArticleBackLinkProps> = ({ href = '/blog', label = 'Back to News' }) => {
   return (
-    <Link href={href} className="flex items-center gap-4 text-white hover:text-[#F29F04] transition-colors group">
+    <Link href={href} className="flex w-fit items-center gap-4 text-white hover:text-[#F29F04] transition-colors group">
       <svg
         width="32"
         height="32"
@@ -22,7 +22,7 @@ const ArticleBackLink: React.FC<ArticleBackLinkProps> = ({ href = '/blog', label
           fill="currentColor"
         />
       </svg>
-      <span className="text-[24px] font-normal font-poppins">{label}</span>
+      <span className="text-[24px] font-normal font-poppins leading-8">{label}</span>
     </Link>
   )
 }
