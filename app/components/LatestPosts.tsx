@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import BlogCard from './BlogCard';
 
 const LatestPosts: React.FC = () => {
     const categories = ['All Articles', 'Agency accounts', 'Google', 'Facebook', 'Case studies', 'Gembla', 'Interviews', 'TikTok', 'Inside industry'];
@@ -55,34 +56,9 @@ const LatestPosts: React.FC = () => {
                 ))}
             </div>
 
-            {/* Posts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px] w-full max-w-[1240px] mt-16">
                 {filteredPosts.map((post, index) => (
-                    <div key={index} className="flex flex-col items-start gap-[24px] p-[16px] pb-[32px] rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group cursor-pointer transition-all duration-300 hover:border-[#FCC660]">
-                        <div className="relative h-[300px] w-full rounded-[20px] overflow-hidden">
-                            <Image
-                                src={post.image}
-                                alt={post.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
-                        </div>
-
-                        <div className="flex flex-col items-start gap-[16px] w-full px-[16px]">
-                            <div className="w-full text-right text-[#BDBDBD] font-poppins text-[16px] leading-[26px] pr-5">
-                                {post.date}
-                            </div>
-
-                            <div className="flex flex-col items-start gap-[12px] w-full">
-                                <div className="px-[12px] py-[4px] rounded-[80px] border-[0.5px] border-[#FCC660] text-[#FCC660] text-[14px] leading-[16px]">
-                                    {post.category}
-                                </div>
-                                <h3 className="text-white font-poppins text-[20px] font-medium leading-[32px] group-hover:text-[#FCC660] transition-colors">
-                                    {post.title}
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
+                    <BlogCard key={index} post={post} />
                 ))}
             </div>
 

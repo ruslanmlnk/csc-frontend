@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import Banner from './Banner';
 
 interface HeroProps {
   data?: {
@@ -85,14 +86,11 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         </div>
 
         {/* Bottom Hero Image (Image 7 in Figma) */}
-        <div className="relative mt-[137.93px] w-full max-w-[1240px] h-[158px] rounded-[40px] overflow-hidden shadow-2xl">
-          <Image
-            src={data?.bottomGraphic?.url || "/images/hero-graphic.webp"}
-            alt="Hero Graphic"
-            fill
-            className="object-cover"
-          />
-        </div>
+        <Banner
+          src={data?.bottomGraphic?.url || "/images/hero-graphic.webp"}
+          alt="Hero Graphic"
+          className="mt-[137.93px]"
+        />
       </div>
 
     </section>
