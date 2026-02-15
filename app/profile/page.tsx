@@ -154,7 +154,7 @@ const ProfilePage: React.FC = () => {
         {/* Cards Section */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {/* Team Card */}
-          <article className="flex flex-col gap-4">
+          <article className="flex flex-col gap-7">
             <div className="relative w-full">
               <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
                 <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
@@ -191,7 +191,7 @@ const ProfilePage: React.FC = () => {
           </article>
 
           {/* Position Card */}
-          <article className="flex flex-col gap-4">
+          <article className="flex flex-col gap-7">
             <div className="relative w-full">
               <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
                 <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
@@ -226,7 +226,7 @@ const ProfilePage: React.FC = () => {
           </article>
 
           {/* Directions Card */}
-          <article className="flex flex-col gap-4">
+          <article className="flex flex-col gap-7">
             <div className="relative w-full">
               <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
                 <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
@@ -252,7 +252,7 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4">
                   <Image
-                    src="https://api.builder.io/api/v1/image/assets/TEMP/349e72cf1034ce07ead426b12ed300b1573dfff2?width=64"
+                    src="/images/profile-directions.png"
                     width={32}
                     height={32}
                     alt="Directions"
@@ -267,7 +267,7 @@ const ProfilePage: React.FC = () => {
         </section>
 
         {/* Banner Section */}
-        <section className="relative w-full h-[158px] rounded-[40px] overflow-hidden border border-[#1f1f1f]">
+        <section className="relative w-full h-[158px] rounded-[40px] overflow-hidden mt-[54px]">
           <Image
             src="/images/profile-banner.png"
             alt="Profile banner"
