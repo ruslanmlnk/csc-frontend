@@ -2,14 +2,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { LogOut, Pencil, Plus, UserRound, Users, FileText } from 'lucide-react';
+import Link from 'next/link';
+import { LogOut, Pencil, Plus, UserRound, Users, FileText, Loader2 } from 'lucide-react';
 import CreateThreadModal from './CreateThreadModal';
-
-type MeResponse = {
-  user?: {
-    email?: string;
-  } | null;
-};
+import { BackendUser } from '@/lib/backend/users';
 
 const EditIcon = () => (
   <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,280 +28,152 @@ const UserIcon = () => (
 
 const ProfilePage: React.FC = () => {
   const [threadsCount, setThreadsCount] = useState(0);
-  const [displayName, setDisplayName] = useState('Mellaile');
+  const [user, setUser] = useState<BackendUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
-
     const loadUser = async () => {
       try {
-        const response = await fetch('/api/auth/me', { cache: 'no-store' });
-        const data: MeResponse = await response.json().catch(() => ({ user: null }));
-
-        if (!mounted) return;
-
-        const email = data?.user?.email;
-
-        if (!email) {
-          window.location.href = '/login';
-          return;
-        }
-
-        const nameFromEmail = email.split('@')[0]?.trim();
-        if (nameFromEmail) {
-          setDisplayName(nameFromEmail);
-        }
-      } catch {
-        if (mounted) {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        if (data?.user) {
+          setUser(data.user);
+        } else {
           window.location.href = '/login';
         }
+      } catch (err) {
+        console.error('Failed to load user', err);
+      } finally {
+        setIsLoading(false);
       }
     };
-
     loadUser();
-
-    return () => {
-      mounted = false;
-    };
   }, []);
-
-  const formattedName = useMemo(() => {
-    if (!displayName) return 'Member';
-    return displayName;
-  }, [displayName]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
     window.location.href = '/login';
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center">
+        <Loader2 className="animate-spin text-[#F29F04] w-10 h-10" />
+      </div>
+    );
+  }
+
+  const avatarUrl = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as any).url : null;
+  const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
+
   return (
     <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black pb-20">
-      {/* Background Glow Logic from /login */}
+      {/* Background Glow */}
       <div className="absolute inset-x-0 top-0 z-0 w-full h-[1000px] pointer-events-none select-none overflow-hidden">
-        <div
-          className="absolute inset-0 z-[-2] w-full h-full bg-repeat opacity-40"
-          style={{ backgroundImage: "url('/images/noise.webp')", backgroundSize: "200px 200px" }}
-        />
-        <div
-          className="absolute inset-0 z-[-1] w-full h-full"
-          style={{
-            background: "linear-gradient(82.71deg, rgba(242, 159, 4, 0.7) 0.75%, #0d0d0d 30.5%, #0d0d0d 69.72%, rgba(242, 159, 4, 0.7) 99.19%)"
-          }}
-        />
-        {/* Mobile Glow */}
-        <div className="md:hidden absolute inset-0 w-full h-full">
-          <Image src="/images/glow-mobile.webp" alt="" fill className="object-cover" priority />
-        </div>
-        {/* Desktop Glow */}
+        <div className="absolute inset-0 z-[-2] w-full h-full bg-repeat opacity-40" style={{ backgroundImage: "url('/images/noise.webp')", backgroundSize: "200px 200px" }} />
+        <div className="absolute inset-0 z-[-1] w-full h-full" style={{ background: "linear-gradient(82.71deg, rgba(242, 159, 4, 0.7) 0.75%, #0d0d0d 30.5%, #0d0d0d 69.72%, rgba(242, 159, 4, 0.7) 99.19%)" }} />
         <div className="hidden md:block absolute inset-0 w-full h-full">
           <Image src="/images/glow-desktop.webp" alt="" fill className="object-cover" priority />
         </div>
       </div>
+
       <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[90px] pt-[128px] md:pt-[202.69px] flex flex-col gap-6 mx-auto">
         {/* Profile Info Section */}
-        <section
-          className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-[29.2px_40px_59.2px_40px] flex flex-col items-end relative overflow-hidden self-stretch"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 0% 100%, rgba(242, 159, 4, 0. 15) 0%, transparent 50%)'
-          }}
-        >
-          {/* Top Row: Action Buttons */}
+        <section className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-[29.2px_40px_59.2px_40px] flex flex-col items-end relative overflow-hidden self-stretch" style={{ backgroundImage: 'radial-gradient(circle at 0% 100%, rgba(242, 159, 4, 0.15) 0%, transparent 50%)' }}>
           <div className="flex items-center gap-[30px] relative">
-            <button className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
-              <EditIcon />
-              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">
-                Edit
-              </span>
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer"
-            >
-              <ExitIcon />
-              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">
-                Exit
-              </span>
+            <Link href="/profile/settings" className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
+              <EditIcon /> <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Edit</span>
+            </Link>
+            <button onClick={handleLogout} className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
+              <ExitIcon /> <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Exit</span>
             </button>
           </div>
 
-          {/* Bottom Row: Profile Details */}
           <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-6 relative">
             <div className="flex items-center gap-10">
-              {/* Avatar */}
-              <div className="h-[125px] w-[125px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 relative overflow-hidden p-[37.5px]">
-                <UserIcon />
+              <div className="h-[125px] w-[125px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 relative overflow-hidden">
+                {avatarUrl ? (
+                  <Image src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'}${avatarUrl}`} alt="Avatar" fill className="object-cover" />
+                ) : (
+                  <div className="p-[37.5px]"><UserIcon /></div>
+                )}
               </div>
-
-              {/* Name */}
               <div className="flex flex-col items-start gap-5">
-                <h1 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px] line-clamp-1 truncate block">
-                  {formattedName}
-                </h1>
+                <h1 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px] line-clamp-1 truncate block">{displayName}</h1>
               </div>
             </div>
-
-            {/* Description */}
             <p className="text-[#BDBDBD] text-[16px] leading-[26px] font-poppins text-right [text-shadow:0_4px_4px_rgba(0,0,0,0.4)] max-w-sm">
-              Description not filled in
+              {user?.bio || 'Description not filled in'}
             </p>
           </div>
         </section>
 
         {/* Cards Section */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Team Card */}
           <article className="flex flex-col gap-7">
             <div className="relative w-full">
-              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
-                <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
-                  Team
-                </span>
-              </div>
-              <svg
-                className="absolute left-[27px] top-[58px]"
-                width="16"
-                height="12"
-                viewBox="0 0 16 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z"
-                  fill="#F29F04"
-                />
-              </svg>
+              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center"><span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">Team</span></div>
+              <svg className="absolute left-[27px] top-[58px]" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z" fill="#F29F04" /></svg>
             </div>
-
             <div className="rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 h-full min-h-[110px] flex items-center">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4">
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18.1556 16.9137H13.8444C12.4344 16.9153 11.0826 17.4761 10.0855 18.4732C9.08849 19.4702 8.52765 20.822 8.52606 22.2321V24.3579C8.52638 24.6296 8.63448 24.8901 8.82665 25.0822C9.01882 25.2743 9.27935 25.3823 9.55106 25.3825H22.4492C22.721 25.3823 22.9815 25.2743 23.1737 25.0822C23.3658 24.8901 23.4739 24.6296 23.4743 24.3579V22.2321C23.4727 20.822 22.9118 19.4701 21.9147 18.473C20.9176 17.476 19.5657 16.9152 18.1556 16.9137ZM21.9145 23.8231H10.0855V22.2321C10.0866 21.2355 10.483 20.28 11.1877 19.5754C11.8924 18.8707 12.8479 18.4743 13.8444 18.4732H18.1556C19.1521 18.4743 20.1076 18.8707 20.8123 19.5754C21.517 20.28 21.9134 21.2355 21.9145 22.2321V23.8231ZM16 15.5604C16.8844 15.5604 17.7489 15.2982 18.4842 14.8069C19.2196 14.3155 19.7927 13.6172 20.1311 12.8001C20.4696 11.983 20.5581 11.084 20.3856 10.2166C20.213 9.3492 19.7872 8.55246 19.1618 7.92711C18.5365 7.30176 17.7397 6.87589 16.8723 6.70335C16.005 6.53082 15.1059 6.61937 14.2888 6.95781C13.4718 7.29624 12.7734 7.86937 12.2821 8.6047C11.7907 9.34004 11.5285 10.2046 11.5285 11.0889C11.5298 12.2744 12.0014 13.411 12.8397 14.2493C13.6779 15.0876 14.8145 15.5591 16 15.5604ZM16 8.17693C16.576 8.17693 17.139 8.34772 17.6179 8.66771C18.0967 8.98769 18.47 9.4425 18.6904 9.97461C18.9108 10.5067 18.9685 11.0922 18.8561 11.6571C18.7437 12.222 18.4664 12.7409 18.0591 13.1482C17.6519 13.5554 17.133 13.8328 16.5681 13.9451C16.0032 14.0575 15.4177 13.9998 14.8856 13.7794C14.3535 13.559 13.8987 13.1857 13.5787 12.7068C13.2587 12.2279 13.0879 11.6649 13.0879 11.0889C13.0888 10.3169 13.3959 9.57672 13.9419 9.0308C14.4878 8.48489 15.228 8.17781 16 8.17693" fill="#212121" />
-                    <path d="M5.01506 17.5721H7.58575C8.00754 17.5713 8.42586 17.6482 8.81987 17.7987C9.01215 17.8688 9.2243 17.8605 9.41052 17.7756C9.59674 17.6907 9.7421 17.5359 9.81523 17.3448C9.88836 17.1536 9.8834 16.9414 9.80141 16.7539C9.71942 16.5663 9.56699 16.4186 9.377 16.3424C8.80517 16.1237 8.19799 16.0119 7.58575 16.0128H5.01506C3.68549 16.0143 2.4108 16.5431 1.47063 17.4833C0.530455 18.4234 0.00157149 19.698 0 21.0276L0 21.7625C0.0003143 22.0398 0.110592 22.3056 0.30664 22.5016C0.502688 22.6977 0.768496 22.8079 1.04575 22.8082H6.677C6.77998 22.8092 6.88213 22.7897 6.97753 22.7509C7.07294 22.7121 7.15973 22.6549 7.23287 22.5824C7.30602 22.5099 7.36408 22.4236 7.40371 22.3285C7.44333 22.2335 7.46373 22.1315 7.46373 22.0285C7.46373 21.9255 7.44333 21.8236 7.40371 21.7285C7.36408 21.6335 7.30602 21.5472 7.23287 21.4747C7.15973 21.4022 7.07294 21.3449 6.97753 21.3061C6.88213 21.2674 6.77998 21.2479 6.677 21.2488H1.55944V21.0274C1.56053 20.1113 1.92496 19.233 2.57279 18.5852C3.22061 17.9375 4.09893 17.5731 5.01506 17.5721ZM6.30044 15.3646C7.00802 15.3646 7.69972 15.1547 8.28806 14.7616C8.87640 14.3685 9.33495 13.8098 9.60573 13.1560C9.87651 12.5023 9.94736 11.7830 9.80932 11.0890C9.67128 10.3950 9.33054 9.75751 8.83020 9.25717C8.32986 8.75683 7.69239 8.41609 6.99840 8.27805C6.30441 8.14001 5.58507 8.21086 4.93134 8.48164C4.27761 8.75242 3.71887 9.21097 3.32575 9.79931C2.93264 10.3876 2.72281 11.0793 2.72281 11.7869C2.72389 12.7354 3.10116 13.6448 3.77186 14.3155C4.44256 14.9862 5.35192 15.3635 6.30044 15.3646ZM6.30044 9.76881C6.69960 9.76881 7.08980 9.88717 7.42169 10.1089" fill="#212121" />
-                    <path d="M26.9849 16.0125H24.4142C23.802 16.0116 23.1948 16.1234 22.623 16.3421C22.433 16.4182 22.2806 16.566 22.1986 16.7535C22.1166 16.9411 22.1116 17.1533 22.1848 17.3445C22.2579 17.5356 22.4033 17.6904 22.5895 17.7753C22.7757 17.8602 22.9878 17.8685 23.1801 17.7984C23.5741 17.6478 23.9925 17.571 24.4142 17.5717H26.9849C27.9011 17.5728 28.7794 17.9372 29.4273 18.585C30.0751 19.2328 30.4395 20.1111 30.4406 21.0273V21.2487H25.3232C25.2203 21.2478 25.1181 21.2673 25.0227 21.306C24.9273 21.3448 24.8405 21.4021 24.7674 21.4746C24.6942 21.5471 24.6362 21.6333 24.5965 21.7284C24.5569 21.8235 24.5365 21.9254 24.5365 22.0284C24.5365 22.1314 24.5569 22.2334 24.5965 22.3284C24.6362 22.4235 24.6942 22.5097 24.7674 22.5822C24.8405 22.6547 24.9273 22.712 25.0227 22.7508C25.1181 22.7896 25.2203 22.809 25.3232 22.8081H30.9545C31.2317 22.8077 31.4974 22.6975 31.6934 22.5014C31.8894 22.3054 31.9997 22.0397 32 21.7625V21.0276C31.9985 19.698 31.4697 18.4233 30.5295 17.4831C29.5893 16.5429 28.3146 16.014 26.9849 16.0125ZM25.6996 15.3646C26.4072 15.3646 27.0988 15.1547 27.6872 14.7616C28.2755 14.3685 28.7341 13.8098 29.0049 13.1560C29.2756 12.5023 29.3465 11.7830 29.2084 11.0890C29.0704 10.3950 28.7297 9.75751 28.2293 9.25717C27.7290 8.75683 27.0915 8.41609 26.3975 8.27805C25.7035 8.14001 24.9842 8.21086 24.3305 8.48164C23.6767 8.75242 23.1180 9.21097 22.7249 9.79931C22.3318 10.3876 22.1219 11.0793 22.1219 11.7869C22.1230 12.7354 22.5003 13.6448 23.1710 14.3155C23.8417 14.9862 24.7510 15.3635 25.6996 15.3646ZM25.6996 9.76881" fill="#212121" />
-                  </svg>
-                </div>
-                <span className="text-white text-[28px] leading-none font-poppins">-</span>
+                <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4"><Users size={32} color="#212121" /></div>
+                <span className="text-white text-[28px] leading-none font-poppins">{user?.company || '-'}</span>
               </div>
             </div>
           </article>
 
-          {/* Position Card */}
           <article className="flex flex-col gap-7">
             <div className="relative w-full">
-              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
-                <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
-                  Position
-                </span>
-              </div>
-              <svg
-                className="absolute left-[27px] top-[58px]"
-                width="16"
-                height="12"
-                viewBox="0 0 16 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z"
-                  fill="#F29F04"
-                />
-              </svg>
+              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center"><span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">Position</span></div>
+              <svg className="absolute left-[27px] top-[58px]" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z" fill="#F29F04" /></svg>
             </div>
-
             <div className="rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 h-full min-h-[110px] flex items-center">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4">
-                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M15.3168 31.9848H3.82692C2.81921 31.9848 1.85277 31.5845 1.14021 30.8719C0.427655 30.1594 0.0273438 29.1929 0.0273438 28.1852L0.0273438 3.79957C0.0273438 2.79186 0.427655 1.82543 1.14021 1.11287C1.85277 0.400311 2.81921 0 3.82692 0L21.4189 0C22.4266 0 23.3931 0.400311 24.1056 1.11287C24.8182 1.82543 25.2185 2.79186 25.2185 3.79957V12.9185C25.2297 13.0376 25.216 13.1577 25.1781 13.2711C25.1403 13.3845 25.0792 13.4888 24.9987 13.5772C24.9182 13.6656 24.8202 13.7363 24.7108 13.7846C24.6014 13.833 24.4832 13.8579 24.3636 13.8579C24.244 13.8579 24.1258 13.833 24.0164 13.7846C23.9071 13.7363 23.809 13.6656 23.7285 13.5772C23.648 13.4888 23.5869 13.3845 23.5491 13.2711C23.5112 13.1577 23.4975 13.0376 23.5087 12.9185V3.79957C23.5087 3.52849 23.4552 3.26008 23.3512 3.00973C23.2472 2.75938 23.0949 2.53202 22.9028 2.34069C22.7108 2.14936 22.4829 1.99782 22.2322 1.89478C21.9814 1.79173 21.7128 1.7392 21.4417 1.7402H3.82692C3.55456 1.73719 3.28432 1.78823 3.03183 1.89037C2.77934 1.99251 2.54961 2.14373 2.35596 2.33526C2.16231 2.52679 2.00858 2.75483 1.90366 3.00619C1.79875 3.25754 1.74473 3.5272 1.74475 3.79957V28.208C1.74473 28.4804 1.79875 28.7501 1.90366 29.0014C2.00858 29.2528 2.16231 29.4808 2.35596 29.6723C2.54961 29.8639 2.77934 30.0151 3.03183 30.1172C3.28432 30.2194 3.55456 30.2704 3.82692 30.2674H15.3168C15.5446 30.2674 15.763 30.3579 15.924 30.5189C16.0851 30.6799 16.1755 30.8984 16.1755 31.1261C16.1755 31.3538 16.0851 31.5723 15.924 31.7333C15.763 31.8943 15.5446 31.9848 15.3168 31.9848Z" fill="#212121" />
-                  </svg>
-                </div>
-                <span className="text-white text-[28px] leading-none font-poppins">-</span>
+                <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4"><UserRound size={32} color="#212121" /></div>
+                <span className="text-white text-[28px] leading-none font-poppins">{user?.position || '-'}</span>
               </div>
             </div>
           </article>
 
-          {/* Directions Card */}
           <article className="flex flex-col gap-7">
             <div className="relative w-full">
-              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center">
-                <span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">
-                  Directions
-                </span>
-              </div>
-              <svg
-                className="absolute left-[27px] top-[58px]"
-                width="16"
-                height="12"
-                viewBox="0 0 16 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z"
-                  fill="#F29F04"
-                />
-              </svg>
+              <div className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 flex items-center"><span className="font-poppins text-[16px] leading-[26px] font-medium text-[#0D0D0D]">Directions</span></div>
+              <svg className="absolute left-[27px] top-[58px]" width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M9.5929 11.0769C8.88231 12.3077 7.10585 12.3077 6.39526 11.0769L0 0L15.9882 0L9.5929 11.0769Z" fill="#F29F04" /></svg>
             </div>
-
             <div className="rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 h-full min-h-[110px] flex items-center">
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-[18.286px] bg-[#F29F04] flex items-center justify-center shrink-0 p-4">
-                  <Image
-                    src="/images/profile-directions.png"
-                    width={32}
-                    height={32}
-                    alt="Directions"
-                    className="w-8 h-8 object-contain brightness-0"
-                  />
+                  <Image src="/images/profile-directions.png" width={32} height={32} alt="Directions" className="w-8 h-8 object-contain brightness-0" />
                 </div>
-                <span className="text-white text-[28px] leading-none font-poppins">-</span>
+                <span className="text-white text-[28px] leading-none font-poppins">{user?.directions || '-'}</span>
               </div>
             </div>
           </article>
-
         </section>
 
-        {/* Banner Section */}
+        {/* Banner */}
         <section className="relative w-full h-[158px] rounded-[40px] overflow-hidden mt-[54px]">
-          <Image
-            src="/images/profile-banner.png"
-            alt="Profile banner"
-            fill
-            className="object-cover"
-          />
+          <Image src="/images/profile-banner.png" alt="Profile banner" fill className="object-cover" />
         </section>
 
         {/* Threads Section */}
         <section className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-[30px]">
-            <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">
-              Threads
-            </h2>
+            <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Threads</h2>
             <div className="flex items-center gap-[10px]">
               <Pencil size={20} className="text-[#F29F04]" />
-              <span className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">
-                {threadsCount}
-              </span>
+              <span className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">{threadsCount}</span>
             </div>
           </div>
-
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="h-[58px] px-6 rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] flex items-center justify-center gap-[5px] hover:bg-[#FCC660] hover:text-[#0D0D0D] transition-all"
-          >
-            <Plus size={24} />
-            Add a comment
+          <button onClick={() => setIsCreateModalOpen(true)} className="h-[58px] px-6 rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] flex items-center justify-center gap-[5px] hover:bg-[#FCC660] hover:text-[#0D0D0D] transition-all">
+            <Plus size={24} /> Add a comment
           </button>
         </section>
       </main>
 
-      <CreateThreadModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-      />
+      <CreateThreadModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </div>
   );
 };

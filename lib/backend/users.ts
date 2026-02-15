@@ -4,6 +4,16 @@ export interface BackendUser {
   id?: number | string
   email?: string
   role?: 'admin' | 'user' | string
+  name?: string
+  bio?: string
+  company?: string
+  position?: string
+  directions?: string
+  instagram?: string
+  telegram?: string
+  tiktok?: string
+  website?: string
+  avatar?: string | { url?: string; id?: string }
   [key: string]: unknown
 }
 
@@ -45,7 +55,7 @@ export const createUser = (payload: CreateUserInput) =>
   })
 
 export const getCurrentUser = (token: string) =>
-  backendRequest<BackendMeResponse | BackendUser>('/api/users/me', {
+  backendRequest<BackendMeResponse | BackendUser>('/api/users/me?depth=1', {
     token,
     cache: 'no-store',
   })

@@ -1,6 +1,6 @@
 ﻿import { NextResponse } from 'next/server'
 
-const DEFAULT_BACKEND_URL = 'http://localhost:3001'
+const DEFAULT_BACKEND_URL = 'http://localhost:3000'
 
 export const getBackendUrl = () => {
   const raw = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || DEFAULT_BACKEND_URL
