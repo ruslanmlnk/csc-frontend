@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Check, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Loader2, Eye, EyeOff, Globe } from 'lucide-react';
 import { BackendUser } from '@/lib/backend/users';
 
 const UserIconLarge = () => (
@@ -11,6 +11,37 @@ const UserIconLarge = () => (
         <path d="M57.7317 53C53.9242 46.4175 48.0567 41.6975 41.2092 39.46C44.5962 37.4437 47.2278 34.3712 48.6997 30.7145C50.1716 27.0578 50.4024 23.019 49.3568 19.2184C48.3112 15.4178 46.0469 12.0655 42.9116 9.67634C39.7763 7.28717 35.9435 5.99323 32.0017 5.99323C28.0598 5.99323 24.227 7.28717 21.0917 9.67634C17.9565 12.0655 15.6921 15.4178 14.6465 19.2184C13.6009 23.019 13.8317 27.0578 15.3036 30.7145C16.7755 34.3712 19.4071 37.4437 22.7942 39.46C15.9467 41.695 10.0792 46.415 6.27165 53C6.13203 53.2277 6.03941 53.481 5.99928 53.7451C5.95914 54.0091 5.97229 54.2785 6.03796 54.5374C6.10363 54.7963 6.22049 55.0394 6.38163 55.2524C6.54278 55.4653 6.74495 55.6439 6.97622 55.7775C7.20748 55.9111 7.46316 55.997 7.72817 56.0301C7.99318 56.0633 8.26215 56.0431 8.51921 55.9706C8.77626 55.8981 9.01621 55.7749 9.22487 55.6082C9.43354 55.4415 9.60671 55.2347 9.73415 55C14.4442 46.86 22.7692 42 32.0017 42C41.2342 42 49.5592 46.86 54.2692 55C54.3966 55.2347 54.5698 55.4415 54.7784 55.6082C54.9871 55.7749 55.227 55.8981 55.4841 55.9706C55.7412 56.0431 56.0101 56.0633 56.2751 56.0301C56.5401 55.997 56.7958 55.9111 57.0271 55.7775C57.2584 55.6439 57.4605 55.4653 57.6217 55.2524C57.7828 55.0394 57.8997 54.7963 57.9653 54.5374C58.031 54.2785 58.0442 54.0091 58.004 53.7451C57.9639 53.481 57.8713 53.2277 57.7317 53ZM18.0017 24C18.0017 21.2311 18.8227 18.5243 20.3611 16.222C21.8994 13.9198 24.0859 12.1253 26.6441 11.0657C29.2023 10.0061 32.0172 9.72884 34.7329 10.269C37.4487 10.8092 39.9432 12.1426 41.9011 14.1005C43.8591 16.0585 45.1925 18.553 45.7326 21.2688C46.2728 23.9845 45.9956 26.7994 44.936 29.3576C43.8763 31.9158 42.0819 34.1023 39.7796 35.6406C37.4773 37.1789 34.7706 38 32.0017 38C28.2898 37.9961 24.7312 36.5198 22.1065 33.8951C19.4819 31.2705 18.0056 27.7118 18.0017 24Z" fill="#BDBDBD" />
     </svg>
 );
+
+const InstagramIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19.9574 0H8.04255C5.9105 0.00315159 3.86668 0.851502 2.35909 2.35909C0.851502 3.86668 0.00315159 5.9105 0 8.04255V19.9574C0.00315159 22.0895 0.851502 24.1333 2.35909 25.6409C3.86668 27.1485 5.9105 27.9968 8.04255 28H19.9574C22.0895 27.9968 24.1333 27.1485 25.6409 25.6409C27.1485 24.1333 27.9968 22.0895 28 19.9574V8.04255C27.9968 5.9105 27.1485 3.86668 25.6409 2.35909C24.1333 0.851502 22.0895 0.00315159 19.9574 0ZM14 20.6604C12.6827 20.6604 11.395 20.2698 10.2997 19.5379C9.20436 18.8061 8.35068 17.7659 7.84657 16.5488C7.34246 15.3318 7.21056 13.9926 7.46755 12.7006C7.72455 11.4086 8.35889 10.2218 9.29037 9.29037C10.2218 8.35889 11.4086 7.72455 12.7006 7.46755C13.9926 7.21056 15.3318 7.34246 16.5488 7.84657C17.7659 8.35068 18.8061 9.20436 19.5379 10.2997C20.2698 11.395 20.6604 12.6827 20.6604 14C20.6573 15.7655 19.9545 17.4578 18.7062 18.7062C17.4578 19.9545 15.7655 20.6573 14 20.6604ZM23.4604 6.29106C23.4239 6.48282 23.3489 6.6652 23.24 6.82723C23.1835 6.90672 23.1218 6.98235 23.0553 7.05362C22.984 7.12014 22.9084 7.18184 22.8289 7.2383C22.7481 7.29205 22.6623 7.33793 22.5728 7.37532C22.4821 7.41128 22.3884 7.43919 22.2928 7.45872C22.0963 7.50003 21.8935 7.50003 21.697 7.45872C21.5053 7.42215 21.3229 7.34717 21.1609 7.2383C21.0802 7.18336 21.0045 7.12157 20.9345 7.05362C20.8679 6.98235 20.8062 6.90672 20.7498 6.82723C20.6409 6.6652 20.5659 6.48282 20.5294 6.29106C20.4881 6.09463 20.4881 5.89175 20.5294 5.69532C20.5659 5.50356 20.6409 5.32118 20.7498 5.15915C20.8062 5.07967 20.8679 5.00404 20.9345 4.93277C21.0045 4.86482 21.0802 4.80303 21.1609 4.74808C21.3229 4.63921 21.5053 4.56423 21.697 4.52766C21.8939 4.49042 22.0959 4.49042 22.2928 4.52766C22.3884 4.54719 22.4821 4.5751 22.5728 4.61106C22.6623 4.64845 22.7481 4.69433 22.8289 4.74808C22.9923 4.8559 23.1322 4.99574 23.24 5.15915C23.3489 5.32118 23.4239 5.50356 23.4604 5.69532C23.5017 5.89175 23.5017 6.09463 23.4604 6.29106ZM18.8732 14C18.8732 14.9638 18.5874 15.906 18.0519 16.7074C17.5164 17.5088 16.7554 18.1334 15.8649 18.5022C14.9744 18.8711 13.9946 18.9676 13.0493 18.7796C12.104 18.5915 11.2357 18.1274 10.5541 17.4459C9.8726 16.7643 9.40848 15.896 9.22045 14.9507C9.03241 14.0054 9.12892 13.0256 9.49776 12.1351C9.8666 11.2447 10.4912 10.4836 11.2926 9.94809C12.094 9.41262 13.0362 9.12681 14 9.12681C15.292 9.12838 16.5306 9.64232 17.4441 10.5559C18.3577 11.4694 18.8716 12.708 18.8732 14Z" fill="#F29F04" />
+    </svg>
+);
+
+const TelegramIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0.616926 13.8321L7.05698 16.0191L22.3481 6.67105C22.5701 6.53605 22.7971 6.83705 22.6061 7.01305L11.03 17.6681L11.03 17.6681L10.6 23.6332C10.593 23.7331 10.6165 23.8328 10.6674 23.9191C10.7184 24.0053 10.7943 24.074 10.8852 24.1161C10.9761 24.1582 11.0777 24.1717 11.1764 24.1547C11.2751 24.1378 11.3664 24.0912 11.438 24.0212L15.002 20.5162L21.5181 25.4482C22.2201 25.9802 23.2371 25.6052 23.4261 24.7452L27.9631 4.14503C28.2221 2.97002 27.0701 1.97802 25.9471 2.40802L0.584925 12.1201C-0.211081 12.4251 -0.189081 13.5581 0.616926 13.8321Z" fill="#F29F04" />
+    </svg>
+);
+
+const TikTokIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.5727 0.900385C16.0051 0.87851 17.427 0.889885 18.848 0.87851C18.8952 2.65563 19.6162 4.25514 20.7633 5.43989L20.7616 5.43814C21.9962 6.55026 23.6027 7.27126 25.3737 7.39376L25.3982 7.39551V11.802C23.7252 11.76 22.152 11.3741 20.7336 10.7109L20.8053 10.7406C20.1193 10.4108 19.5392 10.0721 18.988 9.69414L19.0335 9.72389C19.023 12.9168 19.044 16.1096 19.0116 19.2911C18.9215 20.9125 18.3825 22.3913 17.518 23.6259L17.5355 23.5988C16.09 25.669 13.7485 27.0279 11.0858 27.1084H11.0736C10.966 27.1136 10.8391 27.1163 10.7113 27.1163C9.1976 27.1163 7.78272 26.6945 6.57697 25.9621L6.61197 25.9823C4.41747 24.6619 2.90372 22.4026 2.62372 19.775L2.62022 19.7391C2.59835 19.1923 2.58785 18.6454 2.60972 18.1099C3.03847 13.9283 6.54197 10.6934 10.8006 10.6934C11.2792 10.6934 11.7482 10.7345 12.2041 10.8124L12.1551 10.8054C12.177 12.4233 12.1113 14.042 12.1113 15.6599C11.7412 15.526 11.3142 15.4481 10.8688 15.4481C9.23435 15.4481 7.84397 16.4929 7.32947 17.9515L7.3216 17.9778C7.20522 18.3514 7.13785 18.781 7.13785 19.2255C7.13785 19.4058 7.14922 19.5843 7.17022 19.7593L7.16847 19.7383C7.45897 21.5285 8.99372 22.8795 10.8443 22.8795C10.8977 22.8795 10.9502 22.8786 11.0027 22.876H10.9948C12.275 22.8375 13.3862 22.1489 14.0145 21.1313L14.0232 21.1155C14.2568 20.79 14.417 20.3963 14.4703 19.9684L14.4712 19.9561C14.5806 17.9988 14.5368 16.0528 14.5473 14.0954C14.5578 9.68888 14.5368 5.29288 14.5692 0.89776L14.5727 0.900385Z" fill="#F29F04" />
+    </svg>
+);
+
+type AvatarShape = {
+    id?: string | number;
+    url?: string;
+};
+
+type UploadAvatarResponse = {
+    id?: string | number;
+    doc?: { id?: string | number };
+    message?: string;
+    error?: string;
+    errors?: Array<{ message?: string }>;
+};
 
 const SettingsPage: React.FC = () => {
     const [user, setUser] = useState<BackendUser | null>(null);
@@ -47,8 +78,8 @@ const SettingsPage: React.FC = () => {
                 const data = await response.json();
                 if (data?.user) {
                     setUser(data.user);
-                    setFormData({
-                        ...formData,
+                    setFormData((prev) => ({
+                        ...prev,
                         name: data.user.name || '',
                         email: data.user.email || '',
                         bio: data.user.bio || '',
@@ -59,7 +90,7 @@ const SettingsPage: React.FC = () => {
                         telegram: data.user.telegram || '',
                         tiktok: data.user.tiktok || '',
                         website: data.user.website || '',
-                    });
+                    }));
                 } else {
                     window.location.href = '/login';
                 }
@@ -109,7 +140,7 @@ const SettingsPage: React.FC = () => {
                 }
             }
 
-            const updateData: any = {
+            const updateData: Record<string, string> = {
                 name: formData.name,
                 bio: formData.bio,
                 company: formData.company,
@@ -169,21 +200,22 @@ const SettingsPage: React.FC = () => {
             });
 
             if (!uploadRes.ok) {
-                const err = await uploadRes.json();
-                alert(err.message || 'Failed to upload image. Please check file size and format.');
+                const err = (await uploadRes.json().catch(() => ({}))) as UploadAvatarResponse;
+                alert(err.message || err.error || 'Failed to upload image. Please check file size and format.');
                 return;
             }
 
-            const uploadData = await uploadRes.json();
-            if (uploadData?.id) {
+            const uploadData = (await uploadRes.json().catch(() => null)) as UploadAvatarResponse | null;
+            const newAvatarId = uploadData?.id ?? uploadData?.doc?.id;
+            if (newAvatarId) {
                 // Delete old avatar if it exists to clean up backend
-                const oldAvatarId = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as any).id : null;
+                const oldAvatarId = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as AvatarShape).id : null;
 
                 // Now update the user doc with the new avatar ID
                 const updateRes = await fetch('/api/profile', {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ avatar: uploadData.id }),
+                    body: JSON.stringify({ avatar: newAvatarId }),
                 });
 
                 if (updateRes.ok) {
@@ -201,8 +233,8 @@ const SettingsPage: React.FC = () => {
                         window.location.reload();
                     }, 1500);
                 } else {
-                    const err = await updateRes.json();
-                    alert(err.message || 'Failed to update user profile with new photo.');
+                    const err = (await updateRes.json().catch(() => ({}))) as UploadAvatarResponse;
+                    alert(err.message || err.error || err.errors?.[0]?.message || 'Failed to update user profile with new photo.');
                 }
             } else {
                 alert('Server returned invalid data after upload.');
@@ -211,6 +243,7 @@ const SettingsPage: React.FC = () => {
             console.error('Photo upload failed', err);
             alert('An error occurred during photo upload.');
         } finally {
+            e.target.value = '';
             setIsSaving(false);
         }
     };
@@ -223,7 +256,7 @@ const SettingsPage: React.FC = () => {
         );
     }
 
-    const avatarUrl = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as any).url : null;
+    const avatarUrl = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as AvatarShape).url : null;
 
     const ActionButtons = () => (
         <div className="flex flex-col gap-10 w-full mb-10 last:mb-0">
@@ -355,26 +388,30 @@ const SettingsPage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                                 <div className="flex flex-col gap-4">
                                     <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Instagram</label>
-                                    <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                    <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                        <InstagramIcon />
                                         <input name="instagram" value={formData.instagram} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Telegram</label>
-                                    <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                    <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                        <TelegramIcon />
                                         <input name="telegram" value={formData.telegram} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
                                     <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">TikTok</label>
-                                    <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                    <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                        <TikTokIcon />
                                         <input name="tiktok" value={formData.tiktok} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-4">
                                 <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Website</label>
-                                <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
+                                    <Globe size={28} className="text-[#F29F04]" />
                                     <input name="website" value={formData.website} onChange={handleInputChange} type="text" placeholder="example.com" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                 </div>
                             </div>

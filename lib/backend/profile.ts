@@ -19,6 +19,16 @@ export interface ProfileUpdateResponse extends BackendErrorShape {
     doc?: BackendUser | null
 }
 
+export interface UploadProfilePhotoResponse extends BackendErrorShape {
+    id?: string | number
+}
+
+export interface UploadProfilePhotoResult {
+    ok: boolean
+    status: number
+    data: UploadProfilePhotoResponse | null
+}
+
 /**
  * Updates the current user's profile data
  * @param userId ID of the user to update
@@ -52,7 +62,13 @@ export const uploadProfilePhoto = async (file: File, token: string, alt: string 
         body: formData,
     })
 
-    return response.json()
+    const data = (await response.json().catch(() => null)) as UploadProfilePhotoResponse | null
+
+    return {
+        ok: response.ok,
+        status: response.status,
+        data,
+    } satisfies UploadProfilePhotoResult
 }
 
 /**

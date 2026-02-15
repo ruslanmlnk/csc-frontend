@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { uploadProfilePhoto, deleteMedia } from '@/lib/backend/profile'
+import { getBackendErrorMessage } from '@/lib/backend/errors'
 
 export async function POST(request: Request) {
     try {
@@ -8,7 +9,7 @@ export async function POST(request: Request) {
         const token = cookieStore.get('csc_auth')?.value
 
         if (!token) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
         }
 
         const formData = await request.formData()
@@ -16,15 +17,24 @@ export async function POST(request: Request) {
         const alt = formData.get('altText') as string || 'Profile photo'
 
         if (!file) {
-            return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+            return NextResponse.json({ message: 'No file provided' }, { status: 400 })
         }
 
-        const uploadResponse = await uploadProfilePhoto(file, token, alt)
+        const uploadResult = await uploadProfilePhoto(file, token, alt)
 
-        return NextResponse.json(uploadResponse)
+        if (!uploadResult.ok) {
+            return NextResponse.json(
+                {
+                    message: getBackendErrorMessage(uploadResult.data, 'Failed to upload profile photo.'),
+                },
+                { status: uploadResult.status },
+            )
+        }
+
+        return NextResponse.json(uploadResult.data, { status: uploadResult.status })
     } catch (error) {
         console.error('Avatar upload error:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
     }
 }
 
@@ -35,13 +45,13 @@ export async function DELETE(request: Request) {
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
 
-        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-        if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 })
+        if (!token) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 })
+        if (!id) return NextResponse.json({ message: 'ID required' }, { status: 400 })
 
         const success = await deleteMedia(id, token)
         return NextResponse.json({ success })
     } catch (error) {
         console.error('Avatar delete error:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
     }
 }
