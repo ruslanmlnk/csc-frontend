@@ -9,6 +9,7 @@ import BlogPagination from '../components/blog/BlogPagination';
 import BlogCTA from '../components/blog/BlogCTA';
 import { getArticles, getCategories } from '@/lib/backend/blog';
 import { Article, Category } from '../types/blog';
+import { getBackendUrl } from '@/lib/auth-server';
 
 const BlogPage = () => {
     const [activeCategory, setActiveCategory] = useState('All Articles');
@@ -16,6 +17,18 @@ const BlogPage = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<string[]>(['All Articles']);
     const [loading, setLoading] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
+
+    const backendUrl = getBackendUrl();
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,19 +55,27 @@ const BlogPage = () => {
         return matchesCategory && matchesSearch;
     });
 
-    // Map articles to the format expected by components
-    const formatArticle = (article: Article) => ({
-        id: article.id,
-        date: new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        category: article.category.name,
-        title: article.title,
-        image: article.image.url,
-        slug: article.slug
-    });
+    const limit = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
+    const limitedArticles = filteredArticles.slice(0, limit);
 
-    const formattedArticles = filteredArticles.map(formatArticle);
-    const blogPosts = formattedArticles.slice(0, 4);
-    const extraPosts = formattedArticles.slice(4);
+    // Map articles to the format expected by components
+    const formatArticle = (article: Article) => {
+        let imageUrl = article.image.url;
+        if (imageUrl.startsWith('/')) {
+            imageUrl = `${backendUrl}${imageUrl}`;
+        }
+
+        return {
+            id: article.id,
+            date: new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+            category: article.category.name,
+            title: article.title,
+            image: imageUrl,
+            slug: article.slug
+        };
+    };
+
+    const formattedArticles = limitedArticles.map(formatArticle);
 
     if (loading) {
         return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
@@ -82,8 +103,7 @@ const BlogPage = () => {
                 />
 
                 <BlogGrid
-                    blogPosts={blogPosts}
-                    extraPosts={extraPosts}
+                    articles={formattedArticles}
                 />
 
                 <BlogPagination />

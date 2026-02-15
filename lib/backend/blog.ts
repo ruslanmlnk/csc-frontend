@@ -64,16 +64,16 @@ export const GET_CATEGORIES = gql`
 `
 
 export async function getArticles() {
-    const data: any = await client.request(GET_ARTICLES)
-    return data.Articles.docs
+  const data: any = await client.request(GET_ARTICLES)
+  return data.Articles.docs
 }
 
 export async function getArticleBySlug(slug: string) {
-    const data: any = await client.request(GET_ARTICLE_BY_SLUG, { slug })
-    return data.Articles.docs[0] || null
+  const data: any = await client.request(GET_ARTICLE_BY_SLUG, { slug })
+  return data.Articles.docs[0] || null
 }
 
 export async function getCategories() {
-    const data: any = await client.request(GET_CATEGORIES)
-    return data.Categories.docs
+  const data: any = await client.request(GET_CATEGORIES)
+  return data.Categories.docs
 }

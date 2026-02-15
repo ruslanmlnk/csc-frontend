@@ -1,6 +1,4 @@
-"use client";
-
-import React, { useEffect, useState, use } from 'react';
+import React, { use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, Search, Facebook, Instagram, Linkedin } from 'lucide-react';
@@ -10,37 +8,32 @@ import BlogCTA from '../../components/blog/BlogCTA';
 import { getArticleBySlug, getArticles } from '@/lib/backend/blog';
 import { Article } from '../../types/blog';
 
-const BlogDetailPage = ({ params }: { params: Promise<{ slug: string }> }) => {
-    const { slug } = use(params);
-    const [article, setArticle] = useState<Article | null>(null);
-    const [relatedArticles, setRelatedArticles] = useState<Article[]>([]);
-    const [loading, setLoading] = useState(true);
+const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
+    const { slug } = await params;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [articleData, allArticles] = await Promise.all([
-                    getArticleBySlug(slug),
-                    getArticles()
-                ]);
-                setArticle(articleData);
-                // Filter out current article and take first 3 for simplicity
-                setRelatedArticles(allArticles.filter((a: any) => a.slug !== slug).slice(0, 3));
-            } catch (error) {
-                console.error('Error fetching article:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, [slug]);
+    let article: Article | null = null;
+    let relatedArticles: Article[] = [];
 
-    if (loading) {
-        return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
+    try {
+        const [articleData, allArticles] = await Promise.all([
+            getArticleBySlug(slug),
+            getArticles()
+        ]);
+        article = articleData;
+        relatedArticles = allArticles.filter((a: any) => a.slug !== slug).slice(0, 3);
+    } catch (error) {
+        console.error('Error fetching article:', error);
     }
 
     if (!article) {
-        return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Article not found</div>;
+        return (
+            <div className="min-h-screen bg-[#0D0D0D] flex flex-col items-center justify-center text-white gap-6">
+                <h1 className="text-4xl font-bold">Article not found</h1>
+                <Link href="/blog" className="text-[#F29F04] hover:underline underline-offset-4">
+                    Return to Blog
+                </Link>
+            </div>
+        );
     }
 
     return (
@@ -89,10 +82,7 @@ const BlogDetailPage = ({ params }: { params: Promise<{ slug: string }> }) => {
                         <div className="text-[#9E9E9E] text-[20px] leading-[32px] font-poppins flex flex-col gap-8">
                             <p>{article.description}</p>
 
-                            {/* Simple render of Lexical content (assuming plain paragraphs for now) */}
-                            {/* In a real scenario, you'd use a Lexical serializer */}
                             <div className="article-content prose prose-invert max-w-none">
-                                {/* Simplified: just displaying description as placeholder for content */}
                                 <p>Detailed content would be rendered here using a proper Lexical serializer.</p>
                             </div>
 

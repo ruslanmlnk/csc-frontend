@@ -14,72 +14,54 @@ interface BlogPost {
 }
 
 interface BlogGridProps {
-    blogPosts: BlogPost[];
-    extraPosts: BlogPost[];
+    articles: BlogPost[];
 }
 
-const BlogGrid: React.FC<BlogGridProps> = ({ blogPosts, extraPosts }) => {
+const BlogGrid: React.FC<BlogGridProps> = ({ articles }) => {
+    // Promo banner component
+    const PromoBanner = () => (
+        <div className="relative w-full aspect-[397/517] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)]">
+            <Image
+                src="https://api.builder.io/api/v1/image/assets/TEMP/575debb1f4b5a5e3bc39f8bef505c2d24f8200f0?width=794"
+                alt="Promo Sidebar"
+                fill
+                className="object-cover"
+            />
+        </div>
+    );
+
+    // Create a list with interjected banners
+    // Logic: 4 articles -> 1 banner -> 4 articles -> 1 banner -> rest of articles
+    const gridItems: (BlogPost | { type: 'banner'; id: string })[] = [];
+
+    articles.forEach((article, index) => {
+        gridItems.push(article);
+        // Interject banner after the 4th, 8th etc item (index 3, 7...)
+        if ((index + 1) % 4 === 0) {
+            gridItems.push({ type: 'banner', id: `banner-${index}` });
+        }
+    });
+
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex flex-row gap-6 w-full">
-                {blogPosts.slice(0, 3).map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="flex-1">
-                        <BlogCard post={post} />
-                    </Link>
-                ))}
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+            {gridItems.map((item, idx) => {
+                if ('type' in item && item.type === 'banner') {
+                    return (
+                        <div key={item.id} className="w-full">
+                            <PromoBanner />
+                        </div>
+                    );
+                }
 
-            <div className="flex flex-row gap-6 w-full">
-                {blogPosts[3] && (
-                    <Link href={`/blog/${blogPosts[3].slug}`} className="flex-1 text-inherit decoration-none">
-                        <BlogCard post={blogPosts[3]} />
-                    </Link>
-                )}
-                {/* Sidebar Promo */}
-                <div className="relative w-[397px] h-[517px] rounded-[40px] overflow-hidden">
-                    <Image
-                        src="https://api.builder.io/api/v1/image/assets/TEMP/575debb1f4b5a5e3bc39f8bef505c2d24f8200f0?width=794"
-                        alt="Promo Sidebar"
-                        fill
-                        className="object-cover"
-                    />
-                </div>
-                {extraPosts[0] && (
-                    <Link href={`/blog/${extraPosts[0].slug}`} className="flex-1">
-                        <BlogCard post={extraPosts[0]} />
-                    </Link>
-                )}
-            </div>
-
-            <div className="flex flex-row gap-6 w-full">
-                {extraPosts.slice(1, 4).map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="flex-1">
-                        <BlogCard post={post} />
-                    </Link>
-                ))}
-            </div>
-
-            <div className="flex flex-row gap-6 w-full">
-                {extraPosts[4] && (
-                    <Link href={`/blog/${extraPosts[4].slug}`} className="flex-1">
-                        <BlogCard post={extraPosts[4]} />
-                    </Link>
-                )}
-                {/* Promo Image 2 */}
-                <div className="relative w-[397px] h-[517px] rounded-[40px] overflow-hidden">
-                    <Image
-                        src="https://api.builder.io/api/v1/image/assets/TEMP/575debb1f4b5a5e3bc39f8bef505c2d24f8200f0?width=794"
-                        alt="Promo Sidebar"
-                        fill
-                        className="object-cover"
-                    />
-                </div>
-                {extraPosts.slice(5, 7).map((post) => (
-                    <Link key={post.id} href={`/blog/${post.slug}`} className="flex-1">
-                        <BlogCard post={post} />
-                    </Link>
-                ))}
-            </div>
+                const post = item as BlogPost;
+                return (
+                    <div key={post.id} className="w-full h-full flex">
+                        <Link href={`/blog/${post.slug}`} className="flex-1 no-underline flex">
+                            <BlogCard post={post} />
+                        </Link>
+                    </div>
+                );
+            })}
         </div>
     );
 };
