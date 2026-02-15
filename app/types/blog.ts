@@ -22,12 +22,11 @@ export interface Article {
     id: string;
     title: string;
     slug: string;
-    description: string;
     publishedDate: string;
-    content: any; // Lexical rich text
+    content: unknown; // Lexical rich text
     blockquote?: string;
     image: Media;
     category: Category;
-    author: Author;
+    author?: Author | null;
     tags?: Tag[];
 }

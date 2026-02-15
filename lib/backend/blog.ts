@@ -1,5 +1,6 @@
 import { client } from './graphql'
 import { gql } from 'graphql-request'
+import { Article, Category } from '@/app/types/blog'
 
 export const GET_ARTICLES = gql`
   query GetArticles {
@@ -27,7 +28,6 @@ export const GET_ARTICLE_BY_SLUG = gql`
         id
         title
         slug
-        description
         publishedDate
         content
         blockquote
@@ -36,13 +36,6 @@ export const GET_ARTICLE_BY_SLUG = gql`
         }
         category {
           name
-        }
-        author {
-          name
-          bio
-          avatar {
-            url
-          }
         }
         tags {
           tag
@@ -63,17 +56,29 @@ export const GET_CATEGORIES = gql`
   }
 `
 
+type ArticlesResponse = {
+  Articles: {
+    docs: Article[]
+  }
+}
+
+type CategoriesResponse = {
+  Categories: {
+    docs: Category[]
+  }
+}
+
 export async function getArticles() {
-  const data: any = await client.request(GET_ARTICLES)
+  const data = await client.request<ArticlesResponse>(GET_ARTICLES)
   return data.Articles.docs
 }
 
 export async function getArticleBySlug(slug: string) {
-  const data: any = await client.request(GET_ARTICLE_BY_SLUG, { slug })
+  const data = await client.request<ArticlesResponse>(GET_ARTICLE_BY_SLUG, { slug })
   return data.Articles.docs[0] || null
 }
 
 export async function getCategories() {
-  const data: any = await client.request(GET_CATEGORIES)
+  const data = await client.request<CategoriesResponse>(GET_CATEGORIES)
   return data.Categories.docs
 }

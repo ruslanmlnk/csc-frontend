@@ -38,7 +38,7 @@ const BlogPage = () => {
                     getCategories()
                 ]);
                 setArticles(articlesData);
-                setCategories(['All Articles', ...categoriesData.map((c: any) => c.name)]);
+                setCategories(['All Articles', ...categoriesData.map((c: Category) => c.name)]);
             } catch (error) {
                 console.error('Error fetching blog data:', error);
             } finally {
@@ -50,8 +50,7 @@ const BlogPage = () => {
 
     const filteredArticles = articles.filter(article => {
         const matchesCategory = activeCategory === 'All Articles' || article.category.name === activeCategory;
-        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            article.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
