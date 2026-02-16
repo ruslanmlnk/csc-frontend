@@ -16,8 +16,12 @@ type ArticleRelatedProps = {
 }
 
 const ArticleRelated: React.FC<ArticleRelatedProps> = ({ articles }) => {
+  if (!articles || articles.length === 0) {
+    return null
+  }
+
   return (
-    <div className="flex flex-col gap-16 mt-20">
+    <div className="flex flex-col gap-16 mt-10">
       <h2 className="text-center text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999] font-poppins">
         Related Article
       </h2>
@@ -45,4 +49,3 @@ const ArticleRelated: React.FC<ArticleRelatedProps> = ({ articles }) => {
 }
 
 export default ArticleRelated
-

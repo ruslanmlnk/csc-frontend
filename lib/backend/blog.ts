@@ -54,6 +54,18 @@ export const GET_ARTICLE_BY_SLUG = gql`
         tags {
           tag
         }
+        relatedArticles {
+          id
+          title
+          slug
+          publishedDate
+          image {
+            url
+          }
+          category {
+            name
+          }
+        }
       }
     }
   }

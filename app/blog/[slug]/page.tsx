@@ -24,7 +24,6 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
 
     let article: Article | null = null
     let allArticles: Article[] = []
-    let relatedArticles: Article[] = []
     let categories: Category[] = []
 
     try {
@@ -32,7 +31,6 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
         article = articleData
         allArticles = allArticlesData
         categories = categoriesData
-        relatedArticles = allArticlesData.filter((a: Article) => a.slug !== slug).slice(0, 3)
     } catch (error) {
         console.error('Error fetching article:', error)
     }
@@ -60,14 +58,32 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
         year: 'numeric',
     })
 
-    const formattedRelatedArticles = relatedArticles.map((a) => ({
-        id: a.id,
-        slug: a.slug,
-        publishedDate: a.publishedDate,
-        categoryName: a.category.name,
-        title: a.title,
-        image: withBackendUrl(a.image.url, backendUrl),
-    }))
+    const manualRelatedArticles = (article.relatedArticles || [])
+        .filter((a) => Boolean(a?.slug) && a.slug !== slug)
+        .map((a) => ({
+            id: a.id,
+            slug: a.slug,
+            publishedDate: a.publishedDate,
+            categoryName: a.category.name,
+            title: a.title,
+            image: withBackendUrl(a.image.url, backendUrl),
+        }))
+
+    const fallbackRelatedArticles = allArticles
+        .filter((a: Article) => a.slug !== slug)
+        .slice(0, 3)
+        .map((a) => ({
+            id: a.id,
+            slug: a.slug,
+            publishedDate: a.publishedDate,
+            categoryName: a.category.name,
+            title: a.title,
+            image: withBackendUrl(a.image.url, backendUrl),
+        }))
+
+    const formattedRelatedArticles = manualRelatedArticles.length > 0
+        ? manualRelatedArticles
+        : fallbackRelatedArticles
 
     const sidebarLatestPosts = [...allArticles]
         .filter((a) => a.slug !== slug)

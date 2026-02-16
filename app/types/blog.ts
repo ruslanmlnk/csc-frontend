@@ -25,6 +25,19 @@ export interface Tag {
     tag: string;
 }
 
+export interface RelatedArticleSelection {
+    id: string;
+    title: string;
+    slug: string;
+    publishedDate: string;
+    image: {
+        url: string;
+    };
+    category: {
+        name: string;
+    };
+}
+
 export interface Article {
     id: string;
     title: string;
@@ -35,4 +48,5 @@ export interface Article {
     category: Category;
     author?: Author | null;
     tags?: Tag[];
+    relatedArticles?: RelatedArticleSelection[];
 }
