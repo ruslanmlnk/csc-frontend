@@ -12,6 +12,13 @@ export interface Author {
     name: string;
     avatar?: Media;
     bio?: string;
+    position?: string;
+    facebook?: string;
+    instagram?: string;
+    linkedin?: string;
+    telegram?: string;
+    tiktok?: string;
+    website?: string;
 }
 
 export interface Tag {
@@ -24,7 +31,6 @@ export interface Article {
     slug: string;
     publishedDate: string;
     content: unknown; // Lexical rich text
-    blockquote?: string;
     image: Media;
     category: Category;
     author?: Author | null;

@@ -1,7 +1,7 @@
 import React from 'react'
 import BlogCTA from '../../components/blog/BlogCTA'
-import { getArticleBySlug, getArticles } from '@/lib/backend/blog'
-import { Article } from '../../types/blog'
+import { getArticleBySlug, getArticles, getCategories } from '@/lib/backend/blog'
+import { Article, Category } from '../../types/blog'
 import { getBackendUrl } from '@/lib/auth-server'
 import ArticleNotFound from '@/app/components/article/ArticleNotFound'
 import ArticleBackLink from '@/app/components/article/ArticleBackLink'
@@ -23,12 +23,16 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
     const backendUrl = getBackendUrl()
 
     let article: Article | null = null
+    let allArticles: Article[] = []
     let relatedArticles: Article[] = []
+    let categories: Category[] = []
 
     try {
-        const [articleData, allArticles] = await Promise.all([getArticleBySlug(slug), getArticles()])
+        const [articleData, allArticlesData, categoriesData] = await Promise.all([getArticleBySlug(slug), getArticles(), getCategories()])
         article = articleData
-        relatedArticles = allArticles.filter((a: Article) => a.slug !== slug).slice(0, 3)
+        allArticles = allArticlesData
+        categories = categoriesData
+        relatedArticles = allArticlesData.filter((a: Article) => a.slug !== slug).slice(0, 3)
     } catch (error) {
         console.error('Error fetching article:', error)
     }
@@ -40,7 +44,16 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
     const articleImage = withBackendUrl(article.image?.url, backendUrl)
     const authorName = article.author?.name || 'CSC Agency'
     const authorBio = article.author?.bio || 'Experienced writer and expert in performance marketing and digital industry.'
+    const authorPosition = article.author?.position || 'Writer / Expert'
     const authorAvatar = withBackendUrl(article.author?.avatar?.url, backendUrl)
+    const authorSocials = {
+        facebook: article.author?.facebook,
+        instagram: article.author?.instagram,
+        linkedin: article.author?.linkedin,
+        telegram: article.author?.telegram,
+        tiktok: article.author?.tiktok,
+        website: article.author?.website,
+    }
     const publishedDateLabel = new Date(article.publishedDate).toLocaleDateString('en-US', {
         month: 'long',
         day: 'numeric',
@@ -56,6 +69,23 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
         image: withBackendUrl(a.image.url, backendUrl),
     }))
 
+    const sidebarLatestPosts = [...allArticles]
+        .filter((a) => a.slug !== slug)
+        .sort((a, b) => new Date(b.publishedDate).getTime() - new Date(a.publishedDate).getTime())
+        .slice(0, 2)
+        .map((a) => ({
+            slug: a.slug,
+            title: a.title,
+            categoryName: a.category.name,
+            publishedDateLabel: new Date(a.publishedDate).toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+            }),
+        }))
+
+    const sidebarCategories = categories.map((c) => c.name)
+
     return (
         <div className="relative min-h-screen bg-[#0D0D0D] pt-[162.69px]">
             <main className="relative z-10 w-full max-w-[1280px] mx-auto px-5 flex flex-col gap-20 pb-20">
@@ -69,19 +99,28 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                     imageUrl={articleImage}
                 />
 
-                <div className="flex flex-col lg:flex-row gap-16">
+                <div className="flex flex-col-reverse lg:flex-row gap-16">
                     <article className="flex-1 flex flex-col gap-12">
                         <ArticleContent
                             content={article.content}
                             backendUrl={backendUrl}
-                            blockquote={article.blockquote}
                             tags={article.tags}
                         />
 
-                        <ArticleAuthorCard authorName={authorName} authorBio={authorBio} authorAvatar={authorAvatar} />
+                        <ArticleAuthorCard
+                            authorName={authorName}
+                            authorBio={authorBio}
+                            authorPosition={authorPosition}
+                            authorAvatar={authorAvatar}
+                            authorSocials={authorSocials}
+                        />
                     </article>
 
-                    <ArticleSidebar tags={article.tags} />
+                    <ArticleSidebar
+                        tags={article.tags}
+                        categories={sidebarCategories}
+                        latestPosts={sidebarLatestPosts}
+                    />
                 </div>
 
                 <ArticleRelated articles={formattedRelatedArticles} />

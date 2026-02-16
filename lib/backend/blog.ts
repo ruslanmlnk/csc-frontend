@@ -33,12 +33,18 @@ export const GET_ARTICLE_BY_SLUG = gql`
           id
           name
           bio
+          position
+          facebook
+          instagram
+          linkedin
+          telegram
+          tiktok
+          website
           avatar {
             url
           }
         }
         content
-        blockquote
         image {
           url
         }

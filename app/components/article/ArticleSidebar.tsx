@@ -1,13 +1,25 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 import { Search } from 'lucide-react'
 import type { Tag } from '@/app/types/blog'
 
-type ArticleSidebarProps = {
-  tags?: Tag[]
+type SidebarLatestPost = {
+  slug: string
+  title: string
+  categoryName: string
+  publishedDateLabel: string
 }
 
-const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags }) => {
+type ArticleSidebarProps = {
+  tags?: Tag[]
+  categories?: string[]
+  latestPosts?: SidebarLatestPost[]
+}
+
+const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, latestPosts }) => {
+  const hasLatestPosts = (latestPosts?.length || 0) > 0
+
   return (
     <aside className="w-full lg:w-[380px] flex flex-col gap-16 shrink-0">
       <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
@@ -29,6 +41,44 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags }) => {
           />
         </div>
 
+        <div className="flex w-full flex-col items-start gap-6">
+          <h3 className="self-stretch text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
+            Categories
+          </h3>
+          <div className="flex w-full flex-wrap items-center content-center gap-4">
+            {(categories || []).map((categoryName) => (
+              <div key={categoryName} className="flex items-center justify-center rounded-[80px] border-[0.5px] border-[#FCC660] px-3 py-1.5">
+                <span className="text-[#FCC660] text-[14px] leading-4 font-normal font-poppins">{categoryName}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {hasLatestPosts ? (
+          <div className="flex w-full flex-col items-start gap-6">
+            <h3 className="self-stretch text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
+              Latest Post
+            </h3>
+            <div className="flex w-full flex-col items-start gap-8">
+              {(latestPosts || []).map((post) => (
+                <article key={post.slug} className="flex w-full flex-col items-start justify-center gap-4">
+                  <Link href={`/blog/${post.slug}`} className="self-stretch text-white text-[20px] font-medium leading-[32px] hover:text-[#FCC660] transition-colors">
+                    {post.title}
+                  </Link>
+                  <div className="flex w-full items-center gap-2">
+                    <div className="flex items-center justify-center rounded-[80px] border-[0.5px] border-[#FCC660] px-3 pt-[5px] pb-[6px]">
+                      <span className="text-[#FCC660] text-[14px] leading-4 font-normal font-poppins">{post.categoryName}</span>
+                    </div>
+                    <span className="flex-1 text-right text-[#6C6C6C] text-[14px] leading-4 font-normal font-poppins">
+                      {post.publishedDateLabel}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <div className="flex flex-col gap-6">
           <h3 className="text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
             Popular Tags
@@ -49,4 +99,3 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags }) => {
 }
 
 export default ArticleSidebar
-

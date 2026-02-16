@@ -36,8 +36,11 @@ const ArticleHero: React.FC<ArticleHeroProps> = ({
         {title}
       </h1>
 
-      <div className="relative w-full max-h-[520px] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)] mt-6">
-        <Image src={imageUrl} alt={title} fill className="object-cover" />
+      <div
+        className="relative w-full max-w-[1240px] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)] mt-[7px]"
+        style={{ height: 520 }}
+      >
+        <Image src={imageUrl} alt={title} fill sizes="(max-width: 1280px) 100vw, 1240px" className="object-cover" />
       </div>
     </div>
   )
