@@ -278,9 +278,11 @@ const SettingsPage: React.FC = () => {
     return (
         <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black">
             <GlowBackground
-                heightClassName="h-[1200px]"
+                className="-translate-y-12 md:translate-y-0"
+                heightClassName="h-[1000px] md:h-[1200px]"
                 gradient="linear-gradient(83deg, rgba(242, 159, 4, 0.70) 0.75%, #0D0D0D 30.5%, #0D0D0D 69.72%, rgba(242, 159, 4, 0.70) 99.19%)"
                 gradientBlendMode="soft-light, normal"
+                showMobileGlow
             />
 
             <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[120px] pt-[80px] md:pt-[120px] flex flex-col items-center gap-16 mx-auto">

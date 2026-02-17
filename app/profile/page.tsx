@@ -76,7 +76,7 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black pb-20">
-      <GlowBackground heightClassName="h-[1000px]" />
+      <GlowBackground className="-translate-y-12 md:translate-y-0" heightClassName="h-[1000px]" showMobileGlow />
 
       <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[90px] pt-[128px] md:pt-[202.69px] flex flex-col gap-6 mx-auto">
         <section className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-8 md:p-[29.2px_40px_59.2px_40px] flex flex-col items-stretch md:items-end gap-6 md:gap-0 relative overflow-hidden self-stretch" style={{ backgroundImage: 'radial-gradient(circle at 0% 100%, rgba(242, 159, 4, 0.15) 0%, transparent 50%)' }}>
