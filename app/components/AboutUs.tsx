@@ -3,8 +3,8 @@ import Image from 'next/image';
 
 const AboutUs: React.FC = () => {
     return (
-        <section className="relative w-full bg-[#0D0D0D] py-[120px] px-[20px] md:px-[100px] flex flex-col items-center overflow-hidden">
-            <div className="relative z-10 w-full max-w-[1240px] flex flex-col lg:flex-row items-center gap-[64px] self-center">
+        <section className="relative w-full bg-[#0D0D0D] pb-[120px] flex flex-col items-center overflow-hidden">
+            <div className="relative z-10 w-full max-w-[1280px] px-5 flex flex-col lg:flex-row items-center gap-[64px] self-center">
 
                 {/* --- Left Side: Picture/Graphic (592x680) --- */}
                 <div className="relative w-full lg:w-[592px] h-[680px] bg-[#1A1A1A] rounded-[40px] border border-[rgba(74,74,74,0.70)] overflow-hidden backdrop-blur-[2px] flex-shrink-0 shadow-lg">

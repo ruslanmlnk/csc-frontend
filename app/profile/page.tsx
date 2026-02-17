@@ -10,14 +10,14 @@ import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
 import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
 
-const EditIcon = () => (
-  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+const EditIcon = ({ size = 30 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M5.95 23.5125H6.0875L9.75 23.175C10.2625 23.125 10.7375 22.9 11.1 22.5375L24.925 8.7125C25.575 8.0625 25.9375 7.2 25.9375 6.2875C25.9375 5.375 25.575 4.5125 24.925 3.8625L24.0375 2.975C22.7375 1.675 20.475 1.675 19.175 2.975L17.4125 4.7375L5.3625 16.7875C5 17.15 4.775 17.625 4.7375 18.1375L4.4 21.8C4.3625 22.2625 4.525 22.7125 4.85 23.05C5.15 23.35 5.5375 23.5125 5.95 23.5125ZM21.6125 3.8375C22.0125 3.8375 22.4125 3.9875 22.7125 4.3L23.6 5.1875C23.746 5.33106 23.862 5.50226 23.9412 5.69112C24.0204 5.87998 24.0612 6.08272 24.0612 6.2875C24.0612 6.49228 24.0204 6.69502 23.9412 6.88388C23.862 7.07274 23.746 7.24394 23.6 7.3875L22.5 8.4875L19.4125 5.4L20.5125 4.3C20.8125 4 21.2125 3.8375 21.6125 3.8375ZM6.6 18.3125C6.6 18.2375 6.6375 18.175 6.6875 18.125L18.075 6.725L21.1625 9.8125L9.775 21.2C9.775 21.2 9.65 21.2875 9.5875 21.2875L6.3 21.5875L6.6 18.3V18.3125ZM28.4375 27.5C28.4375 28.0125 28.0125 28.4375 27.5 28.4375H2.5C1.9875 28.4375 1.5625 28.0125 1.5625 27.5C1.5625 26.9875 1.9875 26.5625 2.5 26.5625H27.5C28.0125 26.5625 28.4375 26.9875 28.4375 27.5Z" fill="#F29F04" />
   </svg>
 );
 
-const ExitIcon = () => (
-  <svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+const ExitIcon = ({ size = 30 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M24.5908 15.6363L20.8708 19.3563C20.7016 19.5228 20.4734 19.6158 20.236 19.6148C19.9986 19.6139 19.7711 19.5192 19.6032 19.3513C19.4353 19.1834 19.3406 18.956 19.3396 18.7186C19.3386 18.4812 19.4314 18.253 19.5979 18.0837L21.7666 15.915H12.4195C12.1808 15.915 11.9519 15.8202 11.7831 15.6514C11.6144 15.4826 11.5195 15.2537 11.5195 15.015C11.5195 14.7763 11.6144 14.5474 11.7831 14.3786C11.9519 14.2098 12.1808 14.115 12.4195 14.115H21.7966L19.5979 11.9163C19.4314 11.747 19.3386 11.5188 19.3396 11.2814C19.3406 11.044 19.4353 10.8166 19.6032 10.6487C19.7711 10.4809 19.9986 10.3861 20.236 10.3852C20.4734 10.3843 20.7016 10.4772 20.8708 10.6437L24.5908 14.3637C24.7596 14.5325 24.8543 14.7614 24.8543 15C24.8543 15.2387 24.7596 15.4675 24.5908 15.6363Z" fill="#F29F04" />
     <path d="M16.6645 26.5311H7.54453C6.90821 26.5305 6.29813 26.2774 5.84818 25.8275C5.39823 25.3775 5.14517 24.7674 5.14453 24.1311V5.8689C5.14517 5.23258 5.39823 4.6225 5.84818 4.17255C6.29813 3.7226 6.90821 3.46954 7.54453 3.4689H16.6645C16.9032 3.4689 17.1321 3.56372 17.3009 3.73251C17.4697 3.90129 17.5645 4.13021 17.5645 4.3689C17.5645 4.6076 17.4697 4.83652 17.3009 5.0053C17.1321 5.17408 16.9032 5.2689 16.6645 5.2689H7.54453C7.3854 5.2689 7.23279 5.33212 7.12027 5.44464C7.00775 5.55716 6.94453 5.70977 6.94453 5.8689V24.1311C6.94453 24.2902 7.00775 24.4428 7.12027 24.5554C7.23279 24.6679 7.3854 24.7311 7.54453 24.7311H16.6645C16.9032 24.7311 17.1321 24.8259 17.3009 24.9947C17.4697 25.1635 17.5645 25.3924 17.5645 25.6311C17.5645 25.8698 17.4697 26.0987 17.3009 26.2675C17.1321 26.4363 16.9032 26.5311 16.6645 26.5311Z" fill="#F29F04" />
   </svg>
@@ -79,28 +79,32 @@ const ProfilePage: React.FC = () => {
       <GlowBackground heightClassName="h-[1000px]" />
 
       <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[90px] pt-[128px] md:pt-[202.69px] flex flex-col gap-6 mx-auto">
-        <section className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-[29.2px_40px_59.2px_40px] flex flex-col items-end relative overflow-hidden self-stretch" style={{ backgroundImage: 'radial-gradient(circle at 0% 100%, rgba(242, 159, 4, 0.15) 0%, transparent 50%)' }}>
-          <div className="flex items-center gap-[30px] relative">
+        <section className="rounded-[40px] border border-[#F29F04] bg-[#1A1A1A] p-8 md:p-[29.2px_40px_59.2px_40px] flex flex-col items-stretch md:items-end gap-6 md:gap-0 relative overflow-hidden self-stretch" style={{ backgroundImage: 'radial-gradient(circle at 0% 100%, rgba(242, 159, 4, 0.15) 0%, transparent 50%)' }}>
+          <div className="order-3 md:order-none flex items-center justify-end gap-[30px] w-full md:w-auto relative">
             <Link href="/profile/settings" className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
-              <EditIcon /> <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Edit</span>
+              <span className="md:hidden"><EditIcon size={24} /></span>
+              <span className="hidden md:block"><EditIcon /></span>
+              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Edit</span>
             </Link>
             <button onClick={handleLogout} className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
-              <ExitIcon /> <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Exit</span>
+              <span className="md:hidden"><ExitIcon size={24} /></span>
+              <span className="hidden md:block"><ExitIcon /></span>
+              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Exit</span>
             </button>
           </div>
 
-          <div className="flex flex-col md:flex-row md:items-end justify-between w-full gap-6 relative">
-            <div className="flex items-center gap-10">
-              <div className="h-[125px] w-[125px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 relative overflow-hidden">
+          <div className="order-1 md:order-none flex flex-col md:flex-row md:items-end justify-between w-full gap-6 relative">
+            <div className="flex items-center gap-6 md:gap-10">
+              <div className="h-20 w-20 md:h-[125px] md:w-[125px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 relative overflow-hidden">
                 {avatarUrl ? (
                   <Image src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'}${avatarUrl}`} alt="Avatar" fill className="object-cover" />
                 ) : (
-                  <div className="p-[37.5px]"><UserIcon /></div>
+                  <div className="scale-[0.64] md:scale-100"><UserIcon /></div>
                 )}
               </div>
-              <div className="flex flex-col items-start gap-5">
-                <h1 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px] line-clamp-1 truncate block">{displayName}</h1>
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col items-start gap-4 md:gap-5 w-[140px] md:w-auto min-w-0">
+                <h1 className="text-white font-poppins text-[20px] md:text-[32px] font-medium leading-[32px] md:leading-[40px] tracking-[-0.64px] line-clamp-1 truncate block w-full">{displayName}</h1>
+                <div className="flex items-center gap-6 md:gap-4">
                   {user?.instagram && (
                     <Link href={`https://instagram.com/${user.instagram.replace('@', '')}`} target="_blank" className="hover:opacity-80 transition-opacity">
                       <InstagramIcon size={24} />
@@ -124,7 +128,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <p className="text-[#BDBDBD] text-[16px] leading-[26px] font-poppins text-right [text-shadow:0_4px_4px_rgba(0,0,0,0.4)] md:max-w-[602.81px]">
+            <p className="text-[#BDBDBD] text-[16px] leading-[26px] font-poppins text-left md:text-right w-full [text-shadow:0_4px_4px_rgba(0,0,0,0.4)] md:max-w-[602.81px]">
               {user?.bio || 'Description not filled in'}
             </p>
           </div>

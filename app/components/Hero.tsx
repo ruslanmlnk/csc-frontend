@@ -34,7 +34,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
 
 
       {/* --- Content Area --- */}
-      <div className="relative z-20 flex flex-col items-center w-full max-w-[1440px] px-[100px] pt-[162px]">
+      <div className="relative z-20 flex flex-col items-center w-full max-w-[1280px] px-5 pt-[162px]">
 
         {/* Text Container (Gap 56 from Figma) */}
         <div className="flex flex-col items-center gap-[56px] w-full text-center">
@@ -90,6 +90,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
           src={data?.bottomGraphic?.url || "/images/hero-graphic.webp"}
           alt="Hero Graphic"
           className="mt-[137.93px]"
+          containerStyle={{ maxWidth: '100%' }}
         />
       </div>
 
