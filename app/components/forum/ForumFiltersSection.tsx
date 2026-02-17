@@ -4,7 +4,7 @@ import Image from 'next/image';
 const ForumFiltersSection: React.FC = () => {
     return (
         <div className="w-full max-w-[1280px] px-5 flex flex-col items-center gap-[64px] mb-[64px]">
-            <div className="relative w-full h-[158px] rounded-[40px] overflow-hidden">
+            <div className="hidden lg:block relative w-full h-[158px] rounded-[40px] overflow-hidden">
                 <Image
                     src="https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480"
                     alt="Community Banner"

@@ -1,14 +1,14 @@
 'use client';
 
 import React from 'react';
-import BlogHero from '@/app/components/blog/BlogHero';
+import ForumHero from '@/app/components/forum/ForumHero';
 import ForumFiltersSection from '@/app/components/forum/ForumFiltersSection';
 import ForumContentSection from '@/app/components/forum/ForumContentSection';
 
 const ForumPage = () => {
     return (
         <main className="min-h-screen bg-[#0D0D0D] text-white overflow-x-hidden relative">
-            <BlogHero
+            <ForumHero
                 title={
                     <>
                         Community
