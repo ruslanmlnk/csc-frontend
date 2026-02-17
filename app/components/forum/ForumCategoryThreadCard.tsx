@@ -3,6 +3,7 @@ import Image from 'next/image';
 
 interface ForumCategoryThreadCardProps {
     title: string;
+    description: string;
     authorName: string;
     date: string;
     replyCount: number;
@@ -11,6 +12,7 @@ interface ForumCategoryThreadCardProps {
 
 const ForumCategoryThreadCard: React.FC<ForumCategoryThreadCardProps> = ({
     title,
+    description,
     authorName,
     date,
     replyCount,
@@ -40,7 +42,7 @@ const ForumCategoryThreadCard: React.FC<ForumCategoryThreadCardProps> = ({
                             {title}
                         </div>
                         <div className="text-[#6C6C6C] font-poppins text-[14px] font-normal leading-[16px] lg:hidden">
-                            We read, delve into, discuss
+                            {description}
                         </div>
 
                         <div className="hidden lg:flex items-center gap-2.5 shrink-0">

@@ -1,13 +1,35 @@
 import React from 'react';
 import Image from 'next/image';
 
-const ForumFiltersSection: React.FC = () => {
+interface ForumFiltersSectionProps {
+    categories: string[];
+    activeCategory: string;
+    searchPlaceholder: string;
+    searchButtonLabel: string;
+    createThreadLabel: string;
+    mobileCategoryLabel?: string;
+    bannerImage: string;
+    bannerAlt?: string;
+}
+
+const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
+    categories,
+    activeCategory,
+    searchPlaceholder,
+    searchButtonLabel,
+    createThreadLabel,
+    mobileCategoryLabel,
+    bannerImage,
+    bannerAlt = 'Community Banner',
+}) => {
+    const currentMobileCategory = mobileCategoryLabel ?? activeCategory ?? categories[0] ?? '';
+
     return (
         <div className="w-full max-w-[1280px] px-5 flex flex-col items-center gap-[64px] mb-[64px]">
             <div className="hidden lg:block relative w-full h-[158px] rounded-[40px] overflow-hidden">
                 <Image
-                    src="https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480"
-                    alt="Community Banner"
+                    src={bannerImage}
+                    alt={bannerAlt}
                     fill
                     className="object-cover"
                 />
@@ -16,11 +38,11 @@ const ForumFiltersSection: React.FC = () => {
             <div className="w-full flex flex-col gap-[32px]">
                 <div className="w-full flex flex-col gap-[10px] lg:grid lg:grid-cols-3 lg:gap-[10px]">
                     <div className="hidden lg:flex h-[58px] min-w-0 items-center gap-[16px] bg-[#1A1A1A] rounded-[80px] border-[0.5px] border-[rgba(74,74,74,0.70)] p-[8px] pr-[16px]">
-                        {['All', 'Facebook', 'Keitaro', 'TikTok'].map((filter, index) => (
+                        {categories.map((filter) => (
                             <button
                                 key={filter}
                                 className={`shrink-0 px-[16px] py-[8px] rounded-[80px] text-[16px] leading-[26px] transition-colors ${
-                                    index === 0
+                                    filter === activeCategory
                                         ? 'bg-[#F29F04] text-[#070707] font-medium'
                                         : 'text-[#FCFCFC] font-normal hover:bg-white/5'
                                 }`}
@@ -37,7 +59,7 @@ const ForumFiltersSection: React.FC = () => {
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search thread"
+                                placeholder={searchPlaceholder}
                                 className="bg-transparent border-none outline-none text-white placeholder-white w-full font-poppins text-[16px] leading-[26px] font-normal lg:font-medium"
                             />
                         </div>
@@ -45,19 +67,19 @@ const ForumFiltersSection: React.FC = () => {
 
                     <div className="min-w-0 flex flex-col gap-[10px] lg:h-[58px] lg:grid lg:grid-cols-2 lg:gap-[10px]">
                         <button className="h-[50px] lg:h-full w-full inline-flex items-center justify-center gap-[12px] bg-[#F29F04] text-[#0D0D0D] rounded-[80px] px-[24px] font-medium text-[16px] leading-[26px] hover:brightness-110 transition-all">
-                            Search
+                            {searchButtonLabel}
                         </button>
                         <button className="h-[50px] lg:h-full w-full inline-flex items-center justify-center gap-[12px] lg:gap-[5px] border border-[#FCC660] text-[#FCC660] rounded-[80px] px-[24px] font-medium text-[16px] leading-[26px] whitespace-nowrap hover:bg-[#FCC660]/10 transition-all">
                             <svg className="w-5 h-5 lg:w-6 lg:h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 12C21 12.1989 20.921 12.3897 20.7803 12.5303C20.6397 12.671 20.4489 12.75 20.25 12.75H12.75V20.25C12.75 20.4489 12.671 20.6397 12.5303 20.7803C12.3897 20.921 12.1989 21 12 21C11.8011 21 11.6103 20.921 11.4697 20.7803C11.329 20.6397 11.25 20.4489 11.25 20.25V12.75H3.75C3.55109 12.75 3.36032 12.671 3.21967 12.5303C3.07902 12.3897 3 12.1989 3 12C3 11.8011 3.07902 11.6103 3.21967 11.4697C3.36032 11.329 3.55109 11.25 3.75 11.25H11.25V3.75C11.25 3.55109 11.329 3.36032 11.4697 3.21967C11.6103 3.07902 11.8011 3 12 3C12.1989 3 12.3897 3.07902 12.5303 3.21967C12.671 3.36032 12.75 3.55109 12.75 3.75V11.25H20.25C20.4489 11.25 20.6397 11.329 20.7803 11.4697C20.921 11.6103 21 11.8011 21 12Z" fill="#FCC660" />
                             </svg>
-                            Create a thread
+                            {createThreadLabel}
                         </button>
                     </div>
                 </div>
 
                 <button className="h-[46px] w-full lg:hidden flex items-center justify-between rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] font-normal text-[16px] leading-[26px]">
-                    <span>All</span>
+                    <span>{currentMobileCategory}</span>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12.6673 6L8.00065 10.6667L3.33398 6" stroke="#FCC660" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

@@ -301,6 +301,7 @@ const ProfilePage: React.FC = () => {
             <ForumCategoryThreadCard
               key={String(thread.id)}
               title={thread.title || 'Untitled thread'}
+              description={thread.category || 'We read, delve into, discuss'}
               authorName={displayName}
               date={formatThreadDate(thread.createdAt)}
               replyCount={Array.isArray(thread.comments) ? thread.comments.length : 0}

@@ -1,15 +1,15 @@
 import React from 'react';
-import ForumThreadCard from './ForumThreadCard';
+import ForumThreadCard, { type ForumThreadCardData } from './ForumThreadCard';
 
 type ForumCategorySectionProps = {
     title: string;
-    itemsCount: number;
+    threads: ForumThreadCardData[];
     className?: string;
 };
 
 const ForumCategorySection: React.FC<ForumCategorySectionProps> = ({
     title,
-    itemsCount,
+    threads,
     className = ''
 }) => {
     return (
@@ -26,8 +26,15 @@ const ForumCategorySection: React.FC<ForumCategorySectionProps> = ({
             </div>
 
             <div className="flex flex-col gap-[16px]">
-                {Array.from({ length: itemsCount }).map((_, index) => (
-                    <ForumThreadCard key={`${title}-${index}`} />
+                {threads.map((thread, index) => (
+                    <ForumThreadCard
+                        key={`${title}-${thread.threadTitle}-${thread.authorName}-${index}`}
+                        categoryTitle={thread.categoryTitle}
+                        categoryDescription={thread.categoryDescription}
+                        threadTitle={thread.threadTitle}
+                        authorName={thread.authorName}
+                        date={thread.date}
+                    />
                 ))}
             </div>
         </div>

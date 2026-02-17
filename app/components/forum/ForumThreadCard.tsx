@@ -1,6 +1,20 @@
 import React from 'react';
 
-const ForumThreadCard: React.FC = () => {
+export interface ForumThreadCardData {
+    categoryTitle: string;
+    categoryDescription: string;
+    threadTitle: string;
+    authorName: string;
+    date: string;
+}
+
+const ForumThreadCard: React.FC<ForumThreadCardData> = ({
+    categoryTitle,
+    categoryDescription,
+    threadTitle,
+    authorName,
+    date,
+}) => {
     return (
         <div className="bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] p-6 flex flex-col gap-6 min-h-[199px] lg:min-h-0 lg:p-[23.2px]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -13,22 +27,22 @@ const ForumThreadCard: React.FC = () => {
 
                     <div className="flex flex-col items-start gap-[5px]">
                         <h3 className="text-white text-[16px] lg:text-[20px] font-medium leading-[26px] lg:leading-[32px]">
-                            News and announcements
+                            {categoryTitle}
                         </h3>
                         <span className="text-[#6C6C6C] text-[14px] lg:text-[16px] font-normal leading-[16px]">
-                            We read, delve into, discuss
+                            {categoryDescription}
                         </span>
                     </div>
                 </div>
 
                 <div className="w-full border-t border-white/20 pt-5 flex flex-col gap-[5px] lg:w-auto lg:pt-0 lg:pl-5 lg:border-t-0 lg:border-l lg:gap-[10px]">
                     <h4 className="text-[16px] font-normal leading-[26px] lg:leading-[32px] text-white line-clamp-1 w-[140px] text-ellipsis text-left">
-                        News and announcements
+                        {threadTitle}
                     </h4>
                     <div className="flex items-center gap-[10px] text-[#6C6C6C] text-[16px] font-normal leading-[26px] lg:leading-[16px]">
-                        <span className="line-clamp-1 w-[100px] text-ellipsis">ClickStorm</span>
+                        <span className="line-clamp-1 w-[100px] text-ellipsis">{authorName}</span>
                         <div className="w-[4px] h-[4px] bg-[#6C6C6C] rounded-full" />
-                        <span>Mar 10, 2025</span>
+                        <span>{date}</span>
                     </div>
                 </div>
             </div>
