@@ -13,7 +13,7 @@ const ForumCategorySection: React.FC<ForumCategorySectionProps> = ({
     className = ''
 }) => {
     return (
-        <div className={`flex flex-col gap-[24px] ${className}`.trim()}>
+        <div className={`flex flex-col gap-[28px] ${className}`.trim()}>
             <div className="relative">
                 <div className="w-full h-[58px] bg-[#F29F04] rounded-[80px] flex items-center px-[24px] text-[#0D0D0D] font-medium text-[16px]">
                     {title}

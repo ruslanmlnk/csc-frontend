@@ -4,7 +4,7 @@ import ForumSidebar from './ForumSidebar';
 
 const ForumContentSection: React.FC = () => {
     return (
-        <div className="w-full max-w-[1440px] px-[100px] flex gap-[24px] pb-[100px] justify-between">
+        <div className="w-full max-w-[1280px] px-5 mx-auto flex gap-[24px] pb-[80px] justify-between">
             <ForumThreadsColumn />
             <ForumSidebar />
         </div>
