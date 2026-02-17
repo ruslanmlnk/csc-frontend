@@ -14,8 +14,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const page = searchParams.get('page') || '1'
   const limit = searchParams.get('limit') || '12'
+  const authorId = searchParams.get('authorId') || undefined
 
-  const { ok, status, data } = await getThreads({ page, limit })
+  const { ok, status, data } = await getThreads({ page, limit, authorId })
 
   if (!ok) {
     return NextResponse.json({ error: getBackendErrorMessage(data, 'Unable to load threads.') }, { status })

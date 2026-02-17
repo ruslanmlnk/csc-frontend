@@ -12,8 +12,8 @@ export default function ForumCategoryPage() {
     // For now, we use static data matching the Figma design.
 
     const threads = Array(4).fill({
-        category: "News and announcements",
-        title: "ClickStorm",
+        title: "News and announcements",
+        authorName: "ClickStorm",
         date: "Mar 10, 2025",
         replyCount: 12,
         authorAvatar: "https://api.builder.io/api/v1/image/assets/TEMP/0b8497efb69f83a43046090b90fab29f59b439f2?width=136"
@@ -29,13 +29,13 @@ export default function ForumCategoryPage() {
                 backgroundImage="https://api.builder.io/api/v1/image/assets/TEMP/320fdcece1f77a65a87ca9821ec5eac14d2d2e21?width=1545"
             />
 
-            <div className="flex flex-col items-center w-full max-w-[1440px] px-6 lg:px-[100px] gap-16 pb-20">
+            <div className="flex flex-col items-center w-full max-w-[1280px] px-5 gap-16 pb-20">
                 <div className="flex flex-col gap-4 w-full">
                     {threads.map((thread, index) => (
                         <ForumCategoryThreadCard
                             key={index}
-                            category={thread.category}
                             title={thread.title}
+                            authorName={thread.authorName}
                             date={thread.date}
                             replyCount={thread.replyCount}
                             authorAvatar={thread.authorAvatar}

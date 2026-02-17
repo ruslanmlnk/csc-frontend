@@ -5,7 +5,7 @@ import React, { useEffect, useState, type FormEvent } from 'react';
 interface CreateThreadModalProps {
     isOpen: boolean;
     onClose: () => void;
-    // In a real app, we'd have an onSubmit prop here
+    onSuccess?: () => void | Promise<void>;
 }
 
 type CategoryOption = {
@@ -13,7 +13,7 @@ type CategoryOption = {
     name: string;
 };
 
-const CreateThreadModal: React.FC<CreateThreadModalProps> = ({ isOpen, onClose }) => {
+const CreateThreadModal: React.FC<CreateThreadModalProps> = ({ isOpen, onClose, onSuccess }) => {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
     const [content, setContent] = useState('');
@@ -112,6 +112,10 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({ isOpen, onClose }
 
             if (!response.ok) {
                 throw new Error(data?.error || 'Unable to create thread.');
+            }
+
+            if (onSuccess) {
+                await onSuccess();
             }
 
             handleClose(true);

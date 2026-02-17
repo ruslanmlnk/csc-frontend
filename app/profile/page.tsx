@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Pencil, Plus, UserRound, Users, Loader2, Globe } from 'lucide-react';
+import { Plus, UserRound, Users, Loader2, Globe } from 'lucide-react';
 import CreateThreadModal from './CreateThreadModal';
 import { BackendUser } from '@/lib/backend/users';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
 import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
+import ForumCategoryThreadCard from '@/app/components/forum/ForumCategoryThreadCard';
 
 const EditIcon = ({ size = 30 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -29,12 +30,71 @@ const UserIcon = () => (
   </svg>
 );
 
+const ThreadPencilIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M19.8428 4.62479L15.3749 0.155966C15.2264 0.00735903 15.05 -0.110524 14.8558 -0.190952C14.6617 -0.271379 14.4536 -0.312775 14.2435 -0.312775C14.0333 -0.312775 13.8253 -0.271379 13.6311 -0.190952C13.437 -0.110524 13.2606 0.00735903 13.112 0.155966L0.78149 12.4875C0.632275 12.6355 0.513974 12.8117 0.433463 13.0059C0.352951 13.2 0.311837 13.4083 0.312508 13.6185V18.0873C0.312508 18.5116 0.481073 18.9186 0.781119 19.2186C1.08117 19.5187 1.48812 19.6872 1.91245 19.6872H6.38128C6.59146 19.6879 6.79968 19.6468 6.99384 19.5663C7.18799 19.4858 7.3642 19.3675 7.51223 19.2182L19.8428 6.88771C19.9914 6.73914 20.1093 6.56274 20.1897 6.36861C20.2701 6.17447 20.3115 5.96639 20.3115 5.75625C20.3115 5.54611 20.2701 5.33803 20.1897 5.1439C20.1093 4.94976 19.9914 4.77337 19.8428 4.62479ZM2.24343 13.2875L10.7121 4.81879L12.381 6.48772L3.91237 14.9554L2.24343 13.2875ZM1.91245 15.2184L4.78134 18.0873H1.91245V15.2184ZM6.71226 17.7563L5.04333 16.0874L13.512 7.61868L15.1809 9.28762L6.71226 17.7563ZM16.3119 8.15666L11.8431 3.68783L14.243 1.28792L18.7118 5.75575L16.3119 8.15666Z" fill="#F29F04" />
+  </svg>
+);
+
 type AvatarShape = {
   url?: string;
 };
 
+type ProfileThreadDoc = {
+  id: string | number;
+  title?: string | null;
+  category?: string | null;
+  createdAt?: string;
+  comments?: unknown[] | null;
+  author?: { id?: string | number | null } | string | number | null;
+};
+
+type ThreadsResponse = {
+  docs?: ProfileThreadDoc[];
+  totalDocs?: number;
+  error?: string;
+};
+
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+
+const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+  const normalizedBase = BACKEND_BASE_URL.endsWith('/')
+    ? BACKEND_BASE_URL.slice(0, -1)
+    : BACKEND_BASE_URL;
+  const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+
+  return `${normalizedBase}${normalizedPath}`;
+};
+
+const getThreadAuthorId = (author: ProfileThreadDoc['author']): string | null => {
+  if (author === null || author === undefined) return null;
+  if (typeof author === 'string' || typeof author === 'number') return String(author);
+  if (typeof author === 'object' && author.id !== undefined && author.id !== null) {
+    return String(author.id);
+  }
+  return null;
+};
+
+const formatThreadDate = (value?: string): string => {
+  if (!value) return 'Unknown date';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return 'Unknown date';
+
+  return parsed.toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+  });
+};
+
 const ProfilePage: React.FC = () => {
-  const [threadsCount] = useState(0);
+  const [threadsCount, setThreadsCount] = useState(0);
+  const [threads, setThreads] = useState<ProfileThreadDoc[]>([]);
+  const [threadsError, setThreadsError] = useState('');
+  const [isThreadsLoading, setIsThreadsLoading] = useState(false);
   const [user, setUser] = useState<BackendUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -58,6 +118,49 @@ const ProfilePage: React.FC = () => {
     loadUser();
   }, []);
 
+  const refreshUserThreads = useCallback(async () => {
+    if (user?.id === undefined || user?.id === null) {
+      setThreads([]);
+      setThreadsCount(0);
+      return;
+    }
+
+    const targetUserId = String(user.id);
+    setIsThreadsLoading(true);
+    setThreadsError('');
+
+    try {
+      const response = await fetch(
+        `/api/threads?page=1&limit=100&authorId=${encodeURIComponent(targetUserId)}`,
+        { cache: 'no-store' },
+      );
+      const data = (await response.json().catch(() => null)) as ThreadsResponse | null;
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Unable to load threads.');
+      }
+
+      const docs = Array.isArray(data?.docs) ? data.docs : [];
+      const filteredThreads = docs.filter((thread) => {
+        const authorId = getThreadAuthorId(thread.author);
+        return !authorId || authorId === targetUserId;
+      });
+
+      setThreads(filteredThreads);
+      setThreadsCount(typeof data?.totalDocs === 'number' ? data.totalDocs : filteredThreads.length);
+    } catch (err) {
+      setThreads([]);
+      setThreadsCount(0);
+      setThreadsError(err instanceof Error ? err.message : 'Unable to load threads.');
+    } finally {
+      setIsThreadsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    refreshUserThreads();
+  }, [refreshUserThreads]);
+
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
     window.location.href = '/login';
@@ -71,7 +174,13 @@ const ProfilePage: React.FC = () => {
     );
   }
 
-  const avatarUrl = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as AvatarShape).url : null;
+  const avatarRaw =
+    typeof user?.avatar === 'string'
+      ? user.avatar
+      : user?.avatar && typeof user.avatar === 'object'
+        ? (user.avatar as AvatarShape).url || null
+        : null;
+  const avatarUrl = toAbsoluteMediaUrl(avatarRaw);
   const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
 
   return (
@@ -97,7 +206,7 @@ const ProfilePage: React.FC = () => {
             <div className="flex items-center gap-6 md:gap-10">
               <div className="h-20 w-20 md:h-[125px] md:w-[125px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 relative overflow-hidden">
                 {avatarUrl ? (
-                  <Image src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'}${avatarUrl}`} alt="Avatar" fill className="object-cover" />
+                  <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
                 ) : (
                   <div className="scale-[0.64] md:scale-100"><UserIcon /></div>
                 )}
@@ -160,7 +269,7 @@ const ProfilePage: React.FC = () => {
           <div className="flex items-center gap-[30px]">
             <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Threads</h2>
             <div className="flex items-center gap-[10px]">
-              <Pencil size={20} className="text-[#F29F04]" />
+              <ThreadPencilIcon />
               <span className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">{threadsCount}</span>
             </div>
           </div>
@@ -168,9 +277,44 @@ const ProfilePage: React.FC = () => {
             <Plus size={24} /> Add a comment
           </button>
         </section>
+
+        <section className="flex flex-col gap-4">
+          {isThreadsLoading && (
+            <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
+              Loading threads...
+            </div>
+          )}
+
+          {threadsError && (
+            <div className="rounded-[24px] border border-[rgba(255,128,128,0.6)] bg-[rgba(255,128,128,0.08)] px-6 py-5 text-[#FF9C9C] text-[16px] leading-[26px]">
+              {threadsError}
+            </div>
+          )}
+
+          {!isThreadsLoading && !threadsError && threads.length === 0 && (
+            <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
+              No threads yet.
+            </div>
+          )}
+
+          {threads.map((thread) => (
+            <ForumCategoryThreadCard
+              key={String(thread.id)}
+              title={thread.title || 'Untitled thread'}
+              authorName={displayName}
+              date={formatThreadDate(thread.createdAt)}
+              replyCount={Array.isArray(thread.comments) ? thread.comments.length : 0}
+              authorAvatar={avatarUrl || '/images/logo.png'}
+            />
+          ))}
+        </section>
       </main>
 
-      <CreateThreadModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <CreateThreadModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={refreshUserThreads}
+      />
     </div>
   );
 };

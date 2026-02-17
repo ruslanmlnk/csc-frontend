@@ -7,12 +7,22 @@ export type CreateThreadInput = {
   content: string
 }
 
-export const getThreads = ({ page, limit }: { page: string; limit: string }) => {
+type GetThreadsParams = {
+  page: string
+  limit: string
+  authorId?: string
+}
+
+export const getThreads = ({ page, limit, authorId }: GetThreadsParams) => {
   const params = new URLSearchParams({
     page,
     limit,
     sort: '-createdAt',
   })
+
+  if (authorId) {
+    params.set('where[author][equals]', authorId)
+  }
 
   return backendRequest<Record<string, unknown>>(`/api/threads?${params.toString()}`, {
     cache: 'no-store',
