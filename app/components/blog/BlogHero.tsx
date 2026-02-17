@@ -2,8 +2,8 @@ import React from 'react';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 
 interface BlogHeroProps {
-    title: string;
-    description: string;
+    title: React.ReactNode;
+    description: React.ReactNode;
 }
 
 const BlogHero: React.FC<BlogHeroProps> = ({ title, description }) => {
