@@ -61,7 +61,7 @@ const CoreValues: React.FC = () => {
     ];
 
     return (
-        <section className="flex flex-col items-start gap-[64px] self-stretch relative px-[20px] max-w-[1280px] mx-auto">
+        <section className="flex flex-col items-start gap-[64px] self-stretch relative px-[20px] py-[80px] lg:py-0 max-w-[1280px] mx-auto">
             {/* Header */}
             <div className="flex flex-col justify-center items-center gap-[24px] self-stretch relative">
                 {/* Label */}
@@ -74,7 +74,7 @@ const CoreValues: React.FC = () => {
                 </div>
                 {/* Title */}
                 <div className="w-full max-w-[870px] text-center">
-                    <span className="font-['Poppins'] text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-[#999]">
+                    <span className="font-['Poppins'] text-[40px] lg:text-[56px] font-medium leading-[48px] lg:leading-[72px] tracking-[-0.8px] lg:tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-[#999]">
                         The Values that Drive Everything We Do
                     </span>
                 </div>
@@ -83,9 +83,9 @@ const CoreValues: React.FC = () => {
             {/* Content Grid */}
             <div className="flex flex-col items-start gap-[32px] self-stretch">
                 {/* Row 1 */}
-                <div className="flex items-center gap-[32px] self-stretch">
+                <div className="flex flex-col lg:flex-row justify-center items-start lg:items-center gap-[32px] self-stretch">
                     {values.slice(0, 3).map((value, index) => (
-                        <div key={index} className="flex px-[40px] py-[40px] flex-col justify-center items-start gap-[32px] flex-1 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
+                        <div key={index} className="flex pt-[40px] pb-[40px] pl-[40px] pr-[32px] lg:px-[40px] lg:py-[40px] flex-col justify-center items-start gap-[32px] self-stretch lg:flex-1 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
                             <div className="flex p-[16px] justify-end items-center gap-[32px] rounded-[10px] bg-[#F29F04]">
                                 {value.icon}
                             </div>
@@ -101,9 +101,9 @@ const CoreValues: React.FC = () => {
                     ))}
                 </div>
                 {/* Row 2 */}
-                <div className="flex items-center gap-[32px] self-stretch">
+                <div className="flex flex-col lg:flex-row justify-center items-start lg:items-center gap-[32px] self-stretch">
                     {values.slice(3, 6).map((value, index) => (
-                        <div key={index} className="flex px-[40px] py-[40px] flex-col justify-center items-start gap-[32px] flex-1 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
+                        <div key={index} className="flex pt-[40px] pb-[40px] pl-[40px] pr-[32px] lg:px-[40px] lg:py-[40px] flex-col justify-center items-start gap-[32px] self-stretch lg:flex-1 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
                             <div className="flex p-[16px] justify-end items-center gap-[32px] rounded-[10px] bg-[#F29F04]">
                                 {value.icon}
                             </div>
