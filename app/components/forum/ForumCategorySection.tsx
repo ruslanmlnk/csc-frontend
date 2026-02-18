@@ -34,6 +34,7 @@ const ForumCategorySection: React.FC<ForumCategorySectionProps> = ({
                         threadTitle={thread.threadTitle}
                         authorName={thread.authorName}
                         date={thread.date}
+                        href={thread.href}
                     />
                 ))}
             </div>

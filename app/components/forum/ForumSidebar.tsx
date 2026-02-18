@@ -1,10 +1,12 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export interface ForumSidebarThread {
     title: string;
     authorName: string;
     date: string;
+    href?: string;
 }
 
 interface ForumSidebarProps {
@@ -34,12 +36,20 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
 
                         <div className="w-full flex flex-col gap-[16px]">
                             {popularThreads.map((thread, index) => (
-                                <div key={`${thread.title}-${thread.authorName}-${index}`} className="w-full flex flex-col gap-[12px]">
-                                    <h4 className="text-[16px] font-medium leading-[32px] line-clamp-1">{thread.title}</h4>
-                                    <div className="flex items-center gap-[10px] text-[#6C6C6C] text-[16px] font-normal leading-[16px]">
-                                        <span>{thread.authorName}</span>
-                                        <div className="w-[4px] h-[4px] rounded-full bg-[#6C6C6C]" />
-                                        <span>{thread.date}</span>
+                                <div key={`${thread.title}-${thread.authorName}-${index}`} className="w-full">
+                                    <div className="w-full flex flex-col gap-[12px]">
+                                        {thread.href ? (
+                                            <Link href={thread.href} className="text-[16px] font-medium leading-[32px] line-clamp-1 hover:text-[#F29F04] transition-colors">
+                                                {thread.title}
+                                            </Link>
+                                        ) : (
+                                            <h4 className="text-[16px] font-medium leading-[32px] line-clamp-1">{thread.title}</h4>
+                                        )}
+                                        <div className="flex items-center gap-[10px] text-[#6C6C6C] text-[16px] font-normal leading-[16px]">
+                                            <span>{thread.authorName}</span>
+                                            <div className="w-[4px] h-[4px] rounded-full bg-[#6C6C6C]" />
+                                            <span>{thread.date}</span>
+                                        </div>
                                     </div>
                                 </div>
                             ))}

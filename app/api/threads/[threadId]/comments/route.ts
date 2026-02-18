@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { createComment, getThreadComments } from '@/lib/backend/comments'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { clearAuthCookie } from '@/lib/auth-server'
+import { getThreadById } from '@/lib/backend/threads'
 
 type CommentPayload = {
   comment?: string
@@ -10,6 +11,16 @@ type CommentPayload = {
 
 type RouteContext = {
   params: { threadId?: string } | Promise<{ threadId?: string }>
+}
+
+type UnknownRecord = Record<string, unknown>
+
+const asRecord = (value: unknown): UnknownRecord | null => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null
+  }
+
+  return value as UnknownRecord
 }
 
 export async function GET(_request: Request, context: RouteContext) {
@@ -59,6 +70,18 @@ export async function POST(request: Request, context: RouteContext) {
 
   const numericThreadId = Number(threadId)
   const threadRef = Number.isNaN(numericThreadId) ? threadId : numericThreadId
+
+  const threadResult = await getThreadById(threadId, '1')
+  if (threadResult.ok) {
+    const threadPayload = asRecord(threadResult.data)
+    const threadDoc = asRecord(threadPayload?.doc) || threadPayload
+    if (threadDoc?.isLocked === true) {
+      return NextResponse.json(
+        { error: 'This thread is locked. New comments are disabled.' },
+        { status: 403 },
+      )
+    }
+  }
 
   const { ok, status, data } = await createComment(token, {
     thread: threadRef,

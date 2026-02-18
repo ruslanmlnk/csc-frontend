@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export interface ForumThreadCardData {
     categoryTitle: string;
@@ -6,6 +7,7 @@ export interface ForumThreadCardData {
     threadTitle: string;
     authorName: string;
     date: string;
+    href?: string;
 }
 
 const ForumThreadCard: React.FC<ForumThreadCardData> = ({
@@ -14,8 +16,9 @@ const ForumThreadCard: React.FC<ForumThreadCardData> = ({
     threadTitle,
     authorName,
     date,
+    href,
 }) => {
-    return (
+    const card = (
         <div className="bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] p-6 flex flex-col gap-6 min-h-[199px] lg:min-h-0 lg:p-[23.2px]">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
@@ -47,6 +50,16 @@ const ForumThreadCard: React.FC<ForumThreadCardData> = ({
                 </div>
             </div>
         </div>
+    );
+
+    if (!href) {
+        return card;
+    }
+
+    return (
+        <Link href={href} className="block">
+            {card}
+        </Link>
     );
 };
 

@@ -6,7 +6,7 @@ import ForumThreadOriginalPost from '@/app/components/forum/ForumThreadOriginalP
 import ForumThreadReply from '@/app/components/forum/ForumThreadReply';
 import ForumPagination from '@/app/components/forum/ForumPagination';
 import ForumThreadCommentInput from '@/app/components/forum/ForumThreadCommentInput';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { forumThreadPageData } from './data';
 
 type UnknownRecord = Record<string, unknown>;
@@ -20,6 +20,18 @@ const asRecord = (value: unknown): UnknownRecord | null => {
     }
 
     return value as UnknownRecord;
+};
+
+const asString = (value: unknown): string | null => {
+    if (typeof value === 'string' && value.trim()) {
+        return value;
+    }
+
+    if (typeof value === 'number') {
+        return String(value);
+    }
+
+    return null;
 };
 
 const toEntityId = (value: unknown): string | null => {
@@ -127,6 +139,29 @@ const toCategorySlug = (value: string): string =>
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
 
+const resolveThreadSubCategory = (value: unknown): { title: string | null; slug: string | null } => {
+    const plainValue = asString(value);
+    if (plainValue) {
+        return {
+            title: plainValue,
+            slug: toCategorySlug(plainValue),
+        };
+    }
+
+    const categoryObject = asRecord(value);
+    if (!categoryObject) {
+        return { title: null, slug: null };
+    }
+
+    const title = asString(categoryObject.name);
+    const slugValue = asString(categoryObject.slug);
+
+    return {
+        title,
+        slug: slugValue || (title ? toCategorySlug(title) : null),
+    };
+};
+
 const resolveThreadDocument = (payload: unknown): UnknownRecord | null => {
     const payloadObject = asRecord(payload);
     if (!payloadObject) {
@@ -153,6 +188,7 @@ const extractThreadComments = (thread: UnknownRecord | null): UnknownRecord[] =>
 
 export default function ForumThreadPage() {
     const params = useParams();
+    const router = useRouter();
     const slugParam = params.slug;
     const threadIdParam = params.threadId;
     const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
@@ -164,6 +200,32 @@ export default function ForumThreadPage() {
     const [newComment, setNewComment] = useState('');
     const [isPublishingComment, setIsPublishingComment] = useState(false);
     const [publishError, setPublishError] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        let active = true;
+
+        const loadAuthState = async () => {
+            try {
+                const response = await fetch('/api/auth/me', { cache: 'no-store' });
+                const payload = await response.json().catch(() => null) as { user?: unknown } | null;
+
+                if (active) {
+                    setIsAuthenticated(Boolean(payload?.user));
+                }
+            } catch {
+                if (active) {
+                    setIsAuthenticated(false);
+                }
+            }
+        };
+
+        loadAuthState();
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     useEffect(() => {
         if (!threadId) {
@@ -225,9 +287,8 @@ export default function ForumThreadPage() {
         };
     }, [threadId]);
 
-    const categoryTitle = typeof thread?.category === 'string' && thread.category.trim()
-        ? thread.category
-        : forumThreadPageData.hero.title;
+    const subCategory = resolveThreadSubCategory(thread?.category);
+    const categoryTitle = subCategory.title || forumThreadPageData.hero.title;
     const threadTitle = typeof thread?.title === 'string' && thread.title.trim()
         ? thread.title
         : forumThreadPageData.originalPost.threadTitle;
@@ -241,6 +302,7 @@ export default function ForumThreadPage() {
     const author = thread?.author;
     const authorName = resolveUserName(author);
     const authorAvatar = resolveUserAvatar(author);
+    const isThreadLocked = thread?.isLocked === true;
 
     const replies = useMemo(() => {
         return extractThreadComments(thread)
@@ -276,7 +338,7 @@ export default function ForumThreadPage() {
     }, [thread]);
 
     const totalResponses = thread ? 1 + replies.length : 0;
-    const fallbackSlug = toCategorySlug(categoryTitle);
+    const fallbackSlug = subCategory.slug || toCategorySlug(categoryTitle);
     const backLink = slug ? `/forum/${slug}` : fallbackSlug ? `/forum/${fallbackSlug}` : '/forum';
 
     const handleCancelComment = () => {
@@ -288,6 +350,16 @@ export default function ForumThreadPage() {
         const commentToPublish = newComment.trim();
 
         if (!threadId || !commentToPublish) {
+            return;
+        }
+
+        if (isAuthenticated === false) {
+            router.push('/login');
+            return;
+        }
+
+        if (isThreadLocked) {
+            setPublishError('This thread is locked. New comments are disabled.');
             return;
         }
 
@@ -306,6 +378,11 @@ export default function ForumThreadPage() {
             const payload = await response.json().catch(() => null);
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    router.push('/login');
+                    return;
+                }
+
                 const payloadObject = asRecord(payload);
                 const message = typeof payloadObject?.error === 'string'
                     ? payloadObject.error
@@ -396,23 +473,42 @@ export default function ForumThreadPage() {
                                 onPageChange={() => undefined}
                             />
 
-                            <ForumThreadCommentInput
-                                title={forumThreadPageData.commentInput.title}
-                                placeholder={forumThreadPageData.commentInput.placeholder}
-                                cancelLabel={forumThreadPageData.commentInput.cancelLabel}
-                                publishLabel={forumThreadPageData.commentInput.publishLabel}
-                                value={newComment}
-                                onChange={(value) => {
-                                    setNewComment(value);
-                                    if (publishError) {
-                                        setPublishError('');
-                                    }
-                                }}
-                                onCancel={handleCancelComment}
-                                onPublish={handlePublishComment}
-                                isPublishing={isPublishingComment}
-                                error={publishError}
-                            />
+                            {isThreadLocked ? null : isAuthenticated === false ? (
+                                <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px] flex flex-col gap-4">
+                                    <div>You need to log in to leave a comment.</div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            onClick={() => router.push('/login')}
+                                            className="h-[50px] inline-flex items-center justify-center gap-[12px] rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] text-[16px] font-medium leading-[26px] hover:bg-[#FCC660]/10 transition-all"
+                                        >
+                                            Log In
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : isAuthenticated === null ? (
+                                <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
+                                    Checking access...
+                                </div>
+                            ) : (
+                                <ForumThreadCommentInput
+                                    title={forumThreadPageData.commentInput.title}
+                                    placeholder={forumThreadPageData.commentInput.placeholder}
+                                    cancelLabel={forumThreadPageData.commentInput.cancelLabel}
+                                    publishLabel={forumThreadPageData.commentInput.publishLabel}
+                                    value={newComment}
+                                    onChange={(value) => {
+                                        setNewComment(value);
+                                        if (publishError) {
+                                            setPublishError('');
+                                        }
+                                    }}
+                                    onCancel={handleCancelComment}
+                                    onPublish={handlePublishComment}
+                                    isPublishing={isPublishingComment}
+                                    error={publishError}
+                                />
+                            )}
                         </>
                     )}
                 </div>

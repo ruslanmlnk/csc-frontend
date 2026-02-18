@@ -43,9 +43,14 @@ type AvatarShape = {
 type ProfileThreadDoc = {
   id: string | number;
   title?: string | null;
-  category?: string | null;
+  category?: string | number | {
+    id?: string | number | null;
+    name?: string | null;
+    slug?: string | null;
+  } | null;
   createdAt?: string;
   author?: { id?: string | number | null } | string | number | null;
+  isLocked?: boolean | null;
 };
 
 type ProfileThreadWithCounts = ProfileThreadDoc & {
@@ -106,6 +111,44 @@ const toForumCategorySlug = (value?: string | null): string => {
     .replace(/^-+|-+$/g, '');
 
   return normalized || 'general';
+};
+
+const resolveThreadSubCategory = (
+  value: ProfileThreadDoc['category'],
+): { title: string; slug: string } => {
+  if (typeof value === 'string' && value.trim()) {
+    return {
+      title: value,
+      slug: toForumCategorySlug(value),
+    };
+  }
+
+  if (typeof value === 'number') {
+    const title = String(value);
+    return {
+      title,
+      slug: toForumCategorySlug(title),
+    };
+  }
+
+  if (value && typeof value === 'object') {
+    const name = typeof value.name === 'string' && value.name.trim()
+      ? value.name
+      : 'General';
+    const slug = typeof value.slug === 'string' && value.slug.trim()
+      ? value.slug
+      : toForumCategorySlug(name);
+
+    return {
+      title: name,
+      slug,
+    };
+  }
+
+  return {
+    title: 'General',
+    slug: 'general',
+  };
 };
 
 const getThreadCommentsCount = async (threadId: string): Promise<number> => {
@@ -355,14 +398,16 @@ const ProfilePage: React.FC = () => {
 
           {threads.map((thread) => {
             const threadId = String(thread.id);
-            const categorySlug = toForumCategorySlug(thread.category);
+            const subCategory = resolveThreadSubCategory(thread.category);
+            const categorySlug = subCategory.slug;
             const threadHref = `/forum/${categorySlug}/${threadId}`;
+            const threadDescription = subCategory.title;
 
             return (
               <Link key={threadId} href={threadHref} className="block">
                 <ForumCategoryThreadCard
                   title={thread.title || 'Untitled thread'}
-                  description={thread.category || 'We read, delve into, discuss'}
+                  description={threadDescription || 'We read, delve into, discuss'}
                   authorName={displayName}
                   date={formatThreadDate(thread.createdAt)}
                   replyCount={thread.commentsCount}

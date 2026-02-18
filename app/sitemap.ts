@@ -11,7 +11,7 @@ type UnknownRecord = Record<string, unknown>
 
 type ForumThread = {
   id: string
-  category: string
+  categorySlug: string
   createdAt?: string | null
   updatedAt?: string | null
 }
@@ -58,6 +58,30 @@ const toCategorySlug = (value: string): string =>
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
 
+const resolveThreadCategorySlug = (value: unknown): string | null => {
+  const stringValue = asString(value)
+  if (stringValue) {
+    return toCategorySlug(stringValue)
+  }
+
+  const recordValue = asRecord(value)
+  if (!recordValue) {
+    return null
+  }
+
+  const slug = asString(recordValue.slug)
+  if (slug) {
+    return toCategorySlug(slug)
+  }
+
+  const name = asString(recordValue.name)
+  if (name) {
+    return toCategorySlug(name)
+  }
+
+  return null
+}
+
 const appendRoute = (
   entries: MetadataRoute.Sitemap,
   siteUrl: string,
@@ -71,9 +95,12 @@ const appendRoute = (
 }
 
 const getForumThreads = async (): Promise<ForumThread[]> => {
-  const response = await backendRequest<Record<string, unknown>>('/api/threads?page=1&limit=1000&sort=-updatedAt', {
-    cache: 'no-store',
-  })
+  const response = await backendRequest<Record<string, unknown>>(
+    '/api/threads?page=1&limit=1000&sort=-updatedAt&depth=1',
+    {
+      cache: 'no-store',
+    },
+  )
 
   if (!response.ok || !response.data) {
     return []
@@ -84,25 +111,28 @@ const getForumThreads = async (): Promise<ForumThread[]> => {
     return []
   }
 
-  return payload.docs
-    .map((item) => asRecord(item))
-    .filter((item): item is UnknownRecord => Boolean(item))
-    .map((item) => {
-      const id = asString(item.id)
-      const category = asString(item.category)
+  return payload.docs.reduce<ForumThread[]>((acc, item) => {
+    const record = asRecord(item)
+    if (!record) {
+      return acc
+    }
 
-      if (!id || !category) {
-        return null
-      }
+    const id = asString(record.id)
+    const categorySlug = resolveThreadCategorySlug(record.category)
 
-      return {
-        id,
-        category,
-        createdAt: asString(item.createdAt),
-        updatedAt: asString(item.updatedAt),
-      } satisfies ForumThread
+    if (!id || !categorySlug) {
+      return acc
+    }
+
+    acc.push({
+      id,
+      categorySlug,
+      createdAt: asString(record.createdAt),
+      updatedAt: asString(record.updatedAt),
     })
-    .filter((item): item is ForumThread => Boolean(item))
+
+    return acc
+  }, [])
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -160,7 +190,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const categoryDates = new Map<string, Date>()
 
   for (const thread of forumThreads) {
-    const categorySlug = toCategorySlug(thread.category)
+    const categorySlug = thread.categorySlug
     if (!categorySlug) continue
 
     const threadDate = toDate(thread.updatedAt) || toDate(thread.createdAt) || now

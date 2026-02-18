@@ -2,7 +2,7 @@ import { backendRequest } from './client'
 
 export type CreateThreadInput = {
   title: string
-  category: string
+  category: string | number
   tags: string[]
   content: string
 }
@@ -11,17 +11,28 @@ type GetThreadsParams = {
   page: string
   limit: string
   authorId?: string
+  categoryId?: string
+  depth?: string
+  sort?: string
 }
 
-export const getThreads = ({ page, limit, authorId }: GetThreadsParams) => {
+export const getThreads = ({ page, limit, authorId, categoryId, depth, sort }: GetThreadsParams) => {
   const params = new URLSearchParams({
     page,
     limit,
-    sort: '-createdAt',
+    sort: sort || '-createdAt',
   })
 
   if (authorId) {
     params.set('where[author][equals]', authorId)
+  }
+
+  if (categoryId) {
+    params.set('where[category][equals]', categoryId)
+  }
+
+  if (depth) {
+    params.set('depth', depth)
   }
 
   return backendRequest<Record<string, unknown>>(`/api/threads?${params.toString()}`, {
