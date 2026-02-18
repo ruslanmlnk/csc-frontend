@@ -1,28 +1,32 @@
-"use client";
+'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import ServiceDetailHero from '@/app/components/services/ServiceDetailHero';
+import ServicePromoCode from '@/app/components/services/ServicePromoCode';
+import UsefulServiceCard from '@/app/components/services/UsefulServiceCard';
 
-const ServiceDetailPage: React.FC = () => {
-    const params = useParams();
-    const slug = params.slug as string;
-
-    useEffect(() => {
-        console.log("Service Detail Slug:", slug);
-    }, [slug]);
-
-    const service = {
-        name: slug ? slug.charAt(0).toUpperCase() + slug.slice(1).replace(/-/g, ' ') : 'Service Detail',
-        category: 'Proxy',
+const ServiceDetailPage = () => {
+    // Mock data based on the KeyProxy example in Figma
+    const serviceData = {
+        title: 'KeyProxy',
+        logo: (
+            <svg width="77" height="56" viewBox="0 0 77 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7.66109 27.1377L7.35866 20.8545L18.6147 8.99368H24.6627L14.5154 19.9137L11.4914 23.1393L7.66109 27.1377ZM2.78906 32.5137V8.99368H8.19868V32.5137H2.78906ZM18.8834 32.5137L10.5171 22.2657L14.0787 18.4017L25.2338 32.5137H18.8834Z" fill="white" />
+                <path d="M48.631 8.98947H30.9468L29.4731 13.1158H47.0099L48.631 8.98947Z" fill="#253E8E" />
+                <path d="M48.631 18.5684H30.9468L29.4731 22.6947H47.0099L48.631 18.5684Z" fill="#253E8E" />
+                <path d="M48.631 28.2948H30.9468L29.4731 32.4211H47.0099L48.631 28.2948Z" fill="#253E8E" />
+                <path d="M61.6876 32.5137V22.9041L62.9308 26.1968L52.582 8.99368H58.3612L66.2908 22.1985H62.9644L70.9276 8.99368H76.27L65.9212 26.1968L67.1308 22.9041V32.5137H61.6876Z" fill="white" />
+            </svg>
+        ),
+        websiteUrl: '#',
         price: '10/week, 28/month',
-        telegram: '@keyproxy',
-        promoCode: 'CLICKSTORM',
-        promoDiscount: '15%',
-        promoDetail: 'Ukrainian proxies and Multiport',
-        description: 'KeyProxy — business-grade mobile proxies. We’ve been operating since 2017, with stability as our top priority!',
-        detailedPoints: [
+        handle: '@keyproxy',
+        category: 'Proxy',
+        intro: 'KeyProxy — business-grade mobile proxies. We’ve been operating since 2017, with stability as our top priority!',
+        descriptionTitle: 'Detailed description',
+        descriptionList: [
+            'Why choose KeyProxy:',
             '50+ GEOs',
             'From $10/week, $28/month',
             'Reliable support',
@@ -33,210 +37,176 @@ const ServiceDetailPage: React.FC = () => {
             'Support for 100+ concurrent threads',
             'Perfect for Mass DM, likes, comments'
         ],
-        logo: (
-            <svg width="77" height="56" viewBox="0 0 77 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7.66134 27.1377L7.35891 20.8545L18.6149 8.99365H24.6629L14.5157 19.9137L11.4917 23.1392L7.66134 27.1377ZM2.78931 32.5137V8.99365H8.19892V32.5137H2.78931ZM18.8837 32.5137L10.5173 22.2657L14.0789 18.4017L25.2341 32.5137H18.8837Z" fill="white" />
-                <path d="M48.631 8.9895H30.9468L29.4731 13.1158H47.0099L48.631 8.9895Z" fill="#253E8E" />
-                <path d="M48.631 18.5684H30.9468L29.4731 22.6947H47.0099L48.631 18.5684Z" fill="#253E8E" />
-                <path d="M48.631 28.2948H30.9468L29.4731 32.4211H47.0099L48.631 28.2948Z" fill="#253E8E" />
-                <path d="M61.6879 32.5137V22.9041L62.931 26.1968L52.5823 8.99365H58.3614L66.291 22.1985H62.9647L70.9279 8.99365H76.2703L65.9214 26.1968L67.131 22.9041V32.5137H61.6879Z" fill="white" />
-            </svg>
-        )
+        mainImage: 'https://api.builder.io/api/v1/image/assets/TEMP/3e3d3cb72734dc555d1d7408da401b21ad02751d?width=1592',
+        promoCode: 'CLICKSTORM',
+        promoDescription: 'CLICKSTORM gives a 15% discount on Ukrainian proxies and Multiport',
+        sidebarImage: 'https://api.builder.io/api/v1/image/assets/TEMP/3e844bee26ad8ec77ac05689c0767ff3c1e8fc96?width=760'
     };
 
     const similarServices = [
         {
-            id: 1,
             name: 'Dolphin{anty}',
-            price: '10',
-            period: '/month',
             description: 'Dolphin{anty} is a next-generation anti-detection browser built to simplify and protect multi-accounting. It replaces…',
-            logo: '/dolphin.svg'
+            pricing: '10/month',
+            category: 'Anti-detect', // Assumed based on Figma visual usually having category
+            logo: (
+                <div className="w-[56px] h-[56px] relative">
+                    <Image
+                        src="https://api.builder.io/api/v1/image/assets/TEMP/c1315c8886afd597c3f1ae4f63293222acf10678?width=112"
+                        alt="Dolphin"
+                        fill
+                        sizes="56px"
+                        className="object-contain w-full h-full"
+                    />
+                </div>
+            )
         },
         {
-            id: 2,
             name: 'Geonix',
-            price: '1,65',
-            period: '/month',
             description: 'Geonix — reliable and scalable proxies for any task. A provider focused on stability and speed: a wide network...',
-            isSvg: true,
+            pricing: '1,65/month',
+            category: 'Proxy',
             logo: (
-                <svg width="60" height="40" viewBox="0 0 140 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="140" height="56" viewBox="0 0 140 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* SVG Content for Geonix Logo from previous turn or simplifed */}
+                    <path d="M45.8277 21.0089C49.4251 21.0089 52.2685 22.2864 54.3579 24.8383C56.4473 27.3917 57.2875 30.5979 56.8815 34.4555H40.5187C40.6927 35.6155 41.2504 36.5955 42.1947 37.3926C43.1375 38.1912 44.3347 38.618 45.7846 38.676C46.8003 38.734 47.7491 38.5525 48.6354 38.1317C49.5203 37.7108 50.1508 37.1532 50.5285 36.4557H56.6644C55.9685 38.8351 54.633 40.6851 52.6611 42.0042C50.6877 43.3247 48.396 43.9835 45.7846 43.9835C42.2735 43.9835 39.5179 42.8741 37.5162 40.6539C35.5145 38.4336 34.5137 35.7136 34.5137 32.494C34.5137 29.2446 35.5799 26.5172 37.7125 24.3118C39.8435 22.1109 42.5486 21.0089 45.8277 21.0089ZM49.0697 27.2311C48.1551 26.5931 47.0606 26.2733 45.7846 26.2733C44.5072 26.2733 43.3978 26.599 42.4549 27.2519C41.5121 27.9047 40.8801 28.7821 40.5618 29.8841H50.9197C50.5999 28.7554 49.9843 27.8705 49.0697 27.2311Z" fill="#FFC42B" />
+                    <path d="M78.8228 40.7223C76.6753 42.898 73.8617 43.9865 70.3803 43.9865C66.899 43.9865 64.0838 42.898 61.9379 40.7223C59.7905 38.5466 58.7168 35.8044 58.7168 32.497C58.7168 29.2194 59.7905 26.4845 61.9379 24.294C64.0838 22.1035 66.899 21.0074 70.3803 21.0074C73.8617 21.0074 76.6753 22.1035 78.8228 24.294C80.9687 26.4845 82.0439 29.2194 82.0439 32.497C82.0439 35.8058 80.9702 38.5466 78.8228 40.7223ZM70.3803 38.2864C72.0623 38.2864 73.4483 37.7287 74.5369 36.6104C75.6239 35.4936 76.1682 34.1224 76.1682 32.4985C76.1682 30.8448 75.6314 29.4603 74.5577 28.342C73.484 27.2251 72.0905 26.666 70.3788 26.666C68.6672 26.666 67.2737 27.2251 66.2015 28.342C65.1278 29.4588 64.5909 30.8448 64.5909 32.4985C64.5909 34.1522 65.1278 35.5307 66.2015 36.6327C67.2752 37.7347 68.6672 38.2864 70.3803 38.2864Z" fill="#FFC42B" />
+                    <path d="M96.5192 21.0522C99.1886 21.0522 101.291 21.9088 102.829 23.6205C104.367 25.3322 105.136 27.7265 105.136 30.8019V43.3354H99.26V31.6718C99.26 30.1639 98.8391 28.9742 97.9974 28.1027C97.1557 27.2327 96.0969 26.797 94.8209 26.797C93.4572 26.797 92.2973 27.2833 91.3395 28.2544C90.3818 29.227 89.903 30.5104 89.903 32.1061V43.3339H84.0273V21.662H89.729V24.2734H89.9461C91.4853 22.126 93.6758 21.0522 96.5192 21.0522Z" fill="white" />
+                    <path d="M108.055 12H113.931V18.8765H108.055V12ZM108.055 21.6619H113.931V43.3338H108.055V21.6619Z" fill="white" />
+                    <path d="M131.506 32.323L139.688 43.3337H132.159L127.632 36.936L123.236 43.3337H115.837L124.02 32.4538L115.925 21.6603H123.454L127.937 28.101L132.289 21.6603H139.209L131.506 32.323Z" fill="white" />
                     <path d="M9.78706 24.1632C10.1425 23.5044 10.5842 22.8873 11.1151 22.3132C12.7256 20.5733 14.8641 19.6885 17.5335 19.6587C19.3032 19.6305 20.8632 20.029 22.212 20.8559C23.5608 21.6827 24.5542 22.7921 25.1937 24.1855H32.0702C31.2582 21.0239 29.5465 18.4556 26.9351 16.4822C24.3237 14.5088 21.2052 13.5228 17.5781 13.5228C13.0513 13.5228 9.38851 15.0025 6.58974 17.9619C5.65136 18.9538 4.87359 20.0201 4.25049 21.1592C6.54513 21.2142 8.56762 22.3921 9.78706 24.1632Z" fill="#FFC42B" />
                     <path d="M32.7232 27.1017H20.7488V32.6725H25.8467C25.295 34.2681 24.2941 35.5382 22.8442 36.4795C21.3927 37.4223 19.6677 37.8804 17.666 37.8506C14.9683 37.8224 12.7986 36.9301 11.1598 35.1738C10.4044 34.3648 9.82437 33.4696 9.4169 32.4895C8.1454 34.0257 6.22552 35.0058 4.08109 35.0058C3.90412 35.0058 3.73012 34.9968 3.55762 34.9835C4.25954 36.6758 5.27525 38.212 6.61218 39.5906C9.42582 42.492 13.0678 43.9434 17.5351 43.9434C22.2359 43.9434 26.0222 42.3328 28.8938 39.1132C31.7654 35.8921 33.0414 31.8887 32.7232 27.1017Z" fill="#FFC42B" />
+                    <path d="M4.07954 23.7825C3.73898 23.7825 3.41033 23.8256 3.09357 23.9C1.196 24.3461 -0.218262 26.0459 -0.218262 28.0803C-0.218262 29.9734 1.00713 31.5765 2.70692 32.1505C3.13818 32.2963 3.59919 32.3781 4.08102 32.3781C6.45448 32.3781 8.37882 30.4537 8.37882 28.0803C8.37882 25.7068 6.45448 23.7825 4.07954 23.7825Z" fill="white" />
+                </svg>
+            )
+        },
+        {
+            name: 'KeyProxy',
+            description: 'KeyProxy — business-grade mobile proxies. Operating since 2017, stability is our priority!',
+            pricing: '10/week, 28/month',
+            category: 'Proxy',
+            logo: (
+                <svg width="77" height="56" viewBox="0 0 77 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M7.66109 27.1377L7.35866 20.8545L18.6147 8.99368H24.6627L14.5154 19.9137L11.4914 23.1393L7.66109 27.1377ZM2.78906 32.5137V8.99368H8.19868V32.5137H2.78906ZM18.8834 32.5137L10.5171 22.2657L14.0787 18.4017L25.2338 32.5137H18.8834Z" fill="white" />
+                    <path d="M48.631 8.98947H30.9468L29.4731 13.1158H47.0099L48.631 8.98947Z" fill="#253E8E" />
+                    <path d="M48.631 18.5684H30.9468L29.4731 22.6947H47.0099L48.631 18.5684Z" fill="#253E8E" />
+                    <path d="M48.631 28.2948H30.9468L29.4731 32.4211H47.0099L48.631 28.2948Z" fill="#253E8E" />
+                    <path d="M61.6876 32.5137V22.9041L62.9308 26.1968L52.582 8.99368H58.3612L66.2908 22.1985H62.9644L70.9276 8.99368H76.27L65.9212 26.1968L67.1308 22.9041V32.5137H61.6876Z" fill="white" />
                 </svg>
             )
         }
     ];
 
     return (
-        <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins">
+        <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins text-white">
+            <div className="w-full max-w-[1280px] px-5 pt-[162.69px] mx-auto flex flex-col items-start gap-[80px]">
+                {/* Hero Section */}
+                <ServiceDetailHero
+                    title={serviceData.title}
+                    logo={serviceData.logo}
+                    websiteUrl={serviceData.websiteUrl}
+                    price={serviceData.price}
+                    handle={serviceData.handle}
+                    category={serviceData.category}
+                />
 
-            <div className="flex flex-col pt-32 px-[100px] gap-20">
-                {/* Back Link */}
-                <Link href="/services" className="flex items-center gap-4 text-[#FCFCFC] group">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="group-hover:-translate-x-1 transition-transform">
-                        <path d="M27.9998 16C27.9998 16.2652 27.8945 16.5196 27.7069 16.7071C27.5194 16.8947 27.265 17 26.9998 17H7.41356L14.7073 24.2925C14.8002 24.3854 14.8739 24.4957 14.9242 24.6171C14.9745 24.7385 15.0004 24.8686 15.0004 25C15.0004 25.1314 14.9745 25.2615 14.9242 25.3829C14.8739 25.5043 14.8002 25.6146 14.7073 25.7075C14.6144 25.8004 14.5041 25.8741 14.3827 25.9244C14.2613 25.9747 14.1312 26.0006 13.9998 26.0006C13.8684 26.0006 13.7383 25.9747 13.6169 25.9244C13.4955 25.8741 13.3852 25.8004 13.2923 25.7075L4.29231 16.7075C4.19933 16.6146 4.12557 16.5043 4.07525 16.3829C4.02493 16.2615 3.99902 16.1314 3.99902 16C3.99902 15.8686 4.02493 15.7385 4.07525 15.6171C4.12557 15.4957 4.19933 15.3854 4.29231 15.2925L13.2923 6.29251C13.4799 6.10487 13.7344 5.99945 13.9998 5.99945C14.2652 5.99945 14.5197 6.10487 14.7073 6.29251C14.895 6.48015 15.0004 6.73464 15.0004 7.00001C15.0004 7.26537 14.895 7.51987 14.7073 7.70751L7.41356 15H26.9998C27.265 15 27.5194 15.1054 27.7069 15.2929C27.8945 15.4804 27.9998 15.7348 27.9998 16Z" fill="currentColor" />
-                    </svg>
-                    <span className="text-[24px]">Back to Services</span>
-                </Link>
-
-                {/* Hero Content Part */}
-                <div className="flex flex-col items-center gap-12 w-full">
-                    <div className="flex justify-between items-center w-full">
-                        <div className="flex items-center gap-6">
-                            {service.logo}
-                            <h1 className="text-[56px] font-semibold tracking-[-1.12px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-                                {service.name}
-                            </h1>
-                        </div>
-                        <button className="px-6 py-3 rounded-[80px] bg-[#F29F04] text-[#0D0D0D] text-[16px] font-medium hover:bg-[#d98f04] transition-colors">
-                            Go to the website
-                        </button>
-                    </div>
-
-                    {/* Tags / Info Bar */}
-                    <div className="flex gap-6 w-full overflow-x-auto pb-2">
-                        <div className="flex px-6 py-3 items-center gap-2.5 rounded-[80px] bg-white text-[#0D0D0D]">
-                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <path d="M17.69 0.91H2.31C1.04 0.91 0.77 1.65 0.77 2.45v15.39c0 0.41 0.16 0.8 0.45 1.09s0.68 0.45 1.09 0.45h15.38c0.41 0 0.8-0.16 1.09-0.45s0.45-0.68 0.45-1.09V2.45c0-0.8-0.27-1.54-1.54-1.54z" fill="currentColor" opacity="0.1" />
-                                <path d="M17.6926 0.913462H15.3849V0.144231C15.3849 -0.0597819 15.3039 -0.255439 15.1596 -0.399698C15.0154 -0.543956 14.8197 -0.625 14.6157 -0.625C14.4117 -0.625 14.216 -0.543956 14.0718 -0.399698C13.9275 -0.255439 13.8465 -0.0597819 13.8465 0.144231V0.913462H6.15415V0.144231C6.15415 -0.0597819 6.0731 -0.255439 5.92884 -0.399698C5.78459 -0.543956 5.58893 -0.625 5.38492 -0.625C5.1809 -0.625 4.98525 -0.543956 4.84099 -0.399698C4.69673 -0.255439 4.61569 -0.0597819 4.61569 0.144231V0.913462H2.30799C1.89997 0.913462 1.50865 1.07555 1.22014 1.36407C0.931619 1.65258 0.769531 2.0439 0.769531 2.45192V17.8365C0.769531 18.2446 0.931619 18.6359 1.22014 18.9244C1.50865 19.2129 1.89997 19.375 2.30799 19.375H17.6926C18.1006 19.375 18.4919 19.2129 18.7805 18.9244C19.069 18.6359 19.2311 18.2446 19.2311 17.8365V2.45192C19.2311 2.0439 19.069 1.65258 18.7805 1.36407C18.4919 1.07555 18.1006 0.913462 17.6926 0.913462Z" fill="#070707" />
-                            </svg>
-                            <span className="text-[16px] font-medium">{service.price}</span>
-                        </div>
-                        <div className="flex px-6 py-3 items-center gap-2.5 rounded-[80px] bg-white text-[#0D0D0D]">
-                            <span className="text-[16px] font-medium">{service.telegram}</span>
-                        </div>
-                        <div className="flex px-6 py-3 items-center gap-3 rounded-[80px] border border-[#B3B3B3] text-[#B3B3B3]">
-                            <span className="text-[16px] font-medium tracking-wide uppercase">{service.category}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Main Content Layout */}
-                <div className="flex gap-16 w-full">
-                    <div className="flex flex-col gap-20 flex-1">
-                        <article className="flex flex-col gap-8">
-                            <p className="text-[#9E9E9E] text-[20px] leading-[32px]">
-                                {service.description}
+                {/* Content Section */}
+                <div className="flex items-start gap-[64px] self-stretch">
+                    {/* Left Column - Article */}
+                    <div className="flex flex-col gap-[80px] flex-1">
+                        <div className="flex flex-col gap-[32px] self-stretch">
+                            <p className="text-[#9E9E9E] font-poppins text-[20px] font-normal leading-[32px]">
+                                {serviceData.intro}
                             </p>
 
-                            <div className="flex flex-col gap-4">
-                                <h2 className="text-[#FCFCFC] text-[32px] font-medium">Detailed description</h2>
-                                <h3 className="text-white text-[20px]">Why choose {service.name}:</h3>
-                                <ul className="flex flex-col gap-0">
-                                    {service.detailedPoints.map((point, i) => (
-                                        <li key={i} className="text-[#9E9E9E] text-[20px] leading-[40px]">
-                                            {point}
-                                        </li>
+                            <div className="self-stretch font-poppins text-[20px] font-normal leading-[32px] tracking-[-0.64px] text-[#9E9E9E]">
+                                <h2 className="text-[#FCFCFC] text-[32px] font-medium leading-[32px]">
+                                    {serviceData.descriptionTitle}
+                                </h2>
+                                <p className="mt-3 text-white text-[20px] font-normal leading-[32px]">
+                                    {serviceData.descriptionList[0]}
+                                </p>
+                                <ul className="mt-2 ml-0 list-disc pl-7 text-[#9E9E9E] text-[20px] font-normal leading-[32px] marker:text-[#9E9E9E]">
+                                    {serviceData.descriptionList.slice(1).map((line, index) => (
+                                        <li key={index}>{line}</li>
                                     ))}
                                 </ul>
                             </div>
-                        </article>
-
-                        {/* Middle Banner Image */}
-                        <div className="relative w-full h-[101px] rounded-[40px] overflow-hidden">
-                            <Image src="/images/service-detail-banner.webp" alt="Service Banner" fill className="object-cover" />
                         </div>
 
-                        {/* Promo Code Section */}
-                        <div className="relative flex p-8 flex-col items-start gap-6 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] overflow-hidden group">
-                            {/* Background Pattern SVG */}
-                            <svg className="absolute -left-[30%] -top-[40%] opacity-40 group-hover:scale-105 transition-transform duration-1000" width="1284" height="1284" viewBox="0 0 1284 1284" fill="none">
-                                <circle cx="642" cy="627" r="441" fill="url(#p0_rad)" fillOpacity="0.4" />
-                                <defs>
-                                    <radialGradient id="p0_rad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(642 407) rotate(90) scale(220 354)">
-                                        <stop stopColor="#F29F04" stopOpacity="0.26" />
-                                        <stop offset="1" stopColor="#F29F04" stopOpacity="0.5" />
-                                    </radialGradient>
-                                </defs>
-                            </svg>
+                        {/* Main Image */}
+                        <div className="w-full h-[101px] relative rounded-[40px] overflow-hidden">
+                            <Image
+                                src={serviceData.mainImage}
+                                alt="Service Banner"
+                                fill
+                                sizes="(max-width: 1280px) 100vw, 1240px"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
 
-                            <div className="relative z-10 flex items-center gap-2.5 text-[#F29F04]">
-                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                    <path d="M16.0674 4.81564L4.81737 16.0656" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    <circle cx="6" cy="6" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-                                    <circle cx="14" cy="14" r="2.5" stroke="currentColor" strokeWidth="1.5" />
-                                </svg>
-                                <span className="text-[16px] font-medium">Promo code</span>
-                            </div>
+                        {/* Promo Code Card */}
+                        <div className="flex p-[32px_40px] justify-center items-center gap-[24px] self-stretch rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] overflow-hidden relative">
+                            <div
+                                className="absolute inset-0 pointer-events-none opacity-40"
+                                style={{
+                                    backgroundImage: [
+                                        'radial-gradient(35% 35% at 50% 30%, rgba(242, 159, 4, 0.26) 0%, rgba(242, 159, 4, 0.5) 100%)',
+                                        'linear-gradient(180deg, rgba(255, 216, 212, 0.16) 0%, rgba(255, 156, 148, 0.19) 100%)',
+                                    ].join(','),
+                                }}
+                            />
+                            <div
+                                className="absolute inset-0 pointer-events-none opacity-30"
+                                style={{
+                                    backgroundImage:
+                                        'repeating-linear-gradient(167deg, rgba(242, 159, 4, 0.08) 0px, rgba(242, 159, 4, 0.08) 1px, transparent 1px, transparent 28px)',
+                                }}
+                            />
 
-                            <div className="relative z-10 flex justify-between items-center w-full px-6 py-4 rounded-[16px] bg-[#0D0D0D]/50 border border-white/5 backdrop-blur-sm">
-                                <span className="text-[32px] font-medium tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-                                    {service.promoCode}
-                                </span>
-                                <button className="px-6 py-2.5 rounded-[80px] bg-[#F29F04] text-[#0D0D0D] text-[16px] font-medium hover:scale-105 transition-transform active:scale-95">
-                                    Copy
-                                </button>
-                            </div>
-
-                            <div className="relative z-10 flex gap-2 text-[14px]">
-                                <span className="text-[#F29F04] font-medium">What the promo code gives you:</span>
-                                <span className="text-[#BDBDBD]">{service.promoCode} gives a {service.promoDiscount} discount on {service.promoDetail}</span>
+                            <div className="relative z-10 w-full">
+                                <ServicePromoCode
+                                    promoCode={serviceData.promoCode}
+                                    description={serviceData.promoDescription}
+                                />
                             </div>
                         </div>
                     </div>
 
-                    {/* Sidebar Image */}
-                    <aside className="w-[380px] sticky top-32 h-fit">
-                        <div className="relative w-full h-[727px] rounded-[20px] overflow-hidden">
-                            <Image src="/images/service-sidebar.webp" alt="Sidebar" fill className="object-cover" />
-                        </div>
-                    </aside>
-                </div>
-
-                {/* Similar Services Section */}
-                <div className="flex flex-col gap-16 py-20">
-                    <h2 className="text-[56px] text-center font-medium tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-                        Similar Services
-                    </h2>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {similarServices.map((s, i) => (
-                            <div key={i} className="flex p-8 flex-col gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group hover:border-[#F29F04] transition-all">
-                                <div className="flex items-start gap-4">
-                                    <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-                                        {s.isSvg ? (
-                                            s.logo
-                                        ) : (
-                                            <Image src={s.logo as string} alt={s.name} fill className="object-contain" />
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="text-white text-[20px] font-medium">{s.name}</span>
-                                        <div className="flex items-baseline gap-1">
-                                            <span className="text-white text-[14px] font-semibold">{s.price}</span>
-                                            <span className="text-[#666] text-[14px] font-semibold">{s.period}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-[#BDBDBD] text-[16px] leading-[26px] line-clamp-3">
-                                    {s.description}
-                                </p>
-                            </div>
-                        ))}
-                        {/* Duplicate KeyProxy card as requested by design layout */}
-                        <div className="flex p-8 flex-col gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group hover:border-[#F29F04] transition-all">
-                            <div className="flex items-start gap-4">
-                                <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-                                    {service.logo}
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="text-white text-[20px] font-medium">{service.name}</span>
-                                    <div className="flex items-baseline gap-1">
-                                        <span className="text-white text-[14px] font-semibold">10</span>
-                                        <span className="text-[#666] text-[14px] font-semibold">/week</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <p className="text-[#BDBDBD] text-[16px] leading-[26px] line-clamp-3">
-                                {service.description}
-                            </p>
+                    {/* Right Column - Sidebar */}
+                    <div className="w-[380px] shrink-0">
+                        <div className="w-[380px] h-[727px] rounded-[20px] overflow-hidden relative">
+                            <Image
+                                src={serviceData.sidebarImage}
+                                alt="Sidebar Banner"
+                                fill
+                                sizes="380px"
+                                className="w-full h-full object-cover"
+                            />
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* Similar Services Section */}
+            <div className="flex flex-col justify-center items-center gap-[64px] p-[120px_100px_80px_100px] w-full max-w-[1440px] mx-auto overflow-hidden">
+                <h2 className="text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999] self-stretch">
+                    Similar Services
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[24px] self-stretch">
+                    {similarServices.map((service, index) => (
+                        <UsefulServiceCard
+                            key={index}
+                            logo={service.logo}
+                            category={service.category}
+                            name={service.name}
+                            description={service.description}
+                            pricing={service.pricing}
+                        />
+                    ))}
+                </div>
+            </div>
         </main>
     );
 };
