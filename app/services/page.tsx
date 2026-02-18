@@ -1,7 +1,12 @@
-"use client";
+'use client';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import BlogHero from '@/app/components/blog/BlogHero';
+import Banner from '@/app/components/Banner';
+import UsefulServiceCard from '@/app/components/services/UsefulServiceCard';
+import ServicesFilter from '@/app/components/services/ServicesFilter';
+import ForumPagination from '@/app/components/forum/ForumPagination';
 
 const ServicesPage: React.FC = () => {
     const [activeCategory, setActiveCategory] = useState('All Services');
@@ -10,14 +15,16 @@ const ServicesPage: React.FC = () => {
         'All Services', 'SPY Services', 'Anti-detection browsers',
         'Cloaking', 'Creatives', 'Payment instruments', 'Proxy', 'Trackers'
     ];
+    const promoBannerSrc = "https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480";
 
     const services = [
         {
             id: 1,
-            name: 'KeyProxy',
+            title: 'KeyProxy',
             description: 'KeyProxy — business-grade mobile proxies. Operating since 2017, stability is our priority!',
             category: 'Proxy',
-            price: '10/week, 28/month',
+            price: '10',
+            priceLabel: '/week, 28/month',
             offer: 'CLICKSTORM offers a 15% discount on...',
             brand: 'Clickstorm',
             logo: (
@@ -32,10 +39,11 @@ const ServicesPage: React.FC = () => {
         },
         {
             id: 2,
-            name: 'Geonix',
+            title: 'Geonix',
             description: 'Geonix — reliable and scalable proxies for any task. A provider focused on stability and speed: a wide network...',
             category: 'Proxy',
-            price: '1,65/month',
+            price: '1,65',
+            priceLabel: '/month',
             offer: 'CSC - 15% discount on RU versions',
             brand: 'CSC',
             logo: (
@@ -53,20 +61,21 @@ const ServicesPage: React.FC = () => {
         },
         {
             id: 3,
-            name: 'Dolphin{anty}',
+            title: 'Dolphin{anty}',
             description: 'Dolphin{anty} is a next-generation anti-detection browser built to simplify and protect multi-accounting. It replaces…',
             category: 'ANTI-DETECTION BROWSERS',
-            price: '10/month',
-            offer: null,
+            price: '10',
+            priceLabel: '/month',
+            offer: '',
             brand: 'Dolphin',
             logo: (
                 <div className="relative w-[56px] h-[56px] flex items-center justify-center">
                     <Image
-                        src="/dolphin.svg"
+                        src="https://api.builder.io/api/v1/image/assets/TEMP/c1315c8886afd597c3f1ae4f63293222acf10678?width=112"
                         alt="Dolphin{anty}"
                         width={56}
                         height={56}
-                        className="object-contain"
+                        className="object-contain w-full h-full"
                     />
                 </div>
             )
@@ -74,165 +83,66 @@ const ServicesPage: React.FC = () => {
     ];
 
     return (
-        <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins">
+        <div className="relative flex flex-col items-start bg-[#0D0D0D] overflow-x-hidden font-poppins text-white">
+            <BlogHero
+                title={(
+                    <>
+                        Sharing experience <br className="hidden md:block" /> with the industry
+                    </>
+                )}
+                description="We participate in and speak at major affiliate and marketing conferences, sharing insights, strategies, and real case studies from active campaigns"
+            />
 
-            {/* Top Section */}
-            <section className="relative w-full h-[646px] flex flex-col items-center pt-[120px] px-[100px] overflow-hidden">
-                {/* Background Pattern and Gradients */}
-                <div className="absolute inset-0 z-0 pointer-events-none">
-                    <div
-                        className="absolute inset-0 opacity-40 mix-blend-soft-light"
-                        style={{
-                            backgroundImage: "url('/images/services-top-bg.webp')",
-                            backgroundSize: '100px 100px',
-                            backgroundRepeat: 'repeat'
-                        }}
+            <main className="w-full max-w-[1280px] mx-auto px-5 pb-20">
+                <div className="w-full max-w-[1240px] mx-auto flex flex-col gap-16">
+                    <Banner
+                        src={promoBannerSrc}
+                        alt="Promo banner"
                     />
-                    <div
-                        className="absolute inset-0"
-                        style={{
-                            background: 'linear-gradient(83deg, rgba(242, 159, 4, 0.70) 0.75%, #0D0D0D 30.5%, #0D0D0D 69.72%, rgba(242, 159, 4, 0.70) 99.19%)'
-                        }}
+
+                    <div className="flex flex-col items-center gap-8 w-full">
+                        <ServicesFilter
+                            categories={categories}
+                            activeCategory={activeCategory}
+                            onCategoryChange={setActiveCategory}
+                        />
+                    </div>
+
+                    <div className="w-full flex flex-col gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
+                            {services.map((service, index) => (
+                                <UsefulServiceCard
+                                    key={index}
+                                    logo={service.logo}
+                                    category={service.category}
+                                    name={service.title}
+                                    description={service.description}
+                                    pricing={`$ ${service.price}${service.priceLabel}`}
+                                    offer={service.offer}
+                                    offerBrand={service.brand}
+                                />
+                            ))}
+                        </div>
+
+                        <ForumPagination
+                            showingFrom={1}
+                            showingTo={6}
+                            total={15}
+                            currentPage={1}
+                            totalPages={3}
+                            itemLabel="services"
+                            onPageChange={(page) => console.log('Page changed to:', page)}
+                        />
+                    </div>
+
+                    <Banner
+                        src={promoBannerSrc}
+                        alt="Promo banner"
+                        className="mt-6"
                     />
-                    {/* SVG Gradients (translated from Figma) */}
-                    <div className="absolute inset-0 flex justify-center items-center scale-150">
-                        <svg width="100%" height="100%" viewBox="0 0 3522 3818" fill="none" className="opacity-60">
-                            <g filter="url(#filter0_f)">
-                                <circle cx="926" cy="2892" r="926" fill="#0D0D0D" />
-                            </g>
-                            <g filter="url(#filter1_f)">
-                                <circle cx="2596" cy="2892" r="926" fill="#0D0D0D" />
-                            </g>
-                            <g filter="url(#filter2_f)">
-                                <circle cx="926" cy="926" r="926" fill="#0D0D0D" />
-                            </g>
-                            <g filter="url(#filter3_f)">
-                                <circle cx="2596" cy="926" r="926" fill="#0D0D0D" />
-                            </g>
-                            <defs>
-                                <filter id="filter0_f" x="-200" y="1766" width="2252" height="2252" filterUnits="userSpaceOnUse">
-                                    <feGaussianBlur stdDeviation="100" />
-                                </filter>
-                                <filter id="filter1_f" x="1470" y="1766" width="2252" height="2252" filterUnits="userSpaceOnUse">
-                                    <feGaussianBlur stdDeviation="100" />
-                                </filter>
-                                <filter id="filter2_f" x="-200" y="-200" width="2252" height="2252" filterUnits="userSpaceOnUse">
-                                    <feGaussianBlur stdDeviation="100" />
-                                </filter>
-                                <filter id="filter3_f" x="1470" y="-200" width="2252" height="2252" filterUnits="userSpaceOnUse">
-                                    <feGaussianBlur stdDeviation="100" />
-                                </filter>
-                            </defs>
-                        </svg>
-                    </div>
                 </div>
-
-                {/* Text Content */}
-                <div className="relative z-10 flex flex-col items-center gap-6 text-center pt-20">
-                    <h1 className="text-[80px] font-medium leading-[88px] tracking-[-3.2px] text-transparent bg-clip-text bg-gradient-to-b from-white to-[#999] max-w-[1020px] drop-shadow-lg">
-                        Sharing experience with the industry
-                    </h1>
-                    <p className="text-[16px] leading-[26px] text-[#BDBDBD] max-w-[720px] drop-shadow-md">
-                        We participate in and speak at major affiliate and marketing conferences, sharing insights, strategies, and real case studies from active campaigns
-                    </p>
-                </div>
-            </section>
-
-            {/* Body Section */}
-            <section className="relative w-full px-[100px] pb-[80px] flex flex-col gap-20 -mt-[40px]">
-                {/* Banner Image */}
-                <div className="relative w-full h-[158px] rounded-[40px] overflow-hidden z-20 bg-gradient-to-r from-[#1A1A1A] to-[#333] border border-white/10 flex items-center justify-center">
-                    <span className="text-white/20 text-[24px] font-medium">Special Offers Banner</span>
-                </div>
-
-                {/* Categories Filter */}
-                <div className="flex flex-col items-center gap-8 self-stretch">
-                    <div className="flex p-2 items-start gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-[80px] transition-all text-[16px] font-medium leading-[26px] ${activeCategory === cat
-                                    ? 'bg-[#F29F04] text-[#070707]'
-                                    : 'text-[#FCFCFC] hover:bg-white/5'
-                                    }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Services Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {services.map((service) => (
-                        <div key={service.id} className="flex p-8 flex-col justify-center items-start gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] group hover:border-[#F29F04] transition-all">
-                            {/* Card Header */}
-                            <div className="flex w-full justify-between items-center h-[56px]">
-                                {service.logo}
-                                <div className="px-3 py-1.5 rounded-[80px] border border-[#B3B3B3] text-[#B3B3B3] text-[14px]">
-                                    {service.category}
-                                </div>
-                            </div>
-
-                            {/* Card Content */}
-                            <div className="flex flex-col gap-4 self-stretch">
-                                <h3 className="text-white text-[20px] font-medium leading-[32px]">{service.name}</h3>
-                                <p className="text-[#BDBDBD] text-[16px] leading-[26px] h-20 overflow-hidden line-clamp-3">{service.description}</p>
-                            </div>
-
-                            {/* Card Footer (Price & Offer) */}
-                            <div className="flex flex-col gap-4 self-stretch pt-4 border-t border-white/10">
-                                <div className="flex items-center gap-1.5">
-                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                        <path d="M11.6 3.3C12.2 3.3 12.9 3.6 13.4 4C13.8 4.5 14.1 5.2 14.1 5.8C14.1 6.1 14.2 6.3 14.4 6.4C14.5 6.6 14.7 6.7 14.9 6.7C15.2 6.7 15.4 6.6 15.5 6.4C15.7 6.3 15.8 6.1 15.8 5.8V5.7C15.8 4.6 15.3 3.6 14.5 2.8C13.7 2 12.7 1.6 11.6 1.6H10.8V0.8C10.8 0.6 10.7 0.4 10.5 0.2C10.4 0 10.2 0 9.9 0C9.7 0 9.5 0 9.4 0.2C9.2 0.4 9.1 0.6 9.1 0.8V1.6H8.3C7.3 1.6 6.4 2 5.6 2.6C4.8 3.3 4.3 4.2 4.2 5.2C4 6.2 4.2 7.2 4.7 8C5.2 8.9 6.1 9.5 7 9.8L9.1 10.6V16.6H8.3C7.7 16.6 7 16.3 6.5 15.9C6.1 15.4 5.8 14.7 5.8 14.1C5.8 13.8 5.7 13.6 5.5 13.5C5.4 13.3 5.2 13.2 4.9 13.2C4.7 13.2 4.5 13.3 4.4 13.5C4.2 13.6 4.1 13.8 4.1 14.1V14.2C4.1 15.3 4.6 16.3 5.4 17.1C6.2 17.9 7.2 18.3 8.3 18.3H9.1V19.1C9.1 19.3 9.2 19.5 9.4 19.7C9.5 19.9 9.7 20 9.9 20C10.2 20 10.4 19.9 10.5 19.7C10.7 19.5 10.8 19.3 10.8 19.1V18.3H11.6C12.6 18.3 13.5 17.9 14.3 17.3C15.1 16.6 15.6 15.7 15.7 14.7C15.9 13.7 15.7 12.7 15.2 11.9C14.7 11 13.8 10.4 12.9 10.1L10.8 9.4V3.3H11.6Z" fill="white" />
-                                    </svg>
-                                    <div className="text-[20px] font-semibold text-white">
-                                        {service.price}
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center h-10">
-                                    <div className="px-3 py-1 rounded-[80px] border border-[#06DF73] text-[#06DF73] text-[14px] uppercase font-medium">
-                                        {service.brand}
-                                    </div>
-                                    <span className="text-[#BDBDBD] text-[14px] text-right font-light italic max-w-[200px]">
-                                        {service.offer}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Pagination */}
-                <div className="flex p-10 justify-between items-center self-stretch rounded-[40px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]">
-                    <div className="text-[#A5A5A5] text-[24px]">Showing 1-6 of 15 services</div>
-                    <div className="flex items-center gap-2.5">
-                        <button className="w-[48px] h-[58px] flex items-center justify-center rounded-[20px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] hover:bg-white/5 transition-colors group">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M3.6 8L11.1 0.2C11.4 -0.1 11.8 -0.1 12.1 0.2C12.4 0.5 12.4 1 12.1 1.2L5.3 8L12.1 14.8C12.4 15.1 12.4 15.6 12.1 15.9C11.8 16.2 11.4 16.2 11.1 15.9L3.6 8.5C3.5 8.2 3.5 7.8 3.6 8Z" fill="#A5A5A5" className="group-hover:fill-white transition-colors" />
-                            </svg>
-                        </button>
-                        <div className="flex items-center gap-1.5">
-                            <button className="w-[48px] h-[48px] flex items-center justify-center rounded-full bg-[#F29F04] text-[#070707] text-[24px] font-medium shadow-[inset_0_4px_4px_rgba(255,255,255,0.3)]">1</button>
-                            <button className="w-[48px] h-[48px] flex items-center justify-center rounded-full border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] text-[#A5A5A5] text-[24px] hover:bg-white/5 hover:text-white transition-all">2</button>
-                            <button className="w-[48px] h-[48px] flex items-center justify-center rounded-full border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] text-[#A5A5A5] text-[24px] hover:bg-white/5 hover:text-white transition-all">3</button>
-                        </div>
-                        <button className="w-[48px] h-[58px] flex items-center justify-center rounded-[20px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] hover:bg-white/5 transition-colors group">
-                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M12.4 8L4.9 0.2C4.6 -0.1 4.2 -0.1 3.9 0.2C3.6 0.5 3.6 1 3.9 1.2L10.7 8L3.9 14.8C3.6 15.1 3.6 15.6 3.9 15.9C4.2 16.2 4.6 16.2 4.9 15.9L12.4 8.5C12.5 8.2 12.5 7.8 12.4 8Z" fill="#A5A5A5" className="group-hover:fill-white transition-colors" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                {/* Bottom Banner */}
-                <div className="relative w-full h-[158px] rounded-[40px] overflow-hidden z-20 mt-10 bg-gradient-to-r from-[#1A1A1A] to-[#333] border border-white/10 flex items-center justify-center">
-                    <span className="text-white/20 text-[24px] font-medium">Special Offers Banner</span>
-                </div>
-            </section>
-
-        </main>
+            </main>
+        </div>
     );
 };
 

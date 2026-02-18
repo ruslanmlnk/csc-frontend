@@ -1,4 +1,5 @@
 export * from './client'
+export * from './comments'
 export * from './errors'
 export * from './graphql'
 export * from './threads'

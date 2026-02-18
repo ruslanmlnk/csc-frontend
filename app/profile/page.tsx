@@ -45,14 +45,22 @@ type ProfileThreadDoc = {
   title?: string | null;
   category?: string | null;
   createdAt?: string;
-  comments?: unknown[] | null;
   author?: { id?: string | number | null } | string | number | null;
+};
+
+type ProfileThreadWithCounts = ProfileThreadDoc & {
+  commentsCount: number;
 };
 
 type ThreadsResponse = {
   docs?: ProfileThreadDoc[];
   totalDocs?: number;
   error?: string;
+};
+
+type ThreadCommentsResponse = {
+  totalDocs?: number;
+  docs?: unknown[];
 };
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
@@ -90,9 +98,41 @@ const formatThreadDate = (value?: string): string => {
   });
 };
 
+const toForumCategorySlug = (value?: string | null): string => {
+  const normalized = (value || 'general')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return normalized || 'general';
+};
+
+const getThreadCommentsCount = async (threadId: string): Promise<number> => {
+  try {
+    const response = await fetch(
+      `/api/threads/${encodeURIComponent(threadId)}/comments?limit=1&depth=0`,
+      { cache: 'no-store' },
+    );
+    const data = (await response.json().catch(() => null)) as ThreadCommentsResponse | null;
+
+    if (!response.ok) {
+      return 0;
+    }
+
+    if (typeof data?.totalDocs === 'number') {
+      return data.totalDocs;
+    }
+
+    return Array.isArray(data?.docs) ? data.docs.length : 0;
+  } catch {
+    return 0;
+  }
+};
+
 const ProfilePage: React.FC = () => {
   const [threadsCount, setThreadsCount] = useState(0);
-  const [threads, setThreads] = useState<ProfileThreadDoc[]>([]);
+  const [threads, setThreads] = useState<ProfileThreadWithCounts[]>([]);
   const [threadsError, setThreadsError] = useState('');
   const [isThreadsLoading, setIsThreadsLoading] = useState(false);
   const [user, setUser] = useState<BackendUser | null>(null);
@@ -146,7 +186,23 @@ const ProfilePage: React.FC = () => {
         return !authorId || authorId === targetUserId;
       });
 
-      setThreads(filteredThreads);
+      const commentCountsByThread = Object.fromEntries(
+        await Promise.all(
+          filteredThreads.map(async (thread) => {
+            const threadId = String(thread.id);
+            const commentsCount = await getThreadCommentsCount(threadId);
+
+            return [threadId, commentsCount] as const;
+          }),
+        ),
+      );
+
+      const threadsWithCounts = filteredThreads.map((thread) => ({
+        ...thread,
+        commentsCount: commentCountsByThread[String(thread.id)] ?? 0,
+      }));
+
+      setThreads(threadsWithCounts);
       setThreadsCount(typeof data?.totalDocs === 'number' ? data.totalDocs : filteredThreads.length);
     } catch (err) {
       setThreads([]);
@@ -297,17 +353,24 @@ const ProfilePage: React.FC = () => {
             </div>
           )}
 
-          {threads.map((thread) => (
-            <ForumCategoryThreadCard
-              key={String(thread.id)}
-              title={thread.title || 'Untitled thread'}
-              description={thread.category || 'We read, delve into, discuss'}
-              authorName={displayName}
-              date={formatThreadDate(thread.createdAt)}
-              replyCount={Array.isArray(thread.comments) ? thread.comments.length : 0}
-              authorAvatar={avatarUrl || '/images/logo.png'}
-            />
-          ))}
+          {threads.map((thread) => {
+            const threadId = String(thread.id);
+            const categorySlug = toForumCategorySlug(thread.category);
+            const threadHref = `/forum/${categorySlug}/${threadId}`;
+
+            return (
+              <Link key={threadId} href={threadHref} className="block">
+                <ForumCategoryThreadCard
+                  title={thread.title || 'Untitled thread'}
+                  description={thread.category || 'We read, delve into, discuss'}
+                  authorName={displayName}
+                  date={formatThreadDate(thread.createdAt)}
+                  replyCount={thread.commentsCount}
+                  authorAvatar={avatarUrl || '/images/logo.png'}
+                />
+              </Link>
+            );
+          })}
         </section>
       </main>
 

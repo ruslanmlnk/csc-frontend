@@ -29,6 +29,14 @@ export const getThreads = ({ page, limit, authorId }: GetThreadsParams) => {
   })
 }
 
+export const getThreadById = (threadId: string, depth: string = '3') =>
+  backendRequest<Record<string, unknown>>(
+    `/api/threads/${encodeURIComponent(threadId)}?depth=${encodeURIComponent(depth)}`,
+    {
+      cache: 'no-store',
+    },
+  )
+
 export const createThread = (token: string, payload: CreateThreadInput) =>
   backendRequest<Record<string, unknown>>('/api/threads', {
     method: 'POST',

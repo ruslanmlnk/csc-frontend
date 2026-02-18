@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ForumThreadHero from '@/app/components/forum/ForumThreadHero';
 import ForumThreadOriginalPost from '@/app/components/forum/ForumThreadOriginalPost';
 import ForumThreadReply from '@/app/components/forum/ForumThreadReply';
@@ -9,57 +9,412 @@ import ForumThreadCommentInput from '@/app/components/forum/ForumThreadCommentIn
 import { useParams } from 'next/navigation';
 import { forumThreadPageData } from './data';
 
+type UnknownRecord = Record<string, unknown>;
+
+const DEFAULT_AVATAR = '/images/logo.png';
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+
+const asRecord = (value: unknown): UnknownRecord | null => {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        return null;
+    }
+
+    return value as UnknownRecord;
+};
+
+const toEntityId = (value: unknown): string | null => {
+    if (typeof value === 'string' || typeof value === 'number') {
+        return String(value);
+    }
+
+    const objectValue = asRecord(value);
+    if (!objectValue) {
+        return null;
+    }
+
+    const id = objectValue.id;
+    if (typeof id === 'string' || typeof id === 'number') {
+        return String(id);
+    }
+
+    return null;
+};
+
+const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+    if (!url) {
+        return null;
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+
+    const normalizedBase = BACKEND_BASE_URL.endsWith('/')
+        ? BACKEND_BASE_URL.slice(0, -1)
+        : BACKEND_BASE_URL;
+    const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+
+    return `${normalizedBase}${normalizedPath}`;
+};
+
+const resolveUserName = (user: unknown): string => {
+    const userObject = asRecord(user);
+
+    if (!userObject) {
+        return 'Unknown user';
+    }
+
+    const name = userObject.name;
+    if (typeof name === 'string' && name.trim()) {
+        return name;
+    }
+
+    const email = userObject.email;
+    if (typeof email === 'string' && email.trim()) {
+        return email.split('@')[0];
+    }
+
+    return 'Unknown user';
+};
+
+const resolveUserAvatar = (user: unknown): string => {
+    const userObject = asRecord(user);
+
+    if (!userObject) {
+        return DEFAULT_AVATAR;
+    }
+
+    const avatar = userObject.avatar;
+
+    if (typeof avatar === 'string') {
+        return toAbsoluteMediaUrl(avatar) || DEFAULT_AVATAR;
+    }
+
+    const avatarObject = asRecord(avatar);
+    if (!avatarObject) {
+        return DEFAULT_AVATAR;
+    }
+
+    const avatarUrl = avatarObject.url;
+    if (typeof avatarUrl === 'string' && avatarUrl.trim()) {
+        return toAbsoluteMediaUrl(avatarUrl) || DEFAULT_AVATAR;
+    }
+
+    return DEFAULT_AVATAR;
+};
+
+const formatThreadDate = (value?: string): string => {
+    if (!value) {
+        return 'Unknown date';
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+        return 'Unknown date';
+    }
+
+    return parsed.toLocaleDateString('en-US', {
+        month: 'short',
+        day: '2-digit',
+        year: 'numeric',
+    });
+};
+
+const toCategorySlug = (value: string): string =>
+    value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
+const resolveThreadDocument = (payload: unknown): UnknownRecord | null => {
+    const payloadObject = asRecord(payload);
+    if (!payloadObject) {
+        return null;
+    }
+
+    const nestedDoc = asRecord(payloadObject.doc);
+    if (nestedDoc) {
+        return nestedDoc;
+    }
+
+    return payloadObject;
+};
+
+const extractThreadComments = (thread: UnknownRecord | null): UnknownRecord[] => {
+    if (!thread || !Array.isArray(thread.comments)) {
+        return [];
+    }
+
+    return thread.comments
+        .map((comment) => asRecord(comment))
+        .filter((comment): comment is UnknownRecord => Boolean(comment));
+};
+
 export default function ForumThreadPage() {
     const params = useParams();
+    const slugParam = params.slug;
+    const threadIdParam = params.threadId;
+    const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam;
+    const threadId = Array.isArray(threadIdParam) ? threadIdParam[0] : threadIdParam;
+
+    const [thread, setThread] = useState<UnknownRecord | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [newComment, setNewComment] = useState('');
+    const [isPublishingComment, setIsPublishingComment] = useState(false);
+    const [publishError, setPublishError] = useState('');
+
+    useEffect(() => {
+        if (!threadId) {
+            setThread(null);
+            setError('Thread ID is missing.');
+            setIsLoading(false);
+            return;
+        }
+
+        let active = true;
+
+        const loadThread = async () => {
+            setIsLoading(true);
+            setError('');
+            setPublishError('');
+
+            try {
+                const threadResponse = await fetch(`/api/threads/${encodeURIComponent(threadId)}`, {
+                    cache: 'no-store',
+                });
+                const threadPayload = await threadResponse.json().catch(() => null);
+
+                if (!threadResponse.ok) {
+                    const payloadObject = asRecord(threadPayload);
+                    const message = typeof payloadObject?.error === 'string'
+                        ? payloadObject.error
+                        : 'Unable to load thread.';
+                    throw new Error(message);
+                }
+
+                const resolvedThread = resolveThreadDocument(threadPayload);
+                if (!resolvedThread) {
+                    throw new Error('Invalid thread payload.');
+                }
+
+                if (active) {
+                    setThread(resolvedThread);
+                }
+            } catch (threadError) {
+                if (active) {
+                    setThread(null);
+                    setError(
+                        threadError instanceof Error
+                            ? threadError.message
+                            : 'Unable to load thread.',
+                    );
+                }
+            } finally {
+                if (active) {
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        loadThread();
+
+        return () => {
+            active = false;
+        };
+    }, [threadId]);
+
+    const categoryTitle = typeof thread?.category === 'string' && thread.category.trim()
+        ? thread.category
+        : forumThreadPageData.hero.title;
+    const threadTitle = typeof thread?.title === 'string' && thread.title.trim()
+        ? thread.title
+        : forumThreadPageData.originalPost.threadTitle;
+    const threadContent = typeof thread?.content === 'string' && thread.content.trim()
+        ? thread.content
+        : forumThreadPageData.originalPost.content;
+    const threadDate = formatThreadDate(
+        typeof thread?.createdAt === 'string' ? thread.createdAt : undefined,
+    );
+
+    const author = thread?.author;
+    const authorName = resolveUserName(author);
+    const authorAvatar = resolveUserAvatar(author);
+
+    const replies = useMemo(() => {
+        return extractThreadComments(thread)
+            .map((comment, index) => {
+                const content = typeof comment.comment === 'string'
+                    ? comment.comment.trim()
+                    : '';
+                if (!content) {
+                    return null;
+                }
+
+                const commentUser = comment.user;
+
+                const createdAt = typeof comment.createdAt === 'string'
+                    ? comment.createdAt
+                    : undefined;
+
+                return {
+                    id: toEntityId(comment.id) || `${index}`,
+                    authorName: resolveUserName(commentUser),
+                    authorAvatar: resolveUserAvatar(commentUser),
+                    date: formatThreadDate(createdAt),
+                    content,
+                };
+            })
+            .filter((reply): reply is {
+                id: string;
+                authorName: string;
+                authorAvatar: string;
+                date: string;
+                content: string;
+            } => Boolean(reply));
+    }, [thread]);
+
+    const totalResponses = thread ? 1 + replies.length : 0;
+    const fallbackSlug = toCategorySlug(categoryTitle);
+    const backLink = slug ? `/forum/${slug}` : fallbackSlug ? `/forum/${fallbackSlug}` : '/forum';
+
+    const handleCancelComment = () => {
+        setNewComment('');
+        setPublishError('');
+    };
+
+    const handlePublishComment = async () => {
+        const commentToPublish = newComment.trim();
+
+        if (!threadId || !commentToPublish) {
+            return;
+        }
+
+        setIsPublishingComment(true);
+        setPublishError('');
+
+        try {
+            const response = await fetch(`/api/threads/${encodeURIComponent(threadId)}/comments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ comment: commentToPublish }),
+            });
+
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok) {
+                const payloadObject = asRecord(payload);
+                const message = typeof payloadObject?.error === 'string'
+                    ? payloadObject.error
+                    : 'Unable to publish comment.';
+                throw new Error(message);
+            }
+
+            const refreshResponse = await fetch(`/api/threads/${encodeURIComponent(threadId)}`, {
+                cache: 'no-store',
+            });
+            const refreshPayload = await refreshResponse.json().catch(() => null);
+            if (refreshResponse.ok) {
+                const refreshedThread = resolveThreadDocument(refreshPayload);
+                if (refreshedThread) {
+                    setThread(refreshedThread);
+                }
+            }
+
+            setNewComment('');
+        } catch (commentError) {
+            setPublishError(
+                commentError instanceof Error
+                    ? commentError.message
+                    : 'Unable to publish comment.',
+            );
+        } finally {
+            setIsPublishingComment(false);
+        }
+    };
 
     return (
         <main className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center overflow-x-hidden">
             <div className="relative z-10 w-full flex flex-col items-center">
                 <ForumThreadHero
-                    title={forumThreadPageData.hero.title}
-                    backLink={`/forum/${params.slug}`}
+                    title={categoryTitle}
+                    backLink={backLink}
                     backText={forumThreadPageData.hero.backText}
                     addCommentLabel={forumThreadPageData.hero.addCommentLabel}
                 />
 
                 <div className="flex flex-col items-start gap-16 w-full max-w-[1280px] px-5 pb-32">
                     <div className="flex flex-col gap-4 w-full">
-                        <ForumThreadOriginalPost
-                            threadTitle={forumThreadPageData.originalPost.threadTitle}
-                            authorName={forumThreadPageData.originalPost.authorName}
-                            authorRole={forumThreadPageData.originalPost.authorRole}
-                            date={forumThreadPageData.originalPost.date}
-                            authorAvatar={forumThreadPageData.originalPost.authorAvatar}
-                            content={forumThreadPageData.originalPost.content}
-                        />
+                        {isLoading && (
+                            <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
+                                Loading thread...
+                            </div>
+                        )}
 
-                        {forumThreadPageData.replies.map((reply, index) => (
-                            <ForumThreadReply
-                                key={index}
-                                authorName={reply.authorName}
-                                date={reply.date}
-                                authorAvatar={reply.authorAvatar}
-                                content={reply.content}
-                            />
-                        ))}
+                        {!isLoading && error && (
+                            <div className="w-full rounded-[40px] border border-[rgba(255,128,128,0.6)] bg-[rgba(255,128,128,0.08)] p-6 text-[#FF9C9C] text-[16px] leading-[26px]">
+                                {error}
+                            </div>
+                        )}
+
+                        {!isLoading && !error && thread && (
+                            <>
+                                <ForumThreadOriginalPost
+                                    threadTitle={threadTitle}
+                                    authorName={authorName}
+                                    authorRole={forumThreadPageData.originalPost.authorRole}
+                                    date={threadDate}
+                                    authorAvatar={authorAvatar}
+                                    content={threadContent}
+                                />
+
+                                {replies.map((reply) => (
+                                    <ForumThreadReply
+                                        key={reply.id}
+                                        authorName={reply.authorName}
+                                        date={reply.date}
+                                        authorAvatar={reply.authorAvatar}
+                                        content={reply.content}
+                                    />
+                                ))}
+                            </>
+                        )}
                     </div>
 
-                    <ForumPagination
-                        showingFrom={forumThreadPageData.pagination.showingFrom}
-                        showingTo={forumThreadPageData.pagination.showingTo}
-                        total={forumThreadPageData.pagination.total}
-                        currentPage={forumThreadPageData.pagination.currentPage}
-                        totalPages={forumThreadPageData.pagination.totalPages}
-                        itemLabel={forumThreadPageData.pagination.itemLabel}
-                        onPageChange={(page) => console.log('Page changed:', page)}
-                    />
+                    {!isLoading && !error && thread && (
+                        <>
+                            <ForumPagination
+                                showingFrom={1}
+                                showingTo={Math.max(totalResponses, 1)}
+                                total={Math.max(totalResponses, 1)}
+                                currentPage={1}
+                                totalPages={1}
+                                itemLabel="responses"
+                                onPageChange={() => undefined}
+                            />
 
-                    <ForumThreadCommentInput
-                        title={forumThreadPageData.commentInput.title}
-                        placeholder={forumThreadPageData.commentInput.placeholder}
-                        cancelLabel={forumThreadPageData.commentInput.cancelLabel}
-                        publishLabel={forumThreadPageData.commentInput.publishLabel}
-                    />
+                            <ForumThreadCommentInput
+                                title={forumThreadPageData.commentInput.title}
+                                placeholder={forumThreadPageData.commentInput.placeholder}
+                                cancelLabel={forumThreadPageData.commentInput.cancelLabel}
+                                publishLabel={forumThreadPageData.commentInput.publishLabel}
+                                value={newComment}
+                                onChange={(value) => {
+                                    setNewComment(value);
+                                    if (publishError) {
+                                        setPublishError('');
+                                    }
+                                }}
+                                onCancel={handleCancelComment}
+                                onPublish={handlePublishComment}
+                                isPublishing={isPublishingComment}
+                                error={publishError}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
         </main>

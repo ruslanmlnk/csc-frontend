@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import SearchModal from './SearchModal';
 
 const Header: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const pathname = usePathname();
 
     const handleUserClick = async () => {
         try {
@@ -19,12 +21,40 @@ const Header: React.FC = () => {
     };
 
     const menuItems = [
-        { label: 'Blog', active: true },
-        { label: 'Conferences', active: false },
-        { label: 'Services', active: false },
-        { label: 'Forum', active: false },
-        { label: 'Partnership', active: false },
-        { label: 'Jobs', active: false }
+        {
+            label: 'Blog',
+            href: '/blog',
+            isActive: pathname === '/blog' || pathname?.startsWith('/blog/'),
+        },
+        {
+            label: 'Conferences',
+            href: '/conferences',
+            isActive: pathname === '/conferences' || pathname?.startsWith('/conferences/'),
+        },
+        {
+            label: 'Services',
+            href: '/services',
+            isActive: pathname === '/services' || pathname?.startsWith('/services/'),
+        },
+        {
+            label: 'Forum',
+            href: '/forum',
+            isActive: pathname === '/forum' || pathname?.startsWith('/forum/'),
+        },
+        {
+            label: 'Partnership',
+            href: '/partnership',
+            isActive:
+                pathname === '/partnership' ||
+                pathname?.startsWith('/partnership/') ||
+                pathname === '/partnerships' ||
+                pathname?.startsWith('/partnerships/'),
+        },
+        {
+            label: 'Jobs',
+            href: '/jobs',
+            isActive: pathname === '/jobs' || pathname?.startsWith('/jobs/'),
+        },
     ];
 
     return (
@@ -48,9 +78,9 @@ const Header: React.FC = () => {
                     {menuItems.map((item) => (
                         <Link
                             key={item.label}
-                            href={`/${item.label.toLowerCase()}`}
+                            href={item.href}
                             style={{ fontFamily: 'Poppins, sans-serif' }}
-                            className={`text-[16px] font-normal leading-[26px] transition-colors ${item.active ? 'text-white' : 'text-[#BDBDBD] hover:text-white'
+                            className={`text-[16px] font-normal leading-[26px] transition-colors ${item.isActive ? 'text-white' : 'text-[#BDBDBD] hover:text-white'
                                 }`}
                         >
                             {item.label}
