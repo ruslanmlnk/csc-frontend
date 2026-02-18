@@ -189,15 +189,17 @@ const ServicesPage: React.FC = () => {
             )}
 
             {!isLoading && !error && filteredServices.length > 0 && (
-              <ForumPagination
-                showingFrom={1}
-                showingTo={filteredServices.length}
-                total={filteredServices.length}
-                currentPage={1}
-                totalPages={1}
-                itemLabel="services"
-                onPageChange={() => undefined}
-              />
+              <div className="md:mt-10">
+                <ForumPagination
+                  showingFrom={1}
+                  showingTo={filteredServices.length}
+                  total={filteredServices.length}
+                  currentPage={1}
+                  totalPages={1}
+                  itemLabel="services"
+                  onPageChange={() => undefined}
+                />
+              </div>
             )}
           </div>
 

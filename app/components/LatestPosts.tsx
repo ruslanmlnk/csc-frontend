@@ -1,85 +1,228 @@
-"use client";
+"use client"
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import BlogCard from './BlogCard';
+import React, { useEffect, useMemo, useState } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import BlogCard from './BlogCard'
+import MobileCategorySelector from '@/app/components/shared/MobileCategorySelector'
+
+type BlogApiArticle = {
+  id: string | number
+  title?: string | null
+  slug?: string | null
+  publishedDate?: string | null
+  image?: {
+    url?: string | null
+  } | null
+  category?: {
+    name?: string | null
+  } | null
+}
+
+type BlogApiResponse = {
+  articles?: BlogApiArticle[]
+  error?: string
+}
+
+type LatestPostItem = {
+  id: string
+  title: string
+  date: string
+  category: string
+  image: string
+  slug?: string | null
+  publishedDate?: string | null
+}
+
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
+const ALL_ARTICLES_LABEL = 'All Articles'
+const MAX_VISIBLE_POSTS = 3
+
+const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+
+  const normalizedBase = BACKEND_BASE_URL.endsWith('/') ? BACKEND_BASE_URL.slice(0, -1) : BACKEND_BASE_URL
+  const normalizedPath = url.startsWith('/') ? url : `/${url}`
+
+  return `${normalizedBase}${normalizedPath}`
+}
+
+const formatPublishedDate = (value?: string | null): string => {
+  if (!value) return ''
+
+  const parsedDate = new Date(value)
+  if (Number.isNaN(parsedDate.getTime())) return ''
+
+  return parsedDate.toLocaleDateString('en-US', {
+    month: 'short',
+    day: '2-digit',
+    year: 'numeric',
+  })
+}
 
 const LatestPosts: React.FC = () => {
-    const categories = ['All Articles', 'Agency accounts', 'Google', 'Facebook', 'Case studies', 'Gembla', 'Interviews', 'TikTok', 'Inside industry'];
-    const [activeCategory, setActiveCategory] = useState('All Articles');
+  const [posts, setPosts] = useState<LatestPostItem[]>([])
+  const [categories, setCategories] = useState<string[]>([ALL_ARTICLES_LABEL])
+  const [activeCategory, setActiveCategory] = useState(ALL_ARTICLES_LABEL)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState('')
 
-    const posts = [
-        {
-            title: 'Crypto Security: How to Keep Your Funds Safe',
-            date: 'Mar 10, 2025',
-            category: 'Security',
-            image: '/images/blog-post-1.png'
-        },
-        {
-            title: 'How to Quickly Understand Cryptocurrency Basics',
-            date: 'Feb 20, 2025',
-            category: 'Crypto Basics',
-            image: '/images/blog-post-2.png'
-        },
-        {
-            title: 'Exploring the Great Future of Cryptocurrency',
-            date: 'Jan 01, 2025',
-            category: 'Trends',
-            image: '/images/blog-post-3.png'
+  useEffect(() => {
+    let active = true
+
+    const loadPosts = async () => {
+      setIsLoading(true)
+      setError('')
+
+      try {
+        const response = await fetch('/api/blog', { cache: 'no-store' })
+        const payload = (await response.json().catch(() => null)) as BlogApiResponse | null
+
+        if (!response.ok) {
+          throw new Error(payload?.error || 'Unable to load latest posts.')
         }
-    ];
 
-    const filteredPosts = activeCategory === 'All Articles'
-        ? posts
-        : posts.filter(post => post.category === activeCategory);
+        if (!active) {
+          return
+        }
 
-    return (
-        <section className="w-full py-[120px] px-5 flex flex-col items-center max-w-[1280px] mx-auto overflow-hidden">
+        const loadedArticles = Array.isArray(payload?.articles) ? payload.articles : []
 
-            <h2 className="text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)]">
-                Latest Post
-            </h2>
+        const mappedPosts = loadedArticles
+          .map((article): LatestPostItem | null => {
+            const title = article.title?.trim()
+            if (!title) return null
 
-            {/* Categories Filter */}
-            <div className="flex items-center justify-start lg:justify-center gap-[16px] p-[8px] pr-[16px] rounded-[80px] border-[0.5px] border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] w-full mt-7">
-                {categories.map((cat) => (
-                    <button
-                        key={cat}
-                        onClick={() => setActiveCategory(cat)}
-                        className={`px-[16px] py-[8px] rounded-[80px] text-[16px] font-medium leading-[26px] transition-all duration-300 whitespace-nowrap ${activeCategory === cat
-                            ? 'bg-[#F29F04] text-[#070707]'
-                            : 'text-[#FCFCFC] font-normal hover:bg-white/5'
-                            }`}
-                    >
-                        {cat}
-                    </button>
-                ))}
-            </div>
+            return {
+              id: String(article.id),
+              title,
+              date: formatPublishedDate(article.publishedDate),
+              category: article.category?.name?.trim() || 'Uncategorized',
+              image: toAbsoluteMediaUrl(article.image?.url) || '/images/blog-post-1.png',
+              slug: article.slug || null,
+              publishedDate: article.publishedDate || null,
+            }
+          })
+          .filter((item): item is LatestPostItem => Boolean(item))
+          .sort((first, second) => {
+            const firstTime = first.publishedDate ? new Date(first.publishedDate).getTime() : 0
+            const secondTime = second.publishedDate ? new Date(second.publishedDate).getTime() : 0
+            return secondTime - firstTime
+          })
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-[24px] w-full max-w-[1240px] mt-16">
-                {filteredPosts.map((post, index) => (
-                    <BlogCard key={index} post={post} />
-                ))}
-            </div>
+        const uniqueCategories = Array.from(new Set(mappedPosts.map((post) => post.category)))
+        const nextCategories = [ALL_ARTICLES_LABEL, ...uniqueCategories]
 
-            {/* See More Button */}
-            <button className="flex mt-16 justify-center items-center px-[24px] py-[11px] gap-[16px] rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:bg-[#FCC660]/10 active:scale-95">
-                See More Posts
-            </button>
+        setPosts(mappedPosts)
+        setCategories(nextCategories)
+        setActiveCategory((prev) => (nextCategories.includes(prev) ? prev : ALL_ARTICLES_LABEL))
+      } catch (loadError) {
+        if (!active) {
+          return
+        }
+        setPosts([])
+        setCategories([ALL_ARTICLES_LABEL])
+        setActiveCategory(ALL_ARTICLES_LABEL)
+        setError(loadError instanceof Error ? loadError.message : 'Unable to load latest posts.')
+      } finally {
+        if (active) {
+          setIsLoading(false)
+        }
+      }
+    }
 
-            {/* Bottom Banner Image */}
-            <div className="w-full max-w-[1240px] mt-16">
-                <div className="relative w-full aspect-[675/86] rounded-[40px] overflow-hidden">
-                    <Image
-                        src="/images/latest-posts-bottom-banner.png"
-                        alt="Join Us Banner"
-                        fill
-                        className="object-cover"
-                    />
-                </div>
-            </div>
-        </section>
-    );
-};
+    loadPosts()
 
-export default LatestPosts;
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const filteredPosts = useMemo(() => {
+    if (activeCategory === ALL_ARTICLES_LABEL) {
+      return posts
+    }
+
+    return posts.filter((post) => post.category === activeCategory)
+  }, [activeCategory, posts])
+
+  const visiblePosts = filteredPosts.slice(0, MAX_VISIBLE_POSTS)
+
+  return (
+    <section className="mx-auto flex w-full max-w-[1280px] flex-col items-center overflow-hidden px-5 py-[120px]">
+      <h2 className="bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)] bg-clip-text text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
+        Latest Post
+      </h2>
+
+      <div className="mt-7 w-full lg:hidden">
+        <MobileCategorySelector
+          value={activeCategory}
+          options={categories}
+          onSelect={setActiveCategory}
+          className="lg:hidden"
+        />
+      </div>
+
+      <div className="mt-7 hidden w-full items-center justify-start gap-[16px] rounded-[80px] border-[0.5px] border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-[8px] pr-[16px] lg:flex lg:justify-center">
+        {categories.map((category) => (
+          <button
+            key={category}
+            onClick={() => setActiveCategory(category)}
+            className={`whitespace-nowrap rounded-[80px] px-[16px] py-[8px] text-[16px] leading-[26px] transition-all duration-300 ${
+              activeCategory === category
+                ? 'bg-[#F29F04] font-medium text-[#070707]'
+                : 'font-normal text-[#FCFCFC] hover:bg-white/5'
+            }`}
+          >
+            {category}
+          </button>
+        ))}
+      </div>
+
+      {isLoading && (
+        <div className="mt-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
+          Loading latest posts...
+        </div>
+      )}
+
+      {!isLoading && error && (
+        <div className="mt-16 w-full rounded-[24px] border border-[rgba(255,128,128,0.6)] bg-[rgba(255,128,128,0.08)] px-6 py-5 text-[16px] leading-[26px] text-[#FF9C9C]">
+          {error}
+        </div>
+      )}
+
+      {!isLoading && !error && visiblePosts.length === 0 && (
+        <div className="mt-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
+          No posts found for this category.
+        </div>
+      )}
+
+      {!isLoading && !error && visiblePosts.length > 0 && (
+        <div className="mt-16 grid w-full max-w-[1240px] grid-cols-1 gap-[24px] md:grid-cols-3">
+          {visiblePosts.map((post) => (
+            <Link key={post.id} href={post.slug ? `/blog/${post.slug}` : '/blog'} className="flex h-full">
+              <BlogCard post={post} />
+            </Link>
+          ))}
+        </div>
+      )}
+
+      <Link
+        href="/blog"
+        className="mt-16 flex items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[11px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
+      >
+        See More Posts
+      </Link>
+
+      <div className="mt-16 w-full max-w-[1240px]">
+        <div className="relative aspect-[675/86] w-full overflow-hidden rounded-[40px]">
+          <Image src="/images/latest-posts-bottom-banner.png" alt="Join Us Banner" fill className="object-cover" />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+export default LatestPosts
+

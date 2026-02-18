@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -8,6 +8,7 @@ import SearchModal from './SearchModal';
 
 const Header: React.FC = () => {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const pathname = usePathname();
 
     const handleUserClick = async () => {
@@ -57,9 +58,22 @@ const Header: React.FC = () => {
         },
     ];
 
+    useEffect(() => {
+        if (!isMobileMenuOpen) {
+            document.body.style.overflow = '';
+            return;
+        }
+
+        document.body.style.overflow = 'hidden';
+
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isMobileMenuOpen]);
+
     return (
         <>
-            <header className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1320px] z-50 flex justify-between items-center px-[20px] py-[32px] bg-transparent">
+            <header className="absolute top-0 left-1/2 z-50 flex w-full max-w-[1320px] -translate-x-1/2 items-center justify-between bg-transparent px-5 py-4 lg:py-[32px]">
                 {/* Logo Container */}
                 <div className="flex items-center gap-[12px] shrink-0">
                     <Link href="/" className="relative w-[77px] h-[58.69px] block">
@@ -89,7 +103,7 @@ const Header: React.FC = () => {
                 </nav>
 
                 {/* Icons Container */}
-                <div className="flex items-center gap-[25px]">
+                <div className="hidden items-center gap-[25px] lg:flex">
                     {/* Search Button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
@@ -148,7 +162,76 @@ const Header: React.FC = () => {
                         </div>
                     </button>
                 </div>
+
+                {/* Mobile Burger */}
+                <button
+                    type="button"
+                    aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                    onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                    className="flex h-8 w-8 items-center justify-center lg:hidden"
+                >
+                    {isMobileMenuOpen ? (
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20.4853 20.4852C20.2977 20.6727 20.0434 20.7781 19.7782 20.7781C19.513 20.7781 19.2586 20.6727 19.0711 20.4852L12 13.4141L4.92893 20.4852C4.7414 20.6727 4.48704 20.7781 4.22183 20.7781C3.95661 20.7781 3.70226 20.6727 3.51472 20.4852C3.32718 20.2976 3.22183 20.0433 3.22183 19.7781C3.22183 19.5128 3.32718 19.2585 3.51472 19.071L10.5858 11.9999L3.51472 4.92882C3.32718 4.74129 3.22182 4.48693 3.22183 4.22172C3.22183 3.9565 3.32718 3.70215 3.51472 3.51461C3.70225 3.32707 3.95661 3.22172 4.22182 3.22172C4.48704 3.22172 4.7414 3.32707 4.92893 3.51461L12 10.5857L19.0711 3.51461C19.2586 3.32707 19.513 3.22172 19.7782 3.22172C20.0434 3.22172 20.2977 3.32707 20.4853 3.51461C20.6728 3.70215 20.7782 3.9565 20.7782 4.22172C20.7782 4.48693 20.6728 4.74129 20.4853 4.92882L13.4142 11.9999L20.4853 19.071C20.6728 19.2585 20.7782 19.5128 20.7782 19.7781C20.7782 20.0433 20.6728 20.2976 20.4853 20.4852Z" fill="white" />
+                        </svg>
+                    ) : (
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5.33398 8H26.6673M5.33398 16H26.6673M5.33398 24H26.6673" stroke="white" strokeWidth="2.66667" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    )}
+                </button>
             </header>
+
+            {isMobileMenuOpen ? (
+                <div
+                    className="fixed inset-0 z-[80] lg:hidden"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                >
+                    <div className="absolute inset-0 bg-[rgba(0,0,0,0.78)]" />
+                    <div className="absolute left-5 right-5 top-[92px]" onClick={(event) => event.stopPropagation()}>
+                        <div className="rounded-[32px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 shadow-2xl">
+                            <nav className="flex flex-col gap-2">
+                                {menuItems.map((item) => (
+                                    <Link
+                                        key={item.label}
+                                        href={item.href}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                        className={`rounded-[14px] px-4 py-3 font-poppins text-[18px] font-medium leading-[28px] transition-colors ${item.isActive
+                                            ? 'bg-[rgba(242,159,4,0.16)] text-white'
+                                            : 'text-[#BDBDBD] hover:text-white'
+                                            }`}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                ))}
+                            </nav>
+
+                            <div className="mt-6 grid grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsMobileMenuOpen(false);
+                                        setIsSearchOpen(true);
+                                    }}
+                                    className="rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#262626] px-4 py-3 font-poppins text-[16px] font-medium leading-[26px] text-white"
+                                >
+                                    Search
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsMobileMenuOpen(false);
+                                        void handleUserClick();
+                                    }}
+                                    className="rounded-[80px] bg-[#F29F04] px-4 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]"
+                                >
+                                    Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
 
             {/* Modal */}
             <SearchModal

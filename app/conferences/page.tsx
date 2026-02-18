@@ -198,15 +198,17 @@ const ConferencesPage: React.FC = () => {
             )}
 
             {!isLoading && !error && filteredConferences.length > 0 && (
-              <ForumPagination
-                showingFrom={1}
-                showingTo={filteredConferences.length}
-                total={filteredConferences.length}
-                currentPage={1}
-                totalPages={1}
-                itemLabel="conferences"
-                onPageChange={() => undefined}
-              />
+              <div className="md:mt-10">
+                <ForumPagination
+                  showingFrom={1}
+                  showingTo={filteredConferences.length}
+                  total={filteredConferences.length}
+                  currentPage={1}
+                  totalPages={1}
+                  itemLabel="conferences"
+                  onPageChange={() => undefined}
+                />
+              </div>
             )}
           </div>
 

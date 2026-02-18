@@ -219,15 +219,17 @@ const JobsPage: React.FC = () => {
             )}
 
             {!isLoading && !error && filteredJobs.length > 0 && (
-              <ForumPagination
-                showingFrom={showingFrom}
-                showingTo={showingTo}
-                total={filteredJobs.length}
-                currentPage={normalizedPage}
-                totalPages={totalPages}
-                itemLabel="jobs"
-                onPageChange={setCurrentPage}
-              />
+              <div className="md:mt-10">
+                <ForumPagination
+                  showingFrom={showingFrom}
+                  showingTo={showingTo}
+                  total={filteredJobs.length}
+                  currentPage={normalizedPage}
+                  totalPages={totalPages}
+                  itemLabel="jobs"
+                  onPageChange={setCurrentPage}
+                />
+              </div>
             )}
           </div>
 
