@@ -43,7 +43,7 @@ const Header: React.FC = () => {
         },
         {
             label: 'Partnership',
-            href: '/partnership',
+            href: '/partnerships',
             isActive:
                 pathname === '/partnership' ||
                 pathname?.startsWith('/partnership/') ||
