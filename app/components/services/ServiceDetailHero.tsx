@@ -4,9 +4,9 @@ import Link from 'next/link';
 interface ServiceDetailHeroProps {
     title: string;
     logo: React.ReactNode;
-    websiteUrl: string;
+    websiteUrl?: string | null;
     price: string;
-    handle: string;
+    handle?: string | null;
     category: string;
 }
 
@@ -45,16 +45,18 @@ const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
                             </h1>
                         </div>
 
-                        <a
-                            href={websiteUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex h-[50px] shrink-0 px-6 py-3 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] transition-colors hover:bg-[#d88d03]"
-                        >
-                            <span className="text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px]">
-                                Go to the website
-                            </span>
-                        </a>
+                        {websiteUrl ? (
+                            <a
+                                href={websiteUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex h-[50px] shrink-0 px-6 py-3 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] transition-colors hover:bg-[#d88d03]"
+                            >
+                                <span className="text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px]">
+                                    Go to the website
+                                </span>
+                            </a>
+                        ) : null}
                     </div>
                 </div>
 
@@ -71,11 +73,13 @@ const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
                     </div>
 
                     {/* Handle Badge */}
-                    <div className="flex h-[50px] px-6 py-3 items-center justify-center gap-2.5 rounded-[80px] bg-[#FFF]">
-                        <span className="text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px]">
-                            {handle}
-                        </span>
-                    </div>
+                    {handle ? (
+                        <div className="flex h-[50px] px-6 py-3 items-center justify-center gap-2.5 rounded-[80px] bg-[#FFF]">
+                            <span className="text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px]">
+                                {handle}
+                            </span>
+                        </div>
+                    ) : null}
 
                     {/* Category Badge */}
                     <div className="flex h-[50px] px-6 py-3 items-center justify-center gap-3 rounded-[80px] border border-[#B3B3B3]">
