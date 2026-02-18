@@ -87,16 +87,16 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
           category={categoryName}
         />
 
-        <div className="flex items-start gap-[64px] self-stretch">
+        <div className="flex items-start self-stretch">
           <div className="flex flex-col gap-[80px] flex-1">
             <div className="text-[#9E9E9E] text-[20px] leading-[32px] font-poppins flex flex-col gap-8">
               <div className="service-content prose prose-invert max-w-none">
-                <RichText content={currentService.content} backendUrl={backendUrl} />
+                <RichText content={currentService.content} backendUrl={backendUrl} variant="article" />
               </div>
             </div>
 
             {mainImageUrl ? (
-              <div className="w-full h-[101px] relative rounded-[40px] overflow-hidden">
+              <div className="relative h-[196.009px] w-full overflow-hidden rounded-[40px] md:h-[101px]">
                 <Image
                   src={mainImageUrl}
                   alt={`${currentService.title} banner`}
@@ -134,11 +134,9 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
                 </div>
               </div>
             ) : null}
-          </div>
-
-          {sidebarImageUrl ? (
-            <div className="w-[380px] shrink-0 hidden xl:block">
-              <div className="w-[380px] h-[727px] rounded-[20px] overflow-hidden relative">
+            {sidebarImageUrl ? (
+              <div className="mx-auto w-full max-w-[380px]">
+                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
                 <Image
                   src={sidebarImageUrl}
                   alt={`${currentService.title} sidebar banner`}
@@ -146,9 +144,10 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
                   sizes="380px"
                   className="w-full h-full object-cover"
                 />
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
 

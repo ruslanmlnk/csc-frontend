@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import BlogHero from '@/app/components/blog/BlogHero'
+import ForumHero from '@/app/components/forum/ForumHero'
 import Banner from '@/app/components/Banner'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
 import ServicesFilter from '@/app/components/services/ServicesFilter'
@@ -108,7 +108,7 @@ const ServicesPage: React.FC = () => {
 
   return (
     <div className="relative flex flex-col items-start bg-[#0D0D0D] overflow-x-hidden font-poppins text-white">
-      <BlogHero
+      <ForumHero
         title={(
           <>
             Sharing experience <br className="hidden md:block" /> with the industry
@@ -119,7 +119,7 @@ const ServicesPage: React.FC = () => {
 
       <main className="w-full max-w-[1280px] mx-auto px-5 pb-20">
         <div className="w-full max-w-[1240px] mx-auto flex flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Promo banner" />
+          <Banner src={promoBannerSrc} alt="Promo banner" className="hidden md:block" />
 
           <div className="flex flex-col items-center gap-8 w-full">
             <ServicesFilter

@@ -11,11 +11,11 @@ type ArticleContentProps = {
 const ArticleContent: React.FC<ArticleContentProps> = ({ content, backendUrl, tags }) => {
   return (
     <>
-      <div className="text-[#9E9E9E] text-[20px] leading-[32px] font-poppins flex flex-col gap-8">
-        <div className="article-content prose prose-invert max-w-none">
-          <RichText content={content} backendUrl={backendUrl} />
+        <div className="text-[#9E9E9E] text-[20px] leading-[32px] font-poppins flex flex-col gap-8">
+          <div className="article-content prose prose-invert max-w-none">
+          <RichText content={content} backendUrl={backendUrl} variant="article" />
+          </div>
         </div>
-      </div>
 
       {tags && tags.length > 0 ? (
         <div className="flex flex-col items-start gap-10 self-stretch pt-8 border-t border-[rgba(74,74,74,0.7)]">

@@ -26,12 +26,14 @@ interface RichTextProps {
     bannerSrc?: string
     bannerAlt?: string
     backendUrl?: string
+    variant?: 'default' | 'article'
 }
 
 const BANNER_MARKER_REGEX = /\[\[BANNER(?::([^\]]+))?\]\]/
 const DEFAULT_BANNER_SRC = '/images/latest-posts-bottom-banner.png'
 const ARTICLE_HEADING_CLASS = 'text-[#FCFCFC] text-[32px] font-medium leading-[40px] tracking-[-0.64px] my-0'
-const ARTICLE_UNORDERED_LIST_CLASS = 'my-0 list-none pl-0 leading-[32px]'
+const ARTICLE_H5_CLASS = 'text-[#FCFCFC] text-[20px] font-normal leading-[32px] tracking-normal my-0 !mb-5'
+const ARTICLE_UNORDERED_LIST_CLASS = 'my-0 list-disc pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_ORDERED_LIST_CLASS = 'my-0 list-decimal pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_LIST_ITEM_CLASS = 'last:mb-0 text-[#9E9E9E] font-poppins text-[20px] font-normal leading-[32px] tracking-normal'
 const ARTICLE_TEXT_BANNER_STYLE: React.CSSProperties = {
@@ -210,6 +212,7 @@ const RichText: React.FC<RichTextProps> = ({
     bannerSrc = DEFAULT_BANNER_SRC,
     bannerAlt = 'Banner',
     backendUrl,
+    variant = 'default',
 }) => {
     if (!isRichTextContent(content) || !content.root || !content.root.children) {
         return null
@@ -342,8 +345,12 @@ const RichText: React.FC<RichTextProps> = ({
                     const previousIsBannerBlock = previousNode?.type === 'block' && previousNode.fields?.blockType === 'banner'
                     const previousHasInlineBanner = paragraphHasBannerMarker(previousNode)
                     const headingSpacingClass = (index === 0 || previousIsBannerBlock || previousHasInlineBanner) ? 'mt-0' : 'mt-[20px]'
+                    const headingTypographyClass =
+                        variant === 'article' && HeadingTag === 'h5'
+                            ? ARTICLE_H5_CLASS
+                            : ARTICLE_HEADING_CLASS
                     return (
-                        <HeadingTag key={index} className={`${ARTICLE_HEADING_CLASS} ${headingSpacingClass}`}>
+                        <HeadingTag key={index} className={`${headingTypographyClass} ${headingSpacingClass}`}>
                             {node.children ? renderNodes(node.children) : null}
                         </HeadingTag>
                     )

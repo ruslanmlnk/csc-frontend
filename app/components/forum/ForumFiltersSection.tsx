@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import MobileCategorySelector from '@/app/components/shared/MobileCategorySelector';
 
 interface ForumFiltersSectionProps {
     categories: string[];
@@ -78,12 +79,11 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
                     </div>
                 </div>
 
-                <button className="h-[46px] w-full lg:hidden flex items-center justify-between rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] font-normal text-[16px] leading-[26px]">
-                    <span>{currentMobileCategory}</span>
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12.6673 6L8.00065 10.6667L3.33398 6" stroke="#FCC660" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </button>
+                <MobileCategorySelector
+                    value={currentMobileCategory}
+                    options={categories}
+                    className="lg:hidden"
+                />
             </div>
         </div>
     );

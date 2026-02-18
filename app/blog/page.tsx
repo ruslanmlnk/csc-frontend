@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import BlogHero from '../components/blog/BlogHero';
+import ForumHero from '../components/forum/ForumHero';
 import Banner from '../components/Banner';
 import BlogFilters from '../components/blog/BlogFilters';
 import BlogGrid from '../components/blog/BlogGrid';
-import BlogPagination from '../components/blog/BlogPagination';
+import ForumPagination from '../components/forum/ForumPagination';
 import BlogCTA from '../components/blog/BlogCTA';
 import { getArticles, getCategories } from '@/lib/backend/blog';
 import { Article, Category } from '../types/blog';
@@ -18,6 +18,7 @@ const BlogPage = () => {
     const [categories, setCategories] = useState<string[]>(['All Articles']);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
 
     const backendUrl = getBackendUrl();
 
@@ -54,8 +55,23 @@ const BlogPage = () => {
         return matchesCategory && matchesSearch;
     });
 
-    const limit = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
-    const limitedArticles = filteredArticles.slice(0, limit);
+    const pageSize = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
+    const totalPages = Math.max(1, Math.ceil(filteredArticles.length / pageSize));
+    const normalizedPage = Math.min(currentPage, totalPages);
+    const startIndex = (normalizedPage - 1) * pageSize;
+    const paginatedArticles = filteredArticles.slice(startIndex, startIndex + pageSize);
+    const showingFrom = filteredArticles.length === 0 ? 0 : startIndex + 1;
+    const showingTo = filteredArticles.length === 0 ? 0 : startIndex + paginatedArticles.length;
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [activeCategory, searchQuery, isMobile]);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
     // Map articles to the format expected by components
     const formatArticle = (article: Article) => {
@@ -74,7 +90,7 @@ const BlogPage = () => {
         };
     };
 
-    const formattedArticles = limitedArticles.map(formatArticle);
+    const formattedArticles = paginatedArticles.map(formatArticle);
 
     if (loading) {
         return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
@@ -82,7 +98,7 @@ const BlogPage = () => {
 
     return (
         <div className="relative flex flex-col items-start bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black">
-            <BlogHero
+            <ForumHero
                 title="Inside performance marketing"
                 description="Real cases, deep insights, and hands-on experience from live traffic, affiliate campaigns, and performance-driven strategies"
             />
@@ -91,6 +107,7 @@ const BlogPage = () => {
                 <Banner
                     src="https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480"
                     alt="Promo Banner"
+                    className="hidden md:block"
                 />
 
                 <BlogFilters
@@ -105,7 +122,17 @@ const BlogPage = () => {
                     articles={formattedArticles}
                 />
 
-                <BlogPagination />
+                {filteredArticles.length > 0 ? (
+                    <ForumPagination
+                        showingFrom={showingFrom}
+                        showingTo={showingTo}
+                        total={filteredArticles.length}
+                        currentPage={normalizedPage}
+                        totalPages={totalPages}
+                        itemLabel="articles"
+                        onPageChange={setCurrentPage}
+                    />
+                ) : null}
             </main>
 
             <BlogCTA />

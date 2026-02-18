@@ -4,10 +4,10 @@ import Image from 'next/image';
 const BlogCTA: React.FC = () => {
     return (
         <section className="w-full overflow-hidden px-5 pb-20">
-            <div className="relative mx-auto flex w-full max-w-[1340px] flex-col items-center justify-center gap-6 overflow-hidden rounded-[40px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] p-6 md:p-10 lg:min-h-[480px] lg:flex-row">
+            <div className="relative mx-auto flex w-full max-w-[1340px] flex-col items-center justify-center gap-16 overflow-hidden rounded-[40px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] p-10 lg:min-h-[480px] lg:flex-row lg:gap-6">
                 <svg
                     aria-hidden="true"
-                    className="pointer-events-none absolute left-[-532px] top-[-402px] h-[1284px] w-[1284px] opacity-40"
+                    className="pointer-events-none absolute left-[-146px] bottom-[-336px] h-[642px] w-[642px] opacity-40 lg:left-[-532px] lg:top-[-402px] lg:bottom-auto lg:h-[1284px] lg:w-[1284px]"
                     viewBox="0 0 1284 1284"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -52,8 +52,8 @@ const BlogCTA: React.FC = () => {
                     </defs>
                 </svg>
 
-                <div className="relative z-10 h-[400px] w-full max-w-[400px] shrink-0 lg:self-start">
-                    <div className="absolute left-1/2 top-0 h-[617px] w-[300px] -translate-x-1/2 lg:left-[50px] lg:translate-x-0">
+                <div className="relative z-10 order-2 h-[350px] w-full max-w-[350px] shrink-0 lg:order-1 lg:h-[400px] lg:max-w-[400px] lg:self-start">
+                    <div className="absolute left-1/2 top-0 h-[540px] w-[263px] -translate-x-1/2 lg:left-[50px] lg:h-[617px] lg:w-[300px] lg:translate-x-0">
                         <Image
                             src="https://api.builder.io/api/v1/image/assets/TEMP/b293dd4a4e5fc8a66eecd786d41b3a5216c2c212?width=600"
                             alt="iPhone"
@@ -62,9 +62,9 @@ const BlogCTA: React.FC = () => {
                         />
                     </div>
 
-                    <div className="absolute left-3 top-[300px] z-20 flex h-[90px] w-[280px] items-center gap-3 rounded-[10px] bg-[#232336] p-3 sm:top-[316px] sm:w-[320px]">
-                        <div className="h-[29px] w-[29px] shrink-0">
-                            <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div className="absolute left-[11px] top-[277px] z-20 flex h-[79px] w-[280px] items-center gap-[10.5px] rounded-[8.75px] bg-[#232336] p-[10.5px] lg:left-3 lg:top-[300px] lg:h-[90px] lg:w-[320px] lg:gap-3 lg:rounded-[10px] lg:p-3 xl:top-[316px]">
+                        <div className="h-[25px] w-[25px] shrink-0 lg:h-[29px] lg:w-[29px]">
+                            <svg width="29" height="29" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-full w-full">
                                 <path d="M6.50195 14.1895L14.7807 1.18164L23.0572 14.1895L14.7807 18.9186L6.50195 14.1895Z" fill="#9FA8DA" />
                                 <path d="M14.7812 1.18164L23.0578 14.1895L14.7812 18.9186V1.18164Z" fill="#7986CB" />
                                 <path d="M6.50195 15.9634L14.7807 20.6925L23.0572 15.9634L14.7807 27.1976L6.50195 15.9634Z" fill="#9FA8DA" />
@@ -73,26 +73,26 @@ const BlogCTA: React.FC = () => {
                             </svg>
                         </div>
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
-                            <div className="flex w-full items-start justify-between gap-2 sm:w-[255.621px]">
+                            <div className="flex w-full items-start justify-between gap-2 lg:w-[255.621px]">
                                 <div className="min-w-0">
-                                    <p className="text-[16px] leading-[26px] font-normal text-[#FCFCFC] font-poppins">Bought ETH</p>
-                                    <p className="text-[14px] leading-[16px] font-normal text-[#A7A7CC] font-poppins">-$812.10</p>
+                                    <p className="font-poppins text-[14px] font-normal leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">Bought ETH</p>
+                                    <p className="font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">-$812.10</p>
                                 </div>
-                                <p className="text-[16px] leading-[26px] font-medium text-[#FCFCFC] font-poppins whitespace-nowrap">+0.65 ETH</p>
+                                <p className="whitespace-nowrap font-poppins text-[14px] font-medium leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">+0.65 ETH</p>
                             </div>
-                            <p className="text-right text-[14px] leading-[16px] font-normal text-[#A7A7CC] font-poppins">30 March 2025, 3.30 PM</p>
+                            <p className="text-right font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">30 March 2025, 3.30 PM</p>
                         </div>
                     </div>
                 </div>
 
-                <div className="z-10 flex w-full max-w-[796px] flex-1 flex-col items-start justify-center gap-6">
-                    <h2 className="bg-gradient-to-b from-white to-[#999] bg-clip-text text-transparent font-poppins text-[36px] font-medium leading-[46px] tracking-[-1px] md:text-[56px] md:leading-[72px] md:tracking-[-2.24px]">
+                <div className="z-10 order-1 flex w-full max-w-[796px] flex-1 flex-col items-start justify-center gap-6 lg:order-2">
+                    <h2 className="bg-gradient-to-b from-white to-[#999] bg-clip-text text-transparent font-poppins text-[40px] font-medium leading-[48px] tracking-[-0.8px] md:text-[56px] md:leading-[72px] md:tracking-[-2.24px]">
                         Let&apos;s build scalable traffic systems together!
                     </h2>
-                    <p className="max-w-[552px] text-[#BDBDBD] text-[18px] leading-[30px] font-normal font-poppins md:text-[20px] md:leading-[32px]">
+                    <p className="max-w-[552px] text-[#BDBDBD] text-[20px] leading-[32px] font-normal font-poppins">
                         Partner with a team focused on performance, data, and long-term results - not experiments
                     </p>
-                    <button className="flex h-[50px] w-[180px] items-center justify-center rounded-[80px] bg-[#F29F04] px-6 py-3 text-[16px] font-medium leading-[26px] text-[#0D0D0D] font-poppins transition-opacity hover:opacity-90">
+                    <button className="flex h-[50px] w-[172px] items-center justify-center rounded-[80px] bg-[#F29F04] px-5 py-3 text-[14px] font-medium leading-4 text-[#0D0D0D] font-poppins transition-opacity hover:opacity-90 md:w-[180px] md:px-6 md:text-[16px] md:leading-[26px]">
                         Get in touch
                     </button>
                 </div>
