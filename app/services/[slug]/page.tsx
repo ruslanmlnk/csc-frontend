@@ -87,8 +87,8 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
           category={categoryName}
         />
 
-        <div className="flex items-start self-stretch">
-          <div className="flex flex-col gap-[80px] flex-1">
+        <div className="flex items-start gap-6 self-stretch xl:gap-11">
+          <div className="flex min-w-0 flex-1 flex-col gap-[80px]">
             <div className="text-[#9E9E9E] text-[20px] leading-[32px] font-poppins flex flex-col gap-8">
               <div className="service-content prose prose-invert max-w-none">
                 <RichText content={currentService.content} backendUrl={backendUrl} variant="article" />
@@ -134,20 +134,37 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
                 </div>
               </div>
             ) : null}
+
             {sidebarImageUrl ? (
-              <div className="mx-auto w-full max-w-[380px]">
+              <div className="mx-auto w-full max-w-[380px] xl:hidden">
                 <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                <Image
-                  src={sidebarImageUrl}
-                  alt={`${currentService.title} sidebar banner`}
-                  fill
-                  sizes="380px"
-                  className="w-full h-full object-cover"
-                />
+                  <Image
+                    src={sidebarImageUrl}
+                    alt={`${currentService.title} sidebar banner`}
+                    fill
+                    sizes="(max-width: 1280px) 100vw, 380px"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               </div>
             ) : null}
           </div>
+
+          {sidebarImageUrl ? (
+            <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
+              <div className="sticky top-[140px]">
+                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                  <Image
+                    src={sidebarImageUrl}
+                    alt={`${currentService.title} sidebar banner`}
+                    fill
+                    sizes="380px"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </aside>
+          ) : null}
         </div>
       </div>
 

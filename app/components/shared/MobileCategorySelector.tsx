@@ -1,4 +1,4 @@
- 'use client'
+'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -8,6 +8,11 @@ interface MobileCategorySelectorProps {
   options?: string[]
   onSelect?: (value: string) => void
   className?: string
+  buttonClassName?: string
+  menuClassName?: string
+  optionClassName?: string
+  activeOptionClassName?: string
+  iconClassName?: string
 }
 
 const MobileCategorySelector: React.FC<MobileCategorySelectorProps> = ({
@@ -16,6 +21,11 @@ const MobileCategorySelector: React.FC<MobileCategorySelectorProps> = ({
   options = [],
   onSelect,
   className = '',
+  buttonClassName = '',
+  menuClassName = '',
+  optionClassName = '',
+  activeOptionClassName = '',
+  iconClassName = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [internalValue, setInternalValue] = useState(value ?? label ?? '')
@@ -35,6 +45,10 @@ const MobileCategorySelector: React.FC<MobileCategorySelectorProps> = ({
 
   const hasOptions = options.length > 0
   const selectedLabel = useMemo(() => value ?? internalValue ?? label ?? '', [internalValue, label, value])
+  const mergedButtonClassName = `h-[46px] w-full flex items-center justify-between rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] font-poppins text-[16px] font-normal leading-[26px] ${buttonClassName}`.trim()
+  const mergedMenuClassName = `absolute left-0 right-0 top-[calc(100%+8px)] z-20 rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-2 ${menuClassName}`.trim()
+  const mergedOptionClassName = `w-full rounded-[16px] px-4 py-2 text-left font-poppins text-[16px] leading-[26px] transition-colors text-[#FCFCFC] font-normal hover:bg-white/5 ${optionClassName}`.trim()
+  const mergedActiveOptionClassName = `bg-[#F29F04] text-[#070707] font-medium ${activeOptionClassName}`.trim()
 
   const handleSelect = (nextValue: string) => {
     if (onSelect) {
@@ -50,7 +64,7 @@ const MobileCategorySelector: React.FC<MobileCategorySelectorProps> = ({
       <button
         type="button"
         onClick={() => hasOptions && setIsOpen((prev) => !prev)}
-        className="h-[46px] w-full flex items-center justify-between rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] font-poppins text-[16px] font-normal leading-[26px]"
+        className={mergedButtonClassName}
       >
         <span>{selectedLabel}</span>
         <svg
@@ -59,24 +73,20 @@ const MobileCategorySelector: React.FC<MobileCategorySelectorProps> = ({
           viewBox="0 0 16 16"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`transition-transform ${isOpen ? 'rotate-180' : ''} ${iconClassName}`}
         >
-          <path d="M12.6673 6L8.00065 10.6667L3.33398 6" stroke="#FCC660" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M12.6673 6L8.00065 10.6667L3.33398 6" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
 
       {hasOptions && isOpen ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-20 rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-2">
+        <div className={mergedMenuClassName}>
           {options.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => handleSelect(option)}
-              className={`w-full rounded-[16px] px-4 py-2 text-left font-poppins text-[16px] leading-[26px] transition-colors ${
-                option === selectedLabel
-                  ? 'bg-[#F29F04] text-[#070707] font-medium'
-                  : 'text-[#FCFCFC] font-normal hover:bg-white/5'
-              }`}
+              className={`${mergedOptionClassName} ${option === selectedLabel ? mergedActiveOptionClassName : ''}`.trim()}
             >
               {option}
             </button>
