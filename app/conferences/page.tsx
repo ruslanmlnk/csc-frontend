@@ -22,6 +22,7 @@ type ConferenceFiltersApiResponse = {
 
 const promoBannerSrc =
   'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480'
+const CONFERENCES_PER_PAGE = 6
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 
@@ -46,6 +47,7 @@ const ConferencesPage: React.FC = () => {
   const [dateFilter, setDateFilter] = useState<string>(ALL_VALUE)
   const [locationFilter, setLocationFilter] = useState<string>(ALL_VALUE)
   const [verticalFilter, setVerticalFilter] = useState<string>(ALL_VALUE)
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -128,6 +130,17 @@ const ConferencesPage: React.FC = () => {
     })
   }, [conferences, dateFilter, locationFilter, verticalFilter])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [dateFilter, locationFilter, verticalFilter])
+
+  const totalPages = Math.max(1, Math.ceil(filteredConferences.length / CONFERENCES_PER_PAGE))
+  const normalizedPage = Math.min(currentPage, totalPages)
+  const from = (normalizedPage - 1) * CONFERENCES_PER_PAGE
+  const paginatedConferences = filteredConferences.slice(from, from + CONFERENCES_PER_PAGE)
+  const showingFrom = filteredConferences.length === 0 ? 0 : from + 1
+  const showingTo = filteredConferences.length === 0 ? 0 : from + paginatedConferences.length
+
   return (
     <div className="relative flex flex-col items-start overflow-x-hidden bg-[#0D0D0D] font-poppins text-white">
       <ForumHero
@@ -176,9 +189,9 @@ const ConferencesPage: React.FC = () => {
               </div>
             )}
 
-            {!isLoading && !error && filteredConferences.length > 0 && (
+            {!isLoading && !error && paginatedConferences.length > 0 && (
               <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-                {filteredConferences.map((conference) => {
+                {paginatedConferences.map((conference) => {
                   const mainImageUrl = toAbsoluteMediaUrl(conference.mainImage?.url)
                   const detailsHref = conference.slug ? `/conferences/${conference.slug}` : '/conferences'
 
@@ -200,19 +213,17 @@ const ConferencesPage: React.FC = () => {
             {!isLoading && !error && filteredConferences.length > 0 && (
               <div className="md:mt-10">
                 <ForumPagination
-                  showingFrom={1}
-                  showingTo={filteredConferences.length}
+                  showingFrom={showingFrom}
+                  showingTo={showingTo}
                   total={filteredConferences.length}
-                  currentPage={1}
-                  totalPages={1}
+                  currentPage={normalizedPage}
+                  totalPages={totalPages}
                   itemLabel="conferences"
-                  onPageChange={() => undefined}
+                  onPageChange={setCurrentPage}
                 />
               </div>
             )}
           </div>
-
-          <Banner src={promoBannerSrc} alt="Promo banner" className="mt-6" />
         </div>
       </main>
     </div>

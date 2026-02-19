@@ -25,7 +25,7 @@ const UsefulServiceCard: React.FC<UsefulServiceCardProps> = ({
                 <div className="flex items-center">
                     {logo}
                 </div>
-                <div className="flex px-[12px] py-[6px] justify-center items-center gap-[10px] rounded-[80px] border border-[rgba(179,179,179,0.5)] text-[#B3B3B3] text-[14px] font-normal leading-[16px]">
+                <div className="flex px-[11.2px] py-[5.2px] justify-center items-center gap-[10px] rounded-[80px] border border-[rgba(179,179,179,0.5)] text-[#B3B3B3] text-[14px] font-normal leading-[16px]">
                     {category}
                 </div>
             </div>
@@ -55,7 +55,7 @@ const UsefulServiceCard: React.FC<UsefulServiceCardProps> = ({
 
                 {offerBrand && (
                     <div className="flex justify-between items-center gap-4 w-full">
-                        <div className="flex h-[32px] px-[12px] justify-center items-center gap-[10px] rounded-[80px] border border-[#06DF73] text-[#06DF73] text-[14px] font-normal leading-[16px] uppercase shrink-0">
+                        <div className="flex h-[32px] px-[11.2px] justify-center items-center gap-[10px] rounded-[80px] border border-[#06DF73] text-[#06DF73] text-[14px] font-normal leading-[16px] uppercase shrink-0">
                             {offerBrand}
                         </div>
                         <span className="text-[#BDBDBD] text-[14px] font-normal leading-[16px] text-right">

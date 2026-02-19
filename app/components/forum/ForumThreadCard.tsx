@@ -19,7 +19,7 @@ const ForumThreadCard: React.FC<ForumThreadCardData> = ({
     href,
 }) => {
     const card = (
-        <div className="bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] p-6 flex flex-col gap-6 min-h-[199px] lg:min-h-0 lg:p-[23.2px]">
+        <div className="bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] p-[23.2px] flex flex-col gap-6 min-h-[199px] lg:min-h-0">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-4">
                     <div className="w-[50px] h-[50px] rounded-[14.286px] bg-[#F29F04] flex items-center justify-center p-[12.5px] lg:w-[64px] lg:h-[64px] lg:rounded-[18.286px] lg:p-4">
@@ -28,7 +28,7 @@ const ForumThreadCard: React.FC<ForumThreadCardData> = ({
                         </svg>
                     </div>
 
-                    <div className="flex flex-col items-start gap-[5px]">
+                    <div className="flex flex-col items-start gap-[10px]">
                         <h3 className="text-white text-[16px] lg:text-[20px] font-medium leading-[26px] lg:leading-[32px]">
                             {categoryTitle}
                         </h3>

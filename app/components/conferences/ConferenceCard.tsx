@@ -20,26 +20,31 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   detailsHref,
 }) => {
   return (
-    <article className="flex flex-col items-start justify-center gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-4 py-8">
-      <div className="flex w-full flex-col items-center justify-center gap-4 px-4">
+    <article className="flex flex-col items-start justify-center gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] py-[31.2px] pl-[15.2px] pr-[31.2px]">
+      <div className="flex w-full flex-col items-center justify-center gap-4 pl-4">
         <h3 className="w-full font-poppins text-[20px] font-medium leading-[32px] text-white">{title}</h3>
       </div>
 
-      <div className="relative w-full overflow-hidden rounded-[40px]" style={{ aspectRatio: '140 / 57' }}>
-        {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 608px"
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="h-full w-full bg-[#2A2A2A]" />
-        )}
+      <div className="w-full">
+        <div
+          className="relative w-full overflow-hidden rounded-[40px] lg:h-[228.01px]"
+          style={{ aspectRatio: '140 / 57' }}
+        >
+          {imageSrc ? (
+            <Image
+              src={imageSrc}
+              alt={title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 608px"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <div className="h-full w-full bg-[#2A2A2A]" />
+          )}
+        </div>
       </div>
 
-      <div className="flex w-full flex-col items-start gap-[10px] px-4">
+      <div className="flex w-full flex-col items-start gap-[10px] pl-4">
         {location ? (
           <div className="flex h-8 items-center gap-[10px]">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,7 +73,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
         ) : null}
       </div>
 
-      <div className="flex w-full items-center justify-center gap-4 px-4">
+      <div className="flex w-full items-center justify-center gap-4 pl-4">
         <Link
           href={detailsHref}
           className="flex h-[50px] w-full items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-all hover:brightness-110 active:scale-95"

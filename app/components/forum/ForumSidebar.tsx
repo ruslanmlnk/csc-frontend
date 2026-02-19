@@ -24,7 +24,7 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
 }) => {
     return (
         <div className="flex flex-col gap-[24px] w-full lg:w-[397px] shrink-0">
-            <div className="w-full bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] py-[32px] px-[16px] flex flex-col gap-[24px]">
+            <div className="w-full bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] py-[31.2px] px-[15.2px] flex flex-col gap-[24px]">
                 <div className="w-full px-[16px] flex flex-col gap-[16px]">
                     <div className="w-full flex flex-col gap-[24px]">
                         <div className="w-full flex items-center gap-[16px]">

@@ -196,7 +196,7 @@ const ServicesPage: React.FC = () => {
             )}
           </div>
 
-          <Banner src={promoBannerSrc} alt="Promo banner" className="mt-6" />
+          <Banner src={promoBannerSrc} alt="Promo banner"/>
         </div>
       </main>
     </div>

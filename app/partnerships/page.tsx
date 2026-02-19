@@ -181,7 +181,7 @@ const PartnershipsPage: React.FC = () => {
 
       <main className="mx-auto w-full max-w-[1280px] px-5 pb-20">
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Partnerships banner" className="hidden md:block" />
+          <Banner src={promoBannerSrc} alt="Partnerships banner" className="hidden md:block mt-4" />
 
           <PartnershipsFilters
             searchValue={searchInput}
@@ -270,7 +270,7 @@ const PartnershipsPage: React.FC = () => {
             )}
           </div>
 
-          <Banner src={promoBannerSrc} alt="Partnerships banner" className="mt-6" />
+          <Banner src={promoBannerSrc} alt="Partnerships banner" className="mt-4" />
         </div>
       </main>
     </div>

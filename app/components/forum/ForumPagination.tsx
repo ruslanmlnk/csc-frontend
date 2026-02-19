@@ -38,7 +38,7 @@ const ForumPagination: React.FC<ForumPaginationProps> = ({
     const visiblePages = getVisiblePages();
 
     return (
-        <div className="w-full self-stretch rounded-[40px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 flex flex-col gap-4 md:h-28 md:flex-row md:items-center md:justify-between md:px-10 md:py-8">
+        <div className="w-full self-stretch rounded-[40px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-[23.2px] py-[19.2px] flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:px-[38.4px] md:py-[30.4px]">
             <div className="text-[#A5A5A5] font-poppins text-[18px] font-normal leading-[28px] md:text-[24px] md:leading-[32px]">
                 Showing {showingFrom}-{showingTo} of {total} {itemLabel}
             </div>

@@ -12,7 +12,7 @@ const ServicesFilter: React.FC<ServicesFilterProps> = ({
     onCategoryChange,
 }) => {
     return (
-        <div className="flex p-2 items-start gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] max-w-full overflow-x-auto no-scrollbar">
+        <div className="flex p-[7.2px] items-start gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] max-w-full overflow-x-auto no-scrollbar">
             {categories.map((category) => (
                 <button
                     key={category}
