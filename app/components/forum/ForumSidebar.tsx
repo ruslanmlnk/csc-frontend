@@ -14,6 +14,7 @@ interface ForumSidebarProps {
     popularThreads: ForumSidebarThread[];
     bannerImage: string;
     bannerAlt?: string;
+    bannerHref?: string;
 }
 
 const ForumSidebar: React.FC<ForumSidebarProps> = ({
@@ -21,7 +22,20 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
     popularThreads,
     bannerImage,
     bannerAlt = 'Advertisement',
+    bannerHref,
 }) => {
+    const normalizedHref = bannerHref?.trim();
+    const isExternalLink = Boolean(normalizedHref && /^https?:\/\//i.test(normalizedHref));
+    const bannerImageContent = (
+        <Image
+            src={bannerImage}
+            alt={bannerAlt}
+            fill
+            className="object-cover"
+        />
+    );
+    const bannerContainerClassName = "relative w-full lg:w-[397px] h-[196.01px] lg:h-[631px] rounded-[40px] lg:rounded-[20px] overflow-hidden";
+
     return (
         <div className="flex flex-col gap-[24px] w-full lg:w-[397px] shrink-0">
             <div className="w-full bg-[#1A1A1A] border border-[rgba(74,74,74,0.70)] rounded-[40px] py-[31.2px] px-[15.2px] flex flex-col gap-[24px]">
@@ -58,14 +72,21 @@ const ForumSidebar: React.FC<ForumSidebarProps> = ({
                 </div>
             </div>
 
-            <div className="relative w-full lg:w-[397px] h-[196.01px] lg:h-[631px] rounded-[40px] lg:rounded-[20px] overflow-hidden">
-                <Image
-                    src={bannerImage}
-                    alt={bannerAlt}
-                    fill
-                    className="object-cover"
-                />
-            </div>
+            {normalizedHref ? (
+                <a
+                    href={normalizedHref}
+                    target={isExternalLink ? "_blank" : undefined}
+                    rel={isExternalLink ? "noopener noreferrer" : undefined}
+                    aria-label={bannerAlt}
+                    className={bannerContainerClassName}
+                >
+                    {bannerImageContent}
+                </a>
+            ) : (
+                <div className={bannerContainerClassName}>
+                    {bannerImageContent}
+                </div>
+            )}
         </div>
     );
 };

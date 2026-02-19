@@ -17,6 +17,8 @@ export type PageHeroV2 = {
   banner?: PageHeroBanner
 } | null
 
+export type PageSidebarBanner = PageHeroBanner
+
 export type PageSeo = {
   title?: string | null
   description?: string | null
@@ -44,6 +46,20 @@ type PageGlobalResponse = {
       | number
       | null
   } | null
+  sidebarBanner?:
+    | {
+        caption?: string | null
+        link?: string | null
+        image?:
+          | {
+              url?: string | null
+            }
+          | string
+          | null
+      }
+    | string
+    | number
+    | null
   seo?: {
     title?: string | null
     description?: string | null
@@ -58,6 +74,7 @@ type PageGlobalResponse = {
 
 export type PageGlobalData = {
   heroV2: PageHeroV2
+  sidebarBanner: PageSidebarBanner
   seo: PageSeo
 }
 
@@ -104,6 +121,7 @@ export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> =
   if (!ok || !data) {
     return {
       heroV2: null,
+      sidebarBanner: null,
       seo: null,
     }
   }
@@ -130,9 +148,19 @@ export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> =
           : null,
       }
     : null
+  const sidebarBannerRecord = asRecord(data.sidebarBanner)
+  const sidebarBannerImageUrl = resolveMediaUrl(sidebarBannerRecord?.image)
+  const sidebarBanner: PageSidebarBanner = sidebarBannerRecord
+    ? {
+        caption: asString(sidebarBannerRecord.caption),
+        link: asString(sidebarBannerRecord.link),
+        image: sidebarBannerImageUrl ? { url: sidebarBannerImageUrl } : null,
+      }
+    : null
 
   return {
     heroV2,
+    sidebarBanner,
     seo: data.seo
       ? {
           title: data.seo.title || null,

@@ -321,6 +321,9 @@ export default async function ForumPage() {
   const heroBannerImage = forumPageGlobal.heroV2?.banner?.image?.url || FORUM_BANNER_IMAGE
   const heroBannerAlt = forumPageGlobal.heroV2?.banner?.caption?.trim() || 'Community Banner'
   const heroBannerHref = forumPageGlobal.heroV2?.banner?.link?.trim()
+  const sidebarBannerImage = forumPageGlobal.sidebarBanner?.image?.url || SIDEBAR_BANNER_IMAGE
+  const sidebarBannerAlt = forumPageGlobal.sidebarBanner?.caption?.trim() || 'Advertisement'
+  const sidebarBannerHref = forumPageGlobal.sidebarBanner?.link?.trim()
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white overflow-x-hidden relative">
@@ -353,8 +356,9 @@ export default async function ForumPage() {
           sidebar={{
             title: 'Popular threads',
             popularThreads,
-            bannerImage: SIDEBAR_BANNER_IMAGE,
-            bannerAlt: 'Advertisement',
+            bannerImage: sidebarBannerImage,
+            bannerAlt: sidebarBannerAlt,
+            bannerHref: sidebarBannerHref,
           }}
         />
       </div>

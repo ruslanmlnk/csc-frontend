@@ -16,6 +16,9 @@ export const GET_ARTICLES = gql`
         category {
           name
         }
+        tags {
+          tag
+        }
       }
     }
   }

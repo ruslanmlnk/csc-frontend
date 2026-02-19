@@ -11,6 +11,7 @@ interface ForumContentSectionProps {
         popularThreads: ForumSidebarThread[];
         bannerImage: string;
         bannerAlt?: string;
+        bannerHref?: string;
     };
 }
 
@@ -23,6 +24,7 @@ const ForumContentSection: React.FC<ForumContentSectionProps> = ({ sections, sid
                     popularThreads={sidebar.popularThreads}
                     bannerImage={sidebar.bannerImage}
                     bannerAlt={sidebar.bannerAlt}
+                    bannerHref={sidebar.bannerHref}
                 />
             </div>
             <div className="order-2 lg:order-1 flex-1 min-w-0">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import ForumHero from '../components/forum/ForumHero';
 import Banner from '../components/Banner';
 import BlogFilters from '../components/blog/BlogFilters';
@@ -14,11 +15,13 @@ import { getBackendUrl } from '@/lib/auth-server';
 const BlogPage = () => {
     const [activeCategory, setActiveCategory] = useState('All Articles');
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeTag, setActiveTag] = useState('');
     const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<string[]>(['All Articles']);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const searchParams = useSearchParams();
 
     const backendUrl = getBackendUrl();
 
@@ -30,6 +33,16 @@ const BlogPage = () => {
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        const urlSearch = searchParams.get('search')?.trim() || '';
+        const urlCategory = searchParams.get('category')?.trim() || '';
+        const urlTag = (searchParams.get('tag')?.trim() || '').replace(/^#/, '');
+
+        setSearchQuery(urlSearch);
+        setActiveCategory(urlCategory || 'All Articles');
+        setActiveTag(urlTag);
+    }, [searchParams]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,10 +62,28 @@ const BlogPage = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        if (loading) {
+            return;
+        }
+
+        if (activeCategory !== 'All Articles' && !categories.includes(activeCategory)) {
+            setActiveCategory('All Articles');
+        }
+    }, [activeCategory, categories, loading]);
+
     const filteredArticles = articles.filter(article => {
+        const normalizedSearch = searchQuery.toLowerCase().trim();
+        const normalizedTag = activeTag.toLowerCase().trim();
+        const articleTags = (article.tags || [])
+            .map((tag) => tag?.tag?.toLowerCase().trim())
+            .filter((tag): tag is string => Boolean(tag));
+
         const matchesCategory = activeCategory === 'All Articles' || article.category.name === activeCategory;
-        const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const matchesSearch = !normalizedSearch || article.title.toLowerCase().includes(normalizedSearch);
+        const matchesTag = !normalizedTag || articleTags.includes(normalizedTag);
+
+        return matchesCategory && matchesSearch && matchesTag;
     });
 
     const pageSize = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
@@ -65,7 +96,7 @@ const BlogPage = () => {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [activeCategory, searchQuery, isMobile]);
+    }, [activeCategory, searchQuery, activeTag, isMobile]);
 
     useEffect(() => {
         if (currentPage > totalPages) {
@@ -113,9 +144,15 @@ const BlogPage = () => {
                 <BlogFilters
                     categories={categories}
                     activeCategory={activeCategory}
-                    onCategoryChange={setActiveCategory}
+                    onCategoryChange={(value) => {
+                        setActiveCategory(value);
+                        setActiveTag('');
+                    }}
                     searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
+                    onSearchChange={(value) => {
+                        setSearchQuery(value);
+                        setActiveTag('');
+                    }}
                 />
 
                 <BlogGrid
