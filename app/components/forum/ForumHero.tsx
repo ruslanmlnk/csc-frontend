@@ -8,7 +8,7 @@ interface ForumHeroProps {
 
 const ForumHero: React.FC<ForumHeroProps> = ({ title, description }) => {
     return (
-        <section className="relative w-full overflow-hidden">
+        <section className="relative w-full">
             <GlowBackground className="inset-0" showMobileGlow />
 
             <div className="relative z-10 w-full max-w-[1280px] mx-auto px-5 pt-[210px] pb-[80px] md:pt-[242.69px] md:pb-[151.39px]">

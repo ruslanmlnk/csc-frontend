@@ -1,9 +1,11 @@
+import type { Metadata } from 'next'
 import ForumHero from '@/app/components/forum/ForumHero'
 import ForumFiltersSection from '@/app/components/forum/ForumFiltersSection'
 import ForumContentSection from '@/app/components/forum/ForumContentSection'
 import type { ForumThreadsColumnSection } from '@/app/components/forum/ForumThreadsColumn'
 import type { ForumSidebarThread } from '@/app/components/forum/ForumSidebar'
 import { backendRequest } from '@/lib/backend/client'
+import { getPageGlobalData } from '@/lib/backend/pageGlobals'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -36,6 +38,7 @@ const FORUM_BANNER_IMAGE =
   'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480'
 const SIDEBAR_BANNER_IMAGE =
   'https://api.builder.io/api/v1/image/assets/TEMP/1df77007f20fb9ad313a0326ef07f148489cc4a4?width=794'
+const FORUM_PAGE_GLOBAL_SLUG = 'forum-page'
 
 const asRecord = (value: unknown): UnknownRecord | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -207,8 +210,27 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
   }, [])
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+  const globalData = await getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG)
+  const seo = globalData.seo
+
+  if (!seo) {
+    return { title: 'Forum' }
+  }
+
+  return {
+    title: seo.title || 'Forum',
+    description: seo.description || undefined,
+    openGraph: {
+      title: seo.title || 'Forum',
+      description: seo.description || undefined,
+      images: seo.ogImage?.url ? [{ url: seo.ogImage.url }] : [],
+    },
+  }
+}
+
 export default async function ForumPage() {
-  const [categoriesRes, subCategoriesRes, threadsRes] = await Promise.all([
+  const [categoriesRes, subCategoriesRes, threadsRes, forumPageGlobal] = await Promise.all([
     backendRequest<Record<string, unknown>>('/api/forum-categories?limit=200&sort=name', {
       cache: 'no-store',
     }),
@@ -218,6 +240,7 @@ export default async function ForumPage() {
     backendRequest<Record<string, unknown>>('/api/threads?limit=500&sort=-createdAt&depth=2', {
       cache: 'no-store',
     }),
+    getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG),
   ])
 
   const forumCategories = categoriesRes.ok ? parseForumCategories(categoriesRes.data) : []
@@ -293,18 +316,25 @@ export default async function ForumPage() {
       href,
     }
   })
+  const heroTitle = forumPageGlobal.heroV2?.title?.trim()
+  const heroDescription = forumPageGlobal.heroV2?.description?.trim()
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white overflow-x-hidden relative">
       <ForumHero
         title={
-          <>
-            Community
-            <br />
-            discussions
-          </>
+          heroTitle || (
+            <>
+              Community
+              <br />
+              discussions
+            </>
+          )
         }
-        description="A space to share experience, ask questions, and discuss traffic sources, platforms, strategies, and real-world affiliate cases"
+        description={
+          heroDescription
+          || 'A space to share experience, ask questions, and discuss traffic sources, platforms, strategies, and real-world affiliate cases'
+        }
       />
 
       <div className="relative z-10 flex flex-col items-center">

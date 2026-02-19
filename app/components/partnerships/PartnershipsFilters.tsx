@@ -104,7 +104,7 @@ const PartnershipsFilters: React.FC<PartnershipsFiltersProps> = ({
         </button>
       </div>
 
-      <div className="flex max-w-full items-start gap-4 overflow-x-auto rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-2 pr-4 no-scrollbar">
+      <div className="flex max-w-full items-start gap-4 overflow-x-auto rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-[7.2px] pr-[15.2px] no-scrollbar">
         {categories.map((category) => (
           <button
             key={category}

@@ -27,11 +27,11 @@ const PartnershipProgramCard: React.FC<PartnershipProgramCardProps> = ({
   const normalizedGeo = geo?.trim()
 
   return (
-    <article className="flex flex-col items-start justify-center gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-4 py-8 transition-all duration-300 hover:border-[#FCC660]">
+    <article className="flex flex-col items-start justify-center gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-[15.2px] py-[31.2px] transition-all duration-300 hover:border-[#FCC660]">
       <div className="flex w-full flex-col gap-1 px-4">
         <div className="flex w-full items-center justify-between">
           <h3 className="font-poppins text-[20px] font-medium leading-[32px] text-white">{title}</h3>
-          <div className="flex items-center gap-[5px] rounded-[80px] border border-[#B3B3B3] px-3 py-[6px]">
+          <div className="flex items-center gap-[5px] rounded-[80px] border border-[#B3B3B3] px-[11.2px] py-[7.2px]">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M11.9686 4.3685C11.9302 4.24979 11.8577 4.14499 11.7602 4.06713C11.6627 3.98926 11.5444 3.94175 11.4201 3.93049L7.95609 3.616L6.58708 0.410866C6.48599 0.175386 6.25602 0.0234375 6.00003 0.0234375C5.74404 0.0234375 5.51398 0.175386 5.41354 0.410866L4.04454 3.616L0.579945 3.93049C0.325948 3.95393 0.110882 4.12596 0.0314272 4.3685C-0.00728905 4.48731 -0.0103006 4.61487 0.0227654 4.73538C0.0558315 4.85589 0.123523 4.96405 0.217454 5.04646L2.83601 7.34254L2.06394 10.7431C2.00745 10.9931 2.10449 11.2517 2.31196 11.4016C2.42062 11.4807 2.55157 11.5232 2.68596 11.5231C2.80115 11.5231 2.91418 11.4919 3.01299 11.4327L6.00003 9.64662L8.98654 11.4327C9.09367 11.4968 9.21727 11.528 9.34199 11.5225C9.46671 11.517 9.58707 11.4749 9.68813 11.4016C9.89558 11.2517 9.99263 10.9931 9.93615 10.7431L9.16406 7.34256L11.7826 5.04649C11.8765 4.96408 11.9442 4.85592 11.9773 4.73541C12.0104 4.6149 12.0074 4.48733 11.9686 4.36852V4.3685Z" fill="#F29F04" />
             </svg>
@@ -55,7 +55,7 @@ const PartnershipProgramCard: React.FC<PartnershipProgramCardProps> = ({
             {models.map((model) => (
               <div
                 key={model}
-                className="rounded-[10px] border border-[#B3B3B3] p-2 font-poppins text-[14px] font-normal leading-[16px] text-[#B3B3B3]"
+                className="rounded-[10px] border border-[#B3B3B3] p-[7.2px] font-poppins text-[14px] font-normal leading-[16px] text-[#B3B3B3]"
               >
                 {model}
               </div>
