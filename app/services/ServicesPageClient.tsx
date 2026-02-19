@@ -112,6 +112,9 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
   }, [activeCategory, services])
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
+  const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Promo banner'
+  const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
     <div className="relative flex flex-col items-start bg-[#0D0D0D] overflow-x-hidden font-poppins text-white">
@@ -131,7 +134,12 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
 
       <main className="w-full max-w-[1280px] mx-auto px-5 pb-20">
         <div className="w-full max-w-[1240px] mx-auto flex flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Promo banner" className="hidden md:block" />
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="hidden md:block"
+          />
 
           <div className="flex flex-col items-center gap-8 w-full">
             <ServicesFilter
@@ -208,7 +216,7 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
             )}
           </div>
 
-          <Banner src={promoBannerSrc} alt="Promo banner"/>
+          <Banner src={heroBannerSrc} alt={heroBannerAlt} href={heroBannerHref} />
         </div>
       </main>
     </div>

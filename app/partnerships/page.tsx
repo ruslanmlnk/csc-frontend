@@ -1,32 +1,12 @@
 import PartnershipsPageClient from './PartnershipsPageClient'
-import { backendRequest } from '@/lib/backend/client'
+import { getPageGlobalData } from '@/lib/backend/pageGlobals'
 
-type PartnershipsPageGlobalResponse = {
-  heroV2?: {
-    title?: string | null
-    description?: string | null
-  } | null
-}
-
-const getInitialHeroV2 = async () => {
-  const { ok, data } = await backendRequest<PartnershipsPageGlobalResponse>(
-    '/api/globals/partnerships-page?depth=0',
-    {
-      cache: 'no-store',
-    },
-  )
-
-  if (!ok || !data?.heroV2) {
-    return null
-  }
-
-  return data.heroV2
-}
+const GLOBAL_SLUG = 'partnerships-page'
 
 const PartnershipsPage = async () => {
-  const initialHeroV2 = await getInitialHeroV2()
+  const globalData = await getPageGlobalData(GLOBAL_SLUG)
 
-  return <PartnershipsPageClient initialHeroV2={initialHeroV2} />
+  return <PartnershipsPageClient initialHeroV2={globalData.heroV2} />
 }
 
 export default PartnershipsPage

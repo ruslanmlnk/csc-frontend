@@ -6,6 +6,7 @@ interface ForumFiltersSectionProps {
     searchButtonLabel: string;
     bannerImage: string;
     bannerAlt?: string;
+    bannerHref?: string;
 }
 
 const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
@@ -13,17 +14,37 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
     searchButtonLabel,
     bannerImage,
     bannerAlt = 'Community Banner',
+    bannerHref,
 }) => {
+    const normalizedHref = bannerHref?.trim();
+    const isExternalLink = Boolean(normalizedHref && /^https?:\/\//i.test(normalizedHref));
+    const bannerClassName = "hidden lg:block relative w-full h-[158px] rounded-[40px] overflow-hidden";
+    const bannerImageContent = (
+        <Image
+            src={bannerImage}
+            alt={bannerAlt}
+            fill
+            className="object-cover"
+        />
+    );
+
     return (
         <div className="w-full max-w-[1280px] px-5 flex flex-col items-center gap-[64px] mb-[64px]">
-            <div className="hidden lg:block relative w-full h-[158px] rounded-[40px] overflow-hidden">
-                <Image
-                    src={bannerImage}
-                    alt={bannerAlt}
-                    fill
-                    className="object-cover"
-                />
-            </div>
+            {normalizedHref ? (
+                <a
+                    href={normalizedHref}
+                    target={isExternalLink ? "_blank" : undefined}
+                    rel={isExternalLink ? "noopener noreferrer" : undefined}
+                    aria-label={bannerAlt}
+                    className={bannerClassName}
+                >
+                    {bannerImageContent}
+                </a>
+            ) : (
+                <div className={bannerClassName}>
+                    {bannerImageContent}
+                </div>
+            )}
 
             <div className="w-full flex flex-col gap-[32px]">
                 <div className="w-full flex flex-col gap-[10px] lg:grid lg:grid-cols-6 lg:gap-[10px]">

@@ -147,6 +147,9 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
   const showingTo = filteredConferences.length === 0 ? 0 : from + paginatedConferences.length
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
+  const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Promo banner'
+  const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
     <div className="relative flex flex-col items-start overflow-x-hidden bg-[#0D0D0D] font-poppins text-white">
@@ -166,7 +169,12 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
 
       <main className="mx-auto w-full max-w-[1280px] px-5 pb-20">
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Promo banner" className="hidden md:block" />
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="hidden md:block"
+          />
 
           {!isLoading && !error && conferences.length > 0 ? (
             <ConferenceFilters

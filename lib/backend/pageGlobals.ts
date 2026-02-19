@@ -1,9 +1,20 @@
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendUrl } from '@/lib/auth-server'
 
+type UnknownRecord = Record<string, unknown>
+
+export type PageHeroBanner = {
+  caption?: string | null
+  link?: string | null
+  image?: {
+    url?: string | null
+  } | null
+} | null
+
 export type PageHeroV2 = {
   title?: string | null
   description?: string | null
+  banner?: PageHeroBanner
 } | null
 
 export type PageSeo = {
@@ -18,6 +29,20 @@ type PageGlobalResponse = {
   heroV2?: {
     title?: string | null
     description?: string | null
+    banner?:
+      | {
+          caption?: string | null
+          link?: string | null
+          image?:
+            | {
+                url?: string | null
+              }
+            | string
+            | null
+        }
+      | string
+      | number
+      | null
   } | null
   seo?: {
     title?: string | null
@@ -36,6 +61,23 @@ export type PageGlobalData = {
   seo: PageSeo
 }
 
+const asRecord = (value: unknown): UnknownRecord | null => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return null
+  }
+
+  return value as UnknownRecord
+}
+
+const asString = (value: unknown): string | null => {
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  return trimmed ? trimmed : null
+}
+
 const normalizeMediaUrl = (url?: string | null): string | null => {
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
@@ -44,8 +86,18 @@ const normalizeMediaUrl = (url?: string | null): string | null => {
   return url.startsWith('/') ? `${backendUrl}${url}` : `${backendUrl}/${url}`
 }
 
+const resolveMediaUrl = (value: unknown): string | null => {
+  const directUrl = asString(value)
+  if (directUrl) {
+    return normalizeMediaUrl(directUrl)
+  }
+
+  const recordValue = asRecord(value)
+  return normalizeMediaUrl(asString(recordValue?.url))
+}
+
 export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> => {
-  const { ok, data } = await backendRequest<PageGlobalResponse>(`/api/globals/${slug}?depth=1`, {
+  const { ok, data } = await backendRequest<PageGlobalResponse>(`/api/globals/${slug}?depth=2`, {
     cache: 'no-store',
   })
 
@@ -61,9 +113,26 @@ export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> =
     typeof ogImageRaw === 'string'
       ? normalizeMediaUrl(ogImageRaw)
       : normalizeMediaUrl(ogImageRaw?.url)
+  const heroV2Record = asRecord(data.heroV2)
+  const heroBannerRecord = asRecord(heroV2Record?.banner)
+  const heroBannerImageUrl = resolveMediaUrl(heroBannerRecord?.image)
+
+  const heroV2: PageHeroV2 = heroV2Record
+    ? {
+        title: asString(heroV2Record.title),
+        description: asString(heroV2Record.description),
+        banner: heroBannerRecord
+          ? {
+              caption: asString(heroBannerRecord.caption),
+              link: asString(heroBannerRecord.link),
+              image: heroBannerImageUrl ? { url: heroBannerImageUrl } : null,
+            }
+          : null,
+      }
+    : null
 
   return {
-    heroV2: data.heroV2 || null,
+    heroV2,
     seo: data.seo
       ? {
           title: data.seo.title || null,

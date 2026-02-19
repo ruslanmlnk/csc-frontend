@@ -147,6 +147,9 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
   const showingTo = filteredJobs.length === 0 ? 0 : from + paginatedJobs.length
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
+  const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Jobs banner'
+  const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
     <div className="relative flex flex-col items-start overflow-x-hidden bg-[#0D0D0D] font-poppins text-white">
@@ -166,7 +169,12 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
 
       <main className="mx-auto w-full max-w-[1280px] px-5 pb-20">
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Jobs banner" className="hidden md:block" />
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="hidden md:block"
+          />
 
           <div className="flex w-full flex-col items-center gap-8">
             <JobsFilters
@@ -245,7 +253,12 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
             )}
           </div>
 
-          <Banner src={promoBannerSrc} alt="Jobs banner" className="mt-6" />
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="mt-6"
+          />
         </div>
       </main>
     </div>

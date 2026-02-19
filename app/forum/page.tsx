@@ -318,6 +318,9 @@ export default async function ForumPage() {
   })
   const heroTitle = forumPageGlobal.heroV2?.title?.trim()
   const heroDescription = forumPageGlobal.heroV2?.description?.trim()
+  const heroBannerImage = forumPageGlobal.heroV2?.banner?.image?.url || FORUM_BANNER_IMAGE
+  const heroBannerAlt = forumPageGlobal.heroV2?.banner?.caption?.trim() || 'Community Banner'
+  const heroBannerHref = forumPageGlobal.heroV2?.banner?.link?.trim()
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white overflow-x-hidden relative">
@@ -341,8 +344,9 @@ export default async function ForumPage() {
         <ForumFiltersSection
           searchPlaceholder="Search thread"
           searchButtonLabel="Search"
-          bannerImage={FORUM_BANNER_IMAGE}
-          bannerAlt="Community Banner"
+          bannerImage={heroBannerImage}
+          bannerAlt={heroBannerAlt}
+          bannerHref={heroBannerHref}
         />
         <ForumContentSection
           sections={sections}

@@ -8,6 +8,7 @@ import ForumPagination from '@/app/components/forum/ForumPagination'
 import PartnershipProgramCard from '@/app/components/partnerships/PartnershipProgramCard'
 import PartnershipsFilters from '@/app/components/partnerships/PartnershipsFilters'
 import type { PartnershipCategory, PartnershipItem } from '@/app/types/partnerships'
+import type { PageHeroV2 } from '@/lib/backend/pageGlobals'
 
 type PartnershipsApiResponse = {
   partnerships?: PartnershipItem[]
@@ -19,13 +20,8 @@ type PartnershipCategoriesApiResponse = {
   error?: string
 }
 
-type HeroV2Data = {
-  title?: string | null
-  description?: string | null
-} | null
-
 interface PartnershipsPageClientProps {
-  initialHeroV2?: HeroV2Data
+  initialHeroV2?: PageHeroV2
 }
 
 const promoBannerSrc =
@@ -62,6 +58,9 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
 
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
+  const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Partnerships banner'
+  const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   useEffect(() => {
     let active = true
@@ -198,7 +197,12 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
 
       <main className="mx-auto w-full max-w-[1280px] px-5 pb-20">
         <div className="mx-auto flex w-full max-w-[1240px] flex-col gap-16">
-          <Banner src={promoBannerSrc} alt="Partnerships banner" className='mb-4'/>
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="mb-4"
+          />
 
           <PartnershipsFilters
             searchValue={searchInput}
@@ -287,7 +291,12 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
             )}
           </div>
 
-          <Banner src={promoBannerSrc} alt="Partnerships banner" className="mt-4" />
+          <Banner
+            src={heroBannerSrc}
+            alt={heroBannerAlt}
+            href={heroBannerHref}
+            className="mt-4"
+          />
         </div>
       </main>
     </div>
