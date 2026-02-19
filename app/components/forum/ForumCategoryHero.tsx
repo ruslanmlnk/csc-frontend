@@ -8,6 +8,8 @@ interface ForumCategoryHeroProps {
     backLink: string;
     backText: string;
     backgroundImage?: string;
+    backgroundAlt?: string;
+    backgroundHref?: string;
 }
 
 const ForumCategoryHero: React.FC<ForumCategoryHeroProps> = ({
@@ -16,7 +18,20 @@ const ForumCategoryHero: React.FC<ForumCategoryHeroProps> = ({
     backLink,
     backText,
     backgroundImage,
+    backgroundAlt = 'Category Banner',
+    backgroundHref,
 }) => {
+    const normalizedHref = backgroundHref?.trim();
+    const isExternalLink = Boolean(normalizedHref && /^https?:\/\//i.test(normalizedHref));
+    const bannerImageContent = backgroundImage ? (
+        <Image
+            src={backgroundImage}
+            alt={backgroundAlt}
+            fill
+            className="object-cover"
+        />
+    ) : null;
+
     return (
         <section className="w-full">
             <div className="w-full max-w-[1280px] mx-auto px-5 pt-[128px] pb-16 lg:pt-[162.69px] lg:pb-20">
@@ -47,16 +62,23 @@ const ForumCategoryHero: React.FC<ForumCategoryHeroProps> = ({
                         </div>
                     </div>
 
-                    {backgroundImage && (
-                        <div className="relative w-full h-[196.01px] lg:w-[772.457px] lg:h-[176.773px] shrink-0 rounded-[40px] overflow-hidden">
-                            <Image
-                                src={backgroundImage}
-                                alt="Category Banner"
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
-                    )}
+                    {backgroundImage ? (
+                        normalizedHref ? (
+                            <a
+                                href={normalizedHref}
+                                target={isExternalLink ? '_blank' : undefined}
+                                rel={isExternalLink ? 'noopener noreferrer' : undefined}
+                                aria-label={backgroundAlt}
+                                className="relative w-full h-[196.01px] lg:w-[772.457px] lg:h-[176.773px] shrink-0 rounded-[40px] overflow-hidden"
+                            >
+                                {bannerImageContent}
+                            </a>
+                        ) : (
+                            <div className="relative w-full h-[196.01px] lg:w-[772.457px] lg:h-[176.773px] shrink-0 rounded-[40px] overflow-hidden">
+                                {bannerImageContent}
+                            </div>
+                        )
+                    ) : null}
                 </div>
             </div>
         </section>

@@ -14,6 +14,11 @@ type SubCategoryData = {
   id: string
   name: string
   description: string
+  banner?: {
+    caption?: string
+    link?: string
+    imageUrl?: string
+  }
 }
 
 type ThreadCardData = {
@@ -262,6 +267,11 @@ export default function ForumCategoryPage() {
                 id?: string
                 name?: string
                 description?: string
+                banner?: {
+                  caption?: string
+                  link?: string
+                  imageUrl?: string
+                }
               }>
             }
           | null
@@ -280,6 +290,7 @@ export default function ForumCategoryPage() {
             id: item.id,
             name: item.name,
             description: item.description || 'All threads in this category',
+            banner: item.banner,
           })
         }
       } catch (loadError) {
@@ -403,6 +414,9 @@ export default function ForumCategoryPage() {
 
   const showingFrom = totalDocs === 0 ? 0 : (currentPage - 1) * THREADS_PER_PAGE + 1
   const showingTo = totalDocs === 0 ? 0 : Math.min(currentPage * THREADS_PER_PAGE, totalDocs)
+  const categoryBannerImage = toAbsoluteMediaUrl(subCategory?.banner?.imageUrl) || CATEGORY_BANNER_IMAGE
+  const categoryBannerAlt = subCategory?.banner?.caption?.trim() || 'Category Banner'
+  const categoryBannerHref = subCategory?.banner?.link?.trim()
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center">
@@ -411,7 +425,9 @@ export default function ForumCategoryPage() {
         subtitle={subCategory?.description || 'All threads in this category'}
         backLink="/forum"
         backText="Back to Forum"
-        backgroundImage={CATEGORY_BANNER_IMAGE}
+        backgroundImage={categoryBannerImage}
+        backgroundAlt={categoryBannerAlt}
+        backgroundHref={categoryBannerHref}
       />
 
       <div className="flex flex-col items-center w-full max-w-[1280px] px-5 gap-16 pb-20">

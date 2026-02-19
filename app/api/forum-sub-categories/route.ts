@@ -24,17 +24,49 @@ const asString = (value: unknown): string | null => {
   return null
 }
 
+const resolveBannerData = (value: unknown):
+  | {
+      caption?: string
+      link?: string
+      imageUrl?: string
+    }
+  | undefined => {
+  const bannerRecord = asRecord(value)
+  if (!bannerRecord) {
+    return undefined
+  }
+
+  const imageValue = bannerRecord.image
+  const imageUrl =
+    asString(imageValue)
+    || asString(asRecord(imageValue)?.url)
+    || undefined
+  const caption = asString(bannerRecord.caption) || undefined
+  const link = asString(bannerRecord.link) || undefined
+
+  if (!imageUrl && !caption && !link) {
+    return undefined
+  }
+
+  return {
+    caption,
+    link,
+    imageUrl,
+  }
+}
+
 const encodeWhereValue = (value: string) => value.replace(/"/g, '\\"')
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const slug = normalizeSlug(searchParams.get('slug'))
 
+  const queryDepth = slug ? 2 : 1
   const query = slug
-    ? `/api/forum-sub-categories?limit=200&sort=name&depth=1&where[slug][equals]=${encodeURIComponent(
+    ? `/api/forum-sub-categories?limit=200&sort=name&depth=${queryDepth}&where[slug][equals]=${encodeURIComponent(
         encodeWhereValue(slug),
       )}`
-    : '/api/forum-sub-categories?limit=200&sort=name&depth=1'
+    : `/api/forum-sub-categories?limit=200&sort=name&depth=${queryDepth}`
 
   const { ok, status, data } = await backendRequest<Record<string, unknown>>(query, {
     cache: 'no-store',
@@ -61,6 +93,11 @@ export async function GET(request: Request) {
       categoryName?: string
       categorySlug?: string
       categoryId?: string
+      banner?: {
+        caption?: string
+        link?: string
+        imageUrl?: string
+      }
     }>
   >(
     (acc, item) => {
@@ -83,6 +120,7 @@ export async function GET(request: Request) {
       const categoryName = asString(categoryRecord?.name)
       const categorySlug = asString(categoryRecord?.slug) || undefined
       const categoryId = asString(categoryRecord?.id) || undefined
+      const banner = resolveBannerData(record.banner)
 
       if (categoryName) {
         acc.push({
@@ -95,6 +133,7 @@ export async function GET(request: Request) {
           categoryName,
           categorySlug,
           categoryId,
+          banner,
         })
       } else {
         acc.push({
@@ -106,6 +145,7 @@ export async function GET(request: Request) {
           date,
           categorySlug,
           categoryId,
+          banner,
         })
       }
 
