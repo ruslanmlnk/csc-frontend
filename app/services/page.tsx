@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import ForumHero from '@/app/components/forum/ForumHero'
 import Banner from '@/app/components/Banner'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
 import ServicesFilter from '@/app/components/services/ServicesFilter'
+import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import ForumPagination from '@/app/components/forum/ForumPagination'
 import type { ServiceCategory, ServiceItem } from '@/app/types/services'
 
@@ -161,19 +161,12 @@ const ServicesPage: React.FC = () => {
                     >
                       <UsefulServiceCard
                         logo={(
-                          <div className="relative w-[56px] h-[56px] flex items-center justify-center">
-                            {logoUrl ? (
-                              <Image
-                                src={logoUrl}
-                                alt={service.title}
-                                fill
-                                sizes="56px"
-                                className="object-contain"
-                              />
-                            ) : (
-                              <div className="w-full h-full rounded-[14px] bg-[#2A2A2A]" />
-                            )}
-                          </div>
+                          <ServiceCardLogo
+                            src={logoUrl}
+                            alt={service.title}
+                            width={service.logo?.width}
+                            height={service.logo?.height}
+                          />
                         )}
                         category={service.category?.name || 'Service'}
                         name={service.title}

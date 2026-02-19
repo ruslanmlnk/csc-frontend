@@ -7,6 +7,7 @@ import { getServiceBySlug, getServices } from '@/lib/backend/services'
 import ServiceDetailHero from '@/app/components/services/ServiceDetailHero'
 import ServicePromoCode from '@/app/components/services/ServicePromoCode'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
+import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import RichText from '@/app/components/blog/RichText'
 import type { ServiceItem } from '@/app/types/services'
 
@@ -183,19 +184,12 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
               >
                 <UsefulServiceCard
                   logo={(
-                    <div className="relative w-[56px] h-[56px] flex items-center justify-center">
-                      {withBackendUrl(item.logo?.url, backendUrl) ? (
-                        <Image
-                          src={withBackendUrl(item.logo?.url, backendUrl) as string}
-                          alt={item.title}
-                          fill
-                          sizes="56px"
-                          className="object-contain"
-                        />
-                      ) : (
-                        <div className="w-full h-full rounded-[14px] bg-[#2A2A2A]" />
-                      )}
-                    </div>
+                    <ServiceCardLogo
+                      src={withBackendUrl(item.logo?.url, backendUrl)}
+                      alt={item.title}
+                      width={item.logo?.width}
+                      height={item.logo?.height}
+                    />
                   )}
                   category={item.category?.name || 'Service'}
                   name={item.title}

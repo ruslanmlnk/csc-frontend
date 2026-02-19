@@ -30,6 +30,8 @@ export interface ServiceSearchResultItem extends SearchResultBase {
   promoCode?: string | null
   promoDescription?: string | null
   logoUrl?: string | null
+  logoWidth?: number | null
+  logoHeight?: number | null
 }
 
 export interface PartnershipSearchResultItem extends SearchResultBase {
@@ -60,4 +62,3 @@ export type SearchResultItem =
   | ServiceSearchResultItem
   | PartnershipSearchResultItem
   | JobSearchResultItem
-

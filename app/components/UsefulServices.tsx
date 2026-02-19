@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
+import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import type { ServiceItem } from '@/app/types/services'
 
 type ServicesApiResponse = {
@@ -102,19 +102,12 @@ const UsefulServices: React.FC = () => {
               <Link key={service.id} href={service.slug ? `/services/${service.slug}` : '/services'} className="block">
                 <UsefulServiceCard
                   logo={(
-                    <div className="relative w-[56px] h-[56px] flex items-center justify-center">
-                      {logoUrl ? (
-                        <Image
-                          src={logoUrl}
-                          alt={service.title}
-                          fill
-                          sizes="56px"
-                          className="object-contain"
-                        />
-                      ) : (
-                        <div className="w-full h-full rounded-[14px] bg-[#2A2A2A]" />
-                      )}
-                    </div>
+                    <ServiceCardLogo
+                      src={logoUrl}
+                      alt={service.title}
+                      width={service.logo?.width}
+                      height={service.logo?.height}
+                    />
                   )}
                   category={service.category?.name || 'Service'}
                   name={service.title}

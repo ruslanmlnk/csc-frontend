@@ -28,7 +28,7 @@ const ConferenceFilters: React.FC<ConferenceFiltersProps> = ({
 }) => {
   return (
     <div className="w-full">
-      <div className="inline-flex max-w-full flex-wrap items-start gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-2 pr-4">
+      <div className="inline-flex max-w-full flex-wrap items-start gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-[7.2px] pr-[15.2px]">
         <ConferenceFilterSelect
           placeholder="Date"
           value={dateValue}

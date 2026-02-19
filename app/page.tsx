@@ -10,6 +10,7 @@ import ContactForm from './components/ContactForm';
 import { client } from './lib/graphql';
 import { gql } from 'graphql-request';
 import { Metadata } from 'next';
+import { getBackendUrl } from '@/lib/auth-server';
 
 type HomeQueryResponse = {
   Home?: {
@@ -19,6 +20,24 @@ type HomeQueryResponse = {
       valueProposition?: string | null;
       primaryButtonLink?: string | null;
       secondaryButtonLink?: string | null;
+    } | null;
+    whatWeDo?: {
+      badgeText?: string | null;
+      title?: string | null;
+      description?: string | null;
+      buttonLink?: string | null;
+    } | null;
+    coreValues?: {
+      badgeText?: string | null;
+      title?: string | null;
+      cards?: {
+        id?: string | null;
+        title?: string | null;
+        description?: string | null;
+        icon?: {
+          url?: string | null;
+        } | null;
+      }[] | null;
     } | null;
     seo?: {
       title?: string | null;
@@ -39,6 +58,24 @@ const HOME_QUERY = gql`
         valueProposition
         primaryButtonLink
         secondaryButtonLink
+      }
+      whatWeDo {
+        badgeText
+        title
+        description
+        buttonLink
+      }
+      coreValues {
+        badgeText
+        title
+        cards {
+          id
+          title
+          description
+          icon {
+            url
+          }
+        }
       }
       seo {
         title
@@ -76,12 +113,15 @@ export async function generateMetadata(): Promise<Metadata> {
 const Home: React.FC = async () => {
   const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
   const hero = data?.Home?.hero;
+  const whatWeDo = data?.Home?.whatWeDo;
+  const coreValues = data?.Home?.coreValues;
+  const backendUrl = getBackendUrl();
 
   return (
     <main className="flex flex-col w-full min-h-screen">
       <Hero data={hero} />
-      <AboutUs />
-      <CoreValues />
+      <AboutUs data={whatWeDo} />
+      <CoreValues data={coreValues} backendUrl={backendUrl} />
       <LatestPosts />
       <UsefulServices />
       <PartnershipPrograms />

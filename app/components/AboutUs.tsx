@@ -1,7 +1,25 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
-const AboutUs: React.FC = () => {
+interface AboutUsProps {
+    data?: {
+        badgeText?: string | null;
+        title?: string | null;
+        description?: string | null;
+        buttonLink?: string | null;
+    } | null;
+}
+
+const AboutUs: React.FC<AboutUsProps> = ({ data }) => {
+    const badgeText = data?.badgeText?.trim() || 'What we do';
+    const title = data?.title?.trim() || 'Performance marketing built on data';
+    const description = data?.description?.trim()
+        || 'ClickStorm is a performance-driven agency working at the intersection of traffic arbitrage, CPA marketing, and analytics. We launch, test, and scale traffic across multiple sources while keeping full control over metrics, budgets, and profitability.';
+    const buttonHref = data?.buttonLink?.trim() || '/services';
+    const isExternalLink = /^https?:\/\//i.test(buttonHref);
+    const buttonClasses = 'flex w-[172px] lg:w-[180px] h-[50px] py-[12px] px-[20px] lg:px-[24px] justify-center items-center gap-[12px] rounded-[80px] bg-[#F29F04] transition-all hover:brightness-110 active:scale-95';
+
     return (
         <section className="relative w-full bg-[#0D0D0D] py-[80px] lg:py-[120px] flex flex-col items-center overflow-hidden">
             <div className="relative z-10 w-full max-w-[1280px] px-5 flex flex-col lg:flex-row items-center gap-[64px] self-center">
@@ -88,7 +106,7 @@ const AboutUs: React.FC = () => {
                         <div className="flex p-[4px] flex-col justify-center items-center gap-[10px] rounded-[40px] bg-[rgba(242,159,4,0.25)]">
                             <div className="flex py-[6px] px-[16px] pb-[8px] justify-center items-center gap-[10px] rounded-[24px] border border-[#F29F04]">
                                 <span className="text-white text-center font-poltawski text-[16px] font-normal leading-[26px]">
-                                    What we do
+                                    {badgeText}
                                 </span>
                             </div>
                         </div>
@@ -98,23 +116,34 @@ const AboutUs: React.FC = () => {
                             className="self-stretch text-center lg:text-left font-poppins text-[40px] lg:text-[56px] font-medium leading-[48px] lg:leading-[72px] tracking-[-0.8px] lg:tracking-[-2.24px] bg-clip-text text-transparent"
                             style={{ backgroundImage: 'linear-gradient(180deg, #FFF 25.5%, #999 118.5%)' }}
                         >
-                            Performance marketing built on data
+                            {title}
                         </h2>
 
                         {/* Description */}
                         <p className="self-stretch text-center lg:text-left text-[#BDBDBD] font-poppins text-[16px] font-normal leading-[26px]">
-                            ClickStorm is a performance-driven agency working at the intersection of traffic arbitrage,
-                            CPA marketing, and analytics. We launch, test, and scale traffic across multiple sources
-                            while keeping full control over metrics, budgets, and profitability.
+                            {description}
                         </p>
                     </div>
 
                     {/* Learn More Button */}
-                    <button className="flex w-[172px] lg:w-[180px] h-[50px] py-[12px] px-[20px] lg:px-[24px] justify-center items-center gap-[12px] rounded-[80px] bg-[#F29F04] transition-all hover:brightness-110 active:scale-95">
-                        <span className="text-[#0D0D0D] text-center font-poppins text-[14px] lg:text-[16px] font-medium leading-[16px] lg:leading-[26px]">
-                            Learn More
-                        </span>
-                    </button>
+                    {isExternalLink ? (
+                        <a
+                            href={buttonHref}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={buttonClasses}
+                        >
+                            <span className="text-[#0D0D0D] text-center font-poppins text-[14px] lg:text-[16px] font-medium leading-[16px] lg:leading-[26px]">
+                                Learn More
+                            </span>
+                        </a>
+                    ) : (
+                        <Link href={buttonHref} className={buttonClasses}>
+                            <span className="text-[#0D0D0D] text-center font-poppins text-[14px] lg:text-[16px] font-medium leading-[16px] lg:leading-[26px]">
+                                Learn More
+                            </span>
+                        </Link>
+                    )}
                 </div>
             </div>
         </section>

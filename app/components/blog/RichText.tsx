@@ -65,6 +65,7 @@ type RichTextContent = {
 
 type BannerDoc = {
     caption?: string | null
+    link?: string | null
     image?:
     | number
     | string
@@ -127,7 +128,7 @@ const withBackendUrl = (url: string | undefined, backendUrl: string | undefined)
     return url.startsWith('/') ? `${backendUrl}${url}` : `${backendUrl}/${url}`
 }
 
-const getBannerFromRelation = (relation: unknown): { src?: string; alt?: string } | null => {
+const getBannerFromRelation = (relation: unknown): { src?: string; alt?: string; href?: string } | null => {
     if (!relation) {
         return null
     }
@@ -145,16 +146,19 @@ const getBannerFromRelation = (relation: unknown): { src?: string; alt?: string 
     const alt = typeof bannerDoc.caption === 'string' && bannerDoc.caption.length > 0
         ? bannerDoc.caption
         : undefined
+    const href = typeof bannerDoc.link === 'string' && bannerDoc.link.trim().length > 0
+        ? bannerDoc.link.trim()
+        : undefined
 
     if (typeof bannerDoc.image === 'string') {
-        return { src: bannerDoc.image, alt }
+        return { src: bannerDoc.image, alt, href }
     }
 
     if (isObject(bannerDoc.image) && typeof bannerDoc.image.url === 'string') {
-        return { src: bannerDoc.image.url, alt }
+        return { src: bannerDoc.image.url, alt, href }
     }
 
-    return { alt }
+    return { alt, href }
 }
 
 const getMediaUrlFromRelation = (relation: unknown): string | undefined => {
@@ -449,12 +453,15 @@ const RichText: React.FC<RichTextProps> = ({
                         const blockAlt = bannerFromRelation?.alt
                             || (typeof node.fields.alt === 'string' && node.fields.alt.length > 0 ? node.fields.alt : undefined)
                             || bannerAlt
+                        const blockHref = bannerFromRelation?.href
+                            || (typeof node.fields.link === 'string' && node.fields.link.trim().length > 0 ? node.fields.link.trim() : undefined)
 
                         return (
                             <div key={index} className={previousNode?.type === 'paragraph' ? 'mt-8' : undefined}>
                                 <Banner
                                     src={blockSrc}
                                     alt={blockAlt}
+                                    href={blockHref}
                                     containerStyle={ARTICLE_TEXT_BANNER_STYLE}
                                     sizes={ARTICLE_TEXT_BANNER_SIZES}
                                 />

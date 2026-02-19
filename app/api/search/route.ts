@@ -125,6 +125,8 @@ export async function GET(request: Request) {
               promoCode: service.promoCode || null,
               promoDescription: service.promoDescription || null,
               logoUrl: service.logo?.url || null,
+              logoWidth: service.logo?.width || null,
+              logoHeight: service.logo?.height || null,
             })),
           MAX_RESULTS_PER_TYPE,
         )
@@ -205,4 +207,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }
-

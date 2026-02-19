@@ -9,6 +9,7 @@ import { formatConferenceDate } from '@/app/components/conferences/formatConfere
 import JobVacancyCard from '@/app/components/jobs/JobVacancyCard'
 import PartnershipProgramCard from '@/app/components/partnerships/PartnershipProgramCard'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
+import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import type {
   SearchResultItem,
   SearchResultType,
@@ -221,13 +222,12 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           <div className="h-full [&>div]:h-full [&>div]:justify-between [&>div]:gap-6 [&>div>div:nth-child(2)]:flex-1 [&>div>div:nth-child(2)]:min-h-[132px] [&>div>div:nth-child(2)>p]:line-clamp-4">
             <UsefulServiceCard
               logo={(
-                <div className="relative h-[56px] w-[56px]">
-                  {logoUrl ? (
-                    <Image src={logoUrl} alt={item.title} fill sizes="56px" className="object-contain" />
-                  ) : (
-                    <div className="h-full w-full rounded-[14px] bg-[#2A2A2A]" />
-                  )}
-                </div>
+                <ServiceCardLogo
+                  src={logoUrl}
+                  alt={item.title}
+                  width={item.logoWidth}
+                  height={item.logoHeight}
+                />
               )}
               category={item.category}
               name={item.title}
