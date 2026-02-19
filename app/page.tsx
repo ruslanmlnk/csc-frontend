@@ -11,9 +11,35 @@ import { client } from './lib/graphql';
 import { gql } from 'graphql-request';
 import { Metadata } from 'next';
 
+type HomeQueryResponse = {
+  Home?: {
+    hero?: {
+      title?: string | null;
+      description?: string | null;
+      valueProposition?: string | null;
+      primaryButtonLink?: string | null;
+      secondaryButtonLink?: string | null;
+    } | null;
+    seo?: {
+      title?: string | null;
+      description?: string | null;
+      ogImage?: {
+        url?: string | null;
+      } | null;
+    } | null;
+  } | null;
+};
+
 const HOME_QUERY = gql`
   query {
     Home {
+      hero {
+        title
+        description
+        valueProposition
+        primaryButtonLink
+        secondaryButtonLink
+      }
       seo {
         title
         description
@@ -27,7 +53,7 @@ const HOME_QUERY = gql`
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const data: any = await client.request(HOME_QUERY);
+    const data = await client.request<HomeQueryResponse>(HOME_QUERY);
     const seo = data?.Home?.seo;
 
     if (!seo) return { title: 'CSC Agency' };
@@ -48,12 +74,12 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const Home: React.FC = async () => {
-  const data: any = await client.request(HOME_QUERY).catch(() => null);
-  const sections = data?.Home?.sections;
+  const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
+  const hero = data?.Home?.hero;
 
   return (
     <main className="flex flex-col w-full min-h-screen">
-      <Hero data={sections?.hero} />
+      <Hero data={hero} />
       <AboutUs />
       <CoreValues />
       <LatestPosts />
