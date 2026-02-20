@@ -80,7 +80,7 @@ const Vacancies: React.FC = () => {
         </h2>
         <Link
           href="/jobs"
-          className="flex items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
+          className="hidden md:flex items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
         >
           See More
         </Link>
@@ -122,9 +122,15 @@ const Vacancies: React.FC = () => {
           ))}
         </div>
       )}
+
+      <Link
+        href="/jobs"
+        className="mt-8 flex md:hidden items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
+      >
+        See More
+      </Link>
     </section>
   )
 }
 
 export default Vacancies
-

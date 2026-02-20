@@ -75,7 +75,7 @@ const UsefulServices: React.FC = () => {
         </h2>
         <Link
           href="/services"
-          className="flex py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95"
+          className="hidden md:flex py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95"
         >
           See More
         </Link>
@@ -121,6 +121,13 @@ const UsefulServices: React.FC = () => {
           })}
         </div>
       ) : null}
+
+      <Link
+        href="/services"
+        className="mt-8 flex md:hidden py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95 self-center"
+      >
+        See More
+      </Link>
     </section>
   )
 }

@@ -80,7 +80,7 @@ const PartnershipPrograms: React.FC = () => {
         </h2>
         <Link
           href="/partnerships"
-          className="flex items-center justify-center gap-4 rounded-[80px] border border-[#FCC660] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
+          className="hidden md:flex items-center justify-center gap-4 rounded-[80px] border border-[#FCC660] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
         >
           See More
         </Link>
@@ -137,7 +137,14 @@ const PartnershipPrograms: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-[55px] w-full max-w-[1240px]">
+      <Link
+        href="/partnerships"
+        className="mt-8 flex w-full max-w-fit items-center justify-center gap-4 self-center rounded-[80px] border border-[#FCC660] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95 md:hidden"
+      >
+        See More
+      </Link>
+
+      <div className="mt-[55px] hidden w-full max-w-[1240px] md:block">
         <div className="relative aspect-[675/86] w-full overflow-hidden rounded-[40px]">
           <Image src="/images/partnership-banner.png" alt="Partnership Banner" fill sizes="1240px" className="object-cover" />
         </div>
@@ -147,4 +154,3 @@ const PartnershipPrograms: React.FC = () => {
 }
 
 export default PartnershipPrograms
-

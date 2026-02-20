@@ -103,7 +103,7 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         <Banner
           src={data?.bottomGraphic?.url || '/images/hero-graphic.webp'}
           alt="Hero Graphic"
-          className="mt-12 md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
+          className="mt-12 hidden md:block md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
           containerStyle={{ maxWidth: '100%' }}
         />
       </div>

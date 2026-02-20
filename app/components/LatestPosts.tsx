@@ -215,7 +215,7 @@ const LatestPosts: React.FC = () => {
         See More Posts
       </Link>
 
-      <div className="mt-16 w-full max-w-[1240px]">
+      <div className="mt-16 hidden w-full max-w-[1240px] md:block">
         <div className="relative aspect-[675/86] w-full overflow-hidden rounded-[40px]">
           <Image src="/images/latest-posts-bottom-banner.png" alt="Join Us Banner" fill className="object-cover" />
         </div>
