@@ -118,8 +118,8 @@ const LoginPageClient: React.FC<LoginPageClientProps> = ({ leftBanner, rightBann
                     </Link>
                 </div>
 
-                <AuthOrDivider />
-                <TelegramAuthButton label="Continue with Telegram" />
+                {/* <AuthOrDivider />
+                <TelegramAuthButton label="Continue with Telegram" /> */}
             </div>
         </AuthPageLayout>
     );

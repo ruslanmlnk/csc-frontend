@@ -158,8 +158,8 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
                     </Link>
                 </div>
 
-                <AuthOrDivider />
-                <TelegramAuthButton label="Sign up via Telegram" />
+                {/* <AuthOrDivider />
+                <TelegramAuthButton label="Sign up via Telegram" /> */}
             </div>
         </AuthPageLayout>
     );
