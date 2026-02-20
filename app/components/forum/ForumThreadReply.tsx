@@ -1,11 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ForumThreadReplyProps {
     authorName: string;
     authorAvatar: string;
     date: string;
     content: string;
+    authorProfileHref?: string | null;
     // Optional: Is this the current user's reply? (for styling nuances if needed later)
 }
 
@@ -14,20 +16,36 @@ const ForumThreadReply: React.FC<ForumThreadReplyProps> = ({
     authorAvatar,
     date,
     content,
+    authorProfileHref,
 }) => {
     return (
         <div className="flex flex-col items-start self-stretch rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 overflow-hidden">
             <div className="flex flex-col justify-end items-end gap-6 self-stretch">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between self-stretch">
                     <div className="flex h-12 items-center gap-4">
-                        <div className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0">
-                            <Image
-                                src={authorAvatar}
-                                alt="Author"
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
+                        {authorProfileHref ? (
+                            <Link
+                                href={authorProfileHref}
+                                aria-label={`${authorName} profile`}
+                                className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F29F04]"
+                            >
+                                <Image
+                                    src={authorAvatar}
+                                    alt="Author"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </Link>
+                        ) : (
+                            <div className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0">
+                                <Image
+                                    src={authorAvatar}
+                                    alt="Author"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
                         <div className="text-white font-poppins text-[20px] font-medium leading-[32px]">
                             {authorName}
                         </div>

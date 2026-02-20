@@ -52,6 +52,15 @@ const toEntityId = (value: unknown): string | null => {
     return null;
 };
 
+const toPublicProfileHref = (value: unknown): string | null => {
+    const id = toEntityId(value);
+    if (!id) {
+        return null;
+    }
+
+    return `/profile/${encodeURIComponent(id)}`;
+};
+
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
     if (!url) {
         return null;
@@ -315,6 +324,7 @@ export default function ForumThreadPage() {
                 }
 
                 const commentUser = comment.user;
+                const commentAuthorId = toEntityId(commentUser);
 
                 const createdAt = typeof comment.createdAt === 'string'
                     ? comment.createdAt
@@ -324,6 +334,7 @@ export default function ForumThreadPage() {
                     id: toEntityId(comment.id) || `${index}`,
                     authorName: resolveUserName(commentUser),
                     authorAvatar: resolveUserAvatar(commentUser),
+                    authorProfileHref: toPublicProfileHref(commentAuthorId),
                     date: formatThreadDate(createdAt),
                     content,
                 };
@@ -332,6 +343,7 @@ export default function ForumThreadPage() {
                 id: string;
                 authorName: string;
                 authorAvatar: string;
+                authorProfileHref: string | null;
                 date: string;
                 content: string;
             } => Boolean(reply));
@@ -486,6 +498,7 @@ export default function ForumThreadPage() {
                                         authorName={reply.authorName}
                                         date={reply.date}
                                         authorAvatar={reply.authorAvatar}
+                                        authorProfileHref={reply.authorProfileHref}
                                         content={reply.content}
                                     />
                                 ))}
