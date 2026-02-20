@@ -1,11 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ForumThreadOriginalPostProps {
     threadTitle: string;
     authorName: string;
     authorRole: string;
     authorAvatar: string;
+    authorProfileHref?: string | null;
     date: string;
     content: string;
 }
@@ -15,6 +17,7 @@ const ForumThreadOriginalPost: React.FC<ForumThreadOriginalPostProps> = ({
     authorName,
     authorRole,
     authorAvatar,
+    authorProfileHref,
     date,
     content,
 }) => {
@@ -77,17 +80,39 @@ const ForumThreadOriginalPost: React.FC<ForumThreadOriginalPostProps> = ({
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between self-stretch">
                             <div className="flex h-12 items-center gap-6">
                                 <div className="flex justify-center items-center gap-4">
-                                    <div className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0">
-                                        <Image
-                                            src={authorAvatar}
-                                            alt="Author"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
-                                    <div className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">
-                                        {authorName}
-                                    </div>
+                                    {authorProfileHref ? (
+                                        <Link
+                                            href={authorProfileHref}
+                                            aria-label={`${authorName} profile`}
+                                            className="inline-flex items-center gap-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F29F04] rounded-[48px]"
+                                        >
+                                            <div className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0">
+                                                <Image
+                                                    src={authorAvatar}
+                                                    alt="Author"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">
+                                                {authorName}
+                                            </div>
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            <div className="relative w-12 h-12 rounded-[48px] border-[0.48px] border-white/50 overflow-hidden shrink-0">
+                                                <Image
+                                                    src={authorAvatar}
+                                                    alt="Author"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">
+                                                {authorName}
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                                 <div className="flex p-[2px] flex-col justify-center items-center rounded-[40px] bg-[rgba(242,159,4,0.25)]">
                                     <div className="flex py-[6px] px-3 justify-center items-center rounded-[24px] border border-[#F29F04]">

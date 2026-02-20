@@ -311,6 +311,7 @@ export default function ForumThreadPage() {
     const author = thread?.author;
     const authorName = resolveUserName(author);
     const authorAvatar = resolveUserAvatar(author);
+    const authorProfileHref = toPublicProfileHref(author);
     const isThreadLocked = thread?.isLocked === true;
 
     const replies = useMemo(() => {
@@ -489,6 +490,7 @@ export default function ForumThreadPage() {
                                     authorRole={forumThreadPageData.originalPost.authorRole}
                                     date={threadDate}
                                     authorAvatar={authorAvatar}
+                                    authorProfileHref={authorProfileHref}
                                     content={threadContent}
                                 />
 
