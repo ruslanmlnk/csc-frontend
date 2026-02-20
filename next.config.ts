@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
         hostname: "127.0.0.1",
         port: "3000",
       },
+      {
+        protocol: "https",
+        hostname: "csc-frontend-lx7q9s-679d88-31-42-189-58.traefik.me",
+        port: "443",
+      },
       ...(backendImagePattern ? [backendImagePattern] : []),
     ],
   },
