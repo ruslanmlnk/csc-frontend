@@ -242,7 +242,9 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
             ))}
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="h-16 w-full" aria-hidden />
+      )}
     </main>
   )
 }
