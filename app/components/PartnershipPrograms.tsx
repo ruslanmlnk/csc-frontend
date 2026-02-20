@@ -24,7 +24,17 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   return `${normalizedBase}${normalizedPath}`
 }
 
-const PartnershipPrograms: React.FC = () => {
+interface PartnershipProgramsProps {
+  banner?: {
+    caption?: string | null
+    link?: string | null
+    image?: {
+      url?: string | null
+    } | null
+  } | null
+}
+
+const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => {
   const [programs, setPrograms] = useState<PartnershipItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -144,11 +154,31 @@ const PartnershipPrograms: React.FC = () => {
         See More
       </Link>
 
-      <div className="mt-[55px] hidden w-full max-w-[1240px] md:block">
-        <div className="relative aspect-[675/86] w-full overflow-hidden rounded-[40px]">
-          <Image src="/images/partnership-banner.png" alt="Partnership Banner" fill sizes="1240px" className="object-cover" />
+      {(banner?.image?.url || !banner) && (
+        <div className="mt-[55px] hidden w-full max-w-[1240px] md:block">
+          <div className="relative aspect-[1240/158] w-full overflow-hidden rounded-[40px]">
+            {banner?.link ? (
+              <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
+                <Image
+                  src={banner.image?.url || '/images/partnership-banner.png'}
+                  alt={banner.caption || 'Partnership Banner'}
+                  fill
+                  sizes="1240px"
+                  className="object-cover"
+                />
+              </Link>
+            ) : (
+              <Image
+                src={banner?.image?.url || '/images/partnership-banner.png'}
+                alt={banner?.caption || 'Partnership Banner'}
+                fill
+                sizes="1240px"
+                className="object-cover"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

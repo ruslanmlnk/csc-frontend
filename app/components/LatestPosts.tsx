@@ -61,7 +61,17 @@ const formatPublishedDate = (value?: string | null): string => {
   })
 }
 
-const LatestPosts: React.FC = () => {
+interface LatestPostsProps {
+  banner?: {
+    caption?: string | null
+    link?: string | null
+    image?: {
+      url?: string | null
+    } | null
+  } | null
+}
+
+const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
   const [posts, setPosts] = useState<LatestPostItem[]>([])
   const [categories, setCategories] = useState<string[]>([ALL_ARTICLES_LABEL])
   const [activeCategory, setActiveCategory] = useState(ALL_ARTICLES_LABEL)
@@ -169,11 +179,10 @@ const LatestPosts: React.FC = () => {
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
-            className={`whitespace-nowrap rounded-[80px] px-[16px] py-[8px] text-[16px] leading-[26px] transition-all duration-300 ${
-              activeCategory === category
-                ? 'bg-[#F29F04] font-medium text-[#070707]'
-                : 'font-normal text-[#FCFCFC] hover:bg-white/5'
-            }`}
+            className={`whitespace-nowrap rounded-[80px] px-[16px] py-[8px] text-[16px] leading-[26px] transition-all duration-300 ${activeCategory === category
+              ? 'bg-[#F29F04] font-medium text-[#070707]'
+              : 'font-normal text-[#FCFCFC] hover:bg-white/5'
+              }`}
           >
             {category}
           </button>
@@ -215,11 +224,29 @@ const LatestPosts: React.FC = () => {
         See More Posts
       </Link>
 
-      <div className="mt-16 hidden w-full max-w-[1240px] md:block">
-        <div className="relative aspect-[675/86] w-full overflow-hidden rounded-[40px]">
-          <Image src="/images/latest-posts-bottom-banner.png" alt="Join Us Banner" fill className="object-cover" />
+      {(banner?.image?.url || !banner) && (
+        <div className="mt-16 hidden w-full max-w-[1240px] md:block">
+          <div className="relative aspect-[1240/158] w-full overflow-hidden rounded-[40px]">
+            {banner?.link ? (
+              <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
+                <Image
+                  src={banner.image?.url || '/images/latest-posts-bottom-banner.png'}
+                  alt={banner.caption || 'Join Us Banner'}
+                  fill
+                  className="object-cover"
+                />
+              </Link>
+            ) : (
+              <Image
+                src={banner?.image?.url || '/images/latest-posts-bottom-banner.png'}
+                alt={banner?.caption || 'Join Us Banner'}
+                fill
+                className="object-cover"
+              />
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

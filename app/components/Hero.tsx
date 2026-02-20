@@ -15,13 +15,17 @@ interface HeroProps {
     backgroundImage?: {
       url?: string;
     };
-    bottomGraphic?: {
-      url?: string;
-    };
   };
+  banner?: {
+    caption?: string | null;
+    link?: string | null;
+    image?: {
+      url?: string | null;
+    } | null;
+  } | null;
 }
 
-const Hero: React.FC<HeroProps> = ({ data }) => {
+const Hero: React.FC<HeroProps> = ({ data, banner }) => {
   return (
     <section className="relative w-full min-h-[760px] md:min-h-[907px] bg-[#1A1A1A] flex flex-col items-center overflow-hidden">
       {/* --- Background Image & Effects --- */}
@@ -100,12 +104,15 @@ const Hero: React.FC<HeroProps> = ({ data }) => {
         </div>
 
         {/* Bottom Hero Image (Image 7 in Figma) */}
-        <Banner
-          src={data?.bottomGraphic?.url || '/images/hero-graphic.webp'}
-          alt="Hero Graphic"
-          className="mt-12 hidden md:block md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
-          containerStyle={{ maxWidth: '100%' }}
-        />
+        {(banner?.image?.url || !banner) && (
+          <Banner
+            src={banner?.image?.url || '/images/hero-graphic.webp'}
+            alt={banner?.caption || 'Hero Graphic'}
+            href={banner?.link || undefined}
+            className="mt-12 hidden md:block md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
+            containerStyle={{ maxWidth: '100%' }}
+          />
+        )}
       </div>
     </section>
   );

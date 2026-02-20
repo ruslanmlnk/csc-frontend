@@ -12,6 +12,15 @@ import { gql } from 'graphql-request';
 import { Metadata } from 'next';
 import { getBackendUrl } from '@/lib/auth-server';
 
+type BannerData = {
+  id?: string | null;
+  caption?: string | null;
+  link?: string | null;
+  image?: {
+    url?: string | null;
+  } | null;
+} | null;
+
 type HomeQueryResponse = {
   Home?: {
     hero?: {
@@ -21,12 +30,15 @@ type HomeQueryResponse = {
       primaryButtonLink?: string | null;
       secondaryButtonLink?: string | null;
     } | null;
+    heroBanner?: BannerData;
     whatWeDo?: {
       badgeText?: string | null;
       title?: string | null;
       description?: string | null;
       buttonLink?: string | null;
     } | null;
+    latestPostsBanner?: BannerData;
+    partnershipsProgramsBanner?: BannerData;
     coreValues?: {
       badgeText?: string | null;
       title?: string | null;
@@ -59,11 +71,32 @@ const HOME_QUERY = gql`
         primaryButtonLink
         secondaryButtonLink
       }
+      heroBanner {
+        caption
+        link
+        image {
+          url
+        }
+      }
       whatWeDo {
         badgeText
         title
         description
         buttonLink
+      }
+      latestPostsBanner {
+        caption
+        link
+        image {
+          url
+        }
+      }
+      partnershipsProgramsBanner {
+        caption
+        link
+        image {
+          url
+        }
       }
       coreValues {
         badgeText
@@ -114,25 +147,28 @@ const Home: React.FC = async () => {
   const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
   const hero = data?.Home?.hero
     ? {
-        valueProposition: data.Home.hero.valueProposition ?? undefined,
-        title: data.Home.hero.title ?? undefined,
-        description: data.Home.hero.description ?? undefined,
-        primaryButtonLink: data.Home.hero.primaryButtonLink ?? undefined,
-        secondaryButtonLink: data.Home.hero.secondaryButtonLink ?? undefined,
-      }
+      valueProposition: data.Home.hero.valueProposition ?? undefined,
+      title: data.Home.hero.title ?? undefined,
+      description: data.Home.hero.description ?? undefined,
+      primaryButtonLink: data.Home.hero.primaryButtonLink ?? undefined,
+      secondaryButtonLink: data.Home.hero.secondaryButtonLink ?? undefined,
+    }
     : undefined;
   const whatWeDo = data?.Home?.whatWeDo ?? undefined;
   const coreValues = data?.Home?.coreValues ?? undefined;
+  const heroBanner = data?.Home?.heroBanner;
+  const latestPostsBanner = data?.Home?.latestPostsBanner;
+  const partnershipsProgramsBanner = data?.Home?.partnershipsProgramsBanner;
   const backendUrl = getBackendUrl();
 
   return (
     <main className="flex flex-col w-full min-h-screen">
-      <Hero data={hero} />
+      <Hero data={hero} banner={heroBanner} />
       <AboutUs data={whatWeDo} />
       <CoreValues data={coreValues} backendUrl={backendUrl} />
-      <LatestPosts />
+      <LatestPosts banner={latestPostsBanner} />
       <UsefulServices />
-      <PartnershipPrograms />
+      <PartnershipPrograms banner={partnershipsProgramsBanner} />
       <Vacancies />
       <ContactForm />
     </main>
