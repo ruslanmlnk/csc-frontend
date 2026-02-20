@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/backend/users'
+import { getCurrentUser, normalizeMeUser } from '@/lib/backend/users'
 import { updateProfile } from '@/lib/backend/profile'
 
 export async function PATCH(request: Request) {
@@ -18,9 +18,7 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: 'Failed to fetch user' }, { status: meResponse.status })
         }
 
-        // meResponse.data might be the user directly or { user: ... }
-        // Based on normalizeMeUser logic in users.ts
-        const user = 'user' in meResponse.data ? meResponse.data.user : meResponse.data
+        const user = normalizeMeUser(meResponse.data)
         if (!user || !user.id) {
             return NextResponse.json({ error: 'User ID not found' }, { status: 400 })
         }

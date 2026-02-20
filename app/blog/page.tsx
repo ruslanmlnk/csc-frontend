@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ForumHero from '../components/forum/ForumHero';
 import Banner from '../components/Banner';
@@ -12,7 +12,7 @@ import { getArticles, getCategories } from '@/lib/backend/blog';
 import { Article, Category } from '../types/blog';
 import { getBackendUrl } from '@/lib/auth-server';
 
-const BlogPage = () => {
+const BlogPageContent = () => {
     const [activeCategory, setActiveCategory] = useState('All Articles');
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTag, setActiveTag] = useState('');
@@ -176,5 +176,11 @@ const BlogPage = () => {
         </div>
     );
 };
+
+const BlogPage = () => (
+    <Suspense fallback={<div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>}>
+        <BlogPageContent />
+    </Suspense>
+);
 
 export default BlogPage;

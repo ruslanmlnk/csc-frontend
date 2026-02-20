@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { loginUser, getCurrentUser } from '@/lib/backend/users'
+import { loginUser, getCurrentUser, normalizeMeUser } from '@/lib/backend/users'
 
 export async function POST(request: Request) {
     try {
@@ -17,7 +17,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Failed to fetch user' }, { status: meResponse.status })
         }
 
-        const user = 'user' in meResponse.data ? meResponse.data.user : meResponse.data
+        const user = normalizeMeUser(meResponse.data)
         const email = user?.email
 
         if (!email) {

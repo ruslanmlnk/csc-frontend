@@ -96,11 +96,11 @@ export async function generateMetadata(): Promise<Metadata> {
     if (!seo) return { title: 'CSC Agency' };
 
     return {
-      title: seo.title,
-      description: seo.description,
+      title: seo.title ?? undefined,
+      description: seo.description ?? undefined,
       openGraph: {
-        title: seo.title,
-        description: seo.description,
+        title: seo.title ?? undefined,
+        description: seo.description ?? undefined,
         images: seo.ogImage?.url ? [{ url: seo.ogImage.url }] : [],
       },
     };
@@ -112,9 +112,17 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const Home: React.FC = async () => {
   const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
-  const hero = data?.Home?.hero;
-  const whatWeDo = data?.Home?.whatWeDo;
-  const coreValues = data?.Home?.coreValues;
+  const hero = data?.Home?.hero
+    ? {
+        valueProposition: data.Home.hero.valueProposition ?? undefined,
+        title: data.Home.hero.title ?? undefined,
+        description: data.Home.hero.description ?? undefined,
+        primaryButtonLink: data.Home.hero.primaryButtonLink ?? undefined,
+        secondaryButtonLink: data.Home.hero.secondaryButtonLink ?? undefined,
+      }
+    : undefined;
+  const whatWeDo = data?.Home?.whatWeDo ?? undefined;
+  const coreValues = data?.Home?.coreValues ?? undefined;
   const backendUrl = getBackendUrl();
 
   return (
