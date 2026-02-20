@@ -143,6 +143,8 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+export const dynamic = 'force-dynamic';
+
 const Home: React.FC = async () => {
   const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
   const hero = data?.Home?.hero
@@ -156,10 +158,25 @@ const Home: React.FC = async () => {
     : undefined;
   const whatWeDo = data?.Home?.whatWeDo ?? undefined;
   const coreValues = data?.Home?.coreValues ?? undefined;
-  const heroBanner = data?.Home?.heroBanner;
-  const latestPostsBanner = data?.Home?.latestPostsBanner;
-  const partnershipsProgramsBanner = data?.Home?.partnershipsProgramsBanner;
+
   const backendUrl = getBackendUrl();
+  const processBanner = (banner: BannerData | undefined) => {
+    if (!banner) return banner;
+    if (banner.image?.url && !banner.image.url.startsWith('http')) {
+      return {
+        ...banner,
+        image: {
+          ...banner.image,
+          url: `${backendUrl}${banner.image.url.startsWith('/') ? '' : '/'}${banner.image.url}`
+        }
+      };
+    }
+    return banner;
+  };
+
+  const heroBanner = processBanner(data?.Home?.heroBanner);
+  const latestPostsBanner = processBanner(data?.Home?.latestPostsBanner);
+  const partnershipsProgramsBanner = processBanner(data?.Home?.partnershipsProgramsBanner);
 
   return (
     <main className="flex flex-col w-full min-h-screen">
