@@ -8,7 +8,6 @@ import BlogFilters from '../components/blog/BlogFilters';
 import BlogGrid from '../components/blog/BlogGrid';
 import ForumPagination from '../components/forum/ForumPagination';
 import BlogCTA from '../components/blog/BlogCTA';
-import { getArticles, getCategories } from '@/lib/backend/blog';
 import { Article, Category } from '../types/blog';
 import { getBackendUrl } from '@/lib/auth-server';
 
@@ -47,12 +46,25 @@ const BlogPageContent = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [articlesData, categoriesData] = await Promise.all([
-                    getArticles(),
-                    getCategories()
+                const [articlesResponse, categoriesResponse] = await Promise.all([
+                    fetch('/api/blog', { cache: 'no-store' }),
+                    fetch('/api/categories', { cache: 'no-store' }),
                 ]);
-                setArticles(articlesData);
-                setCategories(['All Articles', ...categoriesData.map((c: Category) => c.name)]);
+
+                if (!articlesResponse.ok || !categoriesResponse.ok) {
+                    throw new Error('Failed to load blog data');
+                }
+
+                const [articlesPayload, categoriesPayload] = await Promise.all([
+                    articlesResponse.json() as Promise<{ articles?: Article[] }>,
+                    categoriesResponse.json() as Promise<{ categories?: Category[] }>,
+                ]);
+
+                const loadedArticles = Array.isArray(articlesPayload?.articles) ? articlesPayload.articles : [];
+                const loadedCategories = Array.isArray(categoriesPayload?.categories) ? categoriesPayload.categories : [];
+
+                setArticles(loadedArticles);
+                setCategories(['All Articles', ...loadedCategories.map((c: Category) => c.name)]);
             } catch (error) {
                 console.error('Error fetching blog data:', error);
             } finally {
