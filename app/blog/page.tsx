@@ -106,7 +106,7 @@ const BlogPageContent = () => {
         return matchesCategory && matchesSearch && matchesTag;
     });
 
-    const pageSize = isMobile ? 5 : 13; // 5 articles + 1 banner = 6 items (mobile), 13 articles + 2 banners = 15 items (desktop)
+    const pageSize = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
     const totalPages = Math.max(1, Math.ceil(filteredArticles.length / pageSize));
     const normalizedPage = Math.min(currentPage, totalPages);
     const startIndex = (normalizedPage - 1) * pageSize;

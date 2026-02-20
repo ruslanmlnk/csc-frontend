@@ -53,13 +53,13 @@ const BlogGrid: React.FC<BlogGridProps> = ({ articles, banner }) => {
     );
 
     // Create a list with interjected banners
-    // Logic: 5 articles -> 1 banner -> 5 articles -> 1 banner -> rest of articles
+    // Logic: 4 articles -> 1 banner -> 4 articles -> 1 banner -> rest of articles
     const gridItems: (BlogPost | { type: 'banner'; id: string })[] = [];
 
     articles.forEach((article, index) => {
         gridItems.push(article);
-        // Interject banner after every 5th item.
-        if ((index + 1) % 5 === 0) {
+        // Interject banner after the 4th, 8th etc item (index 3, 7...)
+        if ((index + 1) % 4 === 0) {
             gridItems.push({ type: 'banner', id: `banner-${index}` });
         }
     });

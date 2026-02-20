@@ -81,7 +81,7 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
   const serviceWebsiteUrl = currentService.websiteUrl?.trim() ? currentService.websiteUrl : null
 
   return (
-    <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins text-white">
+    <main className="min-h-screen bg-[#0D0D0D] overflow-x-hidden font-poppins text-white mb-16">
       <div className="w-full max-w-[1280px] px-5 pt-[162.69px] mx-auto flex flex-col items-start gap-[80px]">
         <ServiceDetailHero
           title={currentService.title}
