@@ -72,12 +72,18 @@ const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhos
 
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   if (!url) return null;
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+
+  const trimmed = url.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) return trimmed;
+  if (trimmed.startsWith('https//')) return `https://${trimmed.slice('https//'.length)}`;
+  if (trimmed.startsWith('http//')) return `http://${trimmed.slice('http//'.length)}`;
+  if (trimmed.startsWith('//')) return `https:${trimmed}`;
 
   const normalizedBase = BACKEND_BASE_URL.endsWith('/')
     ? BACKEND_BASE_URL.slice(0, -1)
     : BACKEND_BASE_URL;
-  const normalizedPath = url.startsWith('/') ? url : `/${url}`;
+  const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
 
   return `${normalizedBase}${normalizedPath}`;
 };

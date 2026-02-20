@@ -346,6 +346,37 @@ export default function ForumThreadPage() {
         setPublishError('');
     };
 
+    const checkAuthStatus = async (): Promise<boolean> => {
+        if (typeof isAuthenticated === 'boolean') {
+            return isAuthenticated;
+        }
+
+        try {
+            const response = await fetch('/api/auth/me', { cache: 'no-store' });
+            const payload = await response.json().catch(() => null) as { user?: unknown } | null;
+            const nextState = Boolean(payload?.user);
+            setIsAuthenticated(nextState);
+            return nextState;
+        } catch {
+            setIsAuthenticated(false);
+            return false;
+        }
+    };
+
+    const handleAddCommentClick = async () => {
+        const canComment = await checkAuthStatus();
+
+        if (!canComment) {
+            router.push('/login');
+            return;
+        }
+
+        document.getElementById('thread-comment-section')?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+        });
+    };
+
     const handlePublishComment = async () => {
         const commentToPublish = newComment.trim();
 
@@ -421,6 +452,7 @@ export default function ForumThreadPage() {
                     backLink={backLink}
                     backText={forumThreadPageData.hero.backText}
                     addCommentLabel={forumThreadPageData.hero.addCommentLabel}
+                    onAddCommentClick={handleAddCommentClick}
                 />
 
                 <div className="flex flex-col items-start gap-16 w-full max-w-[1280px] px-5 pb-32">
@@ -473,41 +505,45 @@ export default function ForumThreadPage() {
                                 onPageChange={() => undefined}
                             />
 
-                            {isThreadLocked ? null : isAuthenticated === false ? (
-                                <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px] flex flex-col gap-4">
-                                    <div>You need to log in to leave a comment.</div>
-                                    <div>
-                                        <button
-                                            type="button"
-                                            onClick={() => router.push('/login')}
-                                            className="h-[50px] inline-flex items-center justify-center gap-[12px] rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] text-[16px] font-medium leading-[26px] hover:bg-[#FCC660]/10 transition-all"
-                                        >
-                                            Log In
-                                        </button>
-                                    </div>
+                            {isThreadLocked ? null : (
+                                <div id="thread-comment-section" className="w-full">
+                                    {isAuthenticated === false ? (
+                                        <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px] flex flex-col gap-4">
+                                            <div>You need to log in to leave a comment.</div>
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => router.push('/login')}
+                                                    className="h-[50px] inline-flex items-center justify-center gap-[12px] rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] text-[16px] font-medium leading-[26px] hover:bg-[#FCC660]/10 transition-all"
+                                                >
+                                                    Log In
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : isAuthenticated === null ? (
+                                        <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
+                                            Checking access...
+                                        </div>
+                                    ) : (
+                                        <ForumThreadCommentInput
+                                            title={forumThreadPageData.commentInput.title}
+                                            placeholder={forumThreadPageData.commentInput.placeholder}
+                                            cancelLabel={forumThreadPageData.commentInput.cancelLabel}
+                                            publishLabel={forumThreadPageData.commentInput.publishLabel}
+                                            value={newComment}
+                                            onChange={(value) => {
+                                                setNewComment(value);
+                                                if (publishError) {
+                                                    setPublishError('');
+                                                }
+                                            }}
+                                            onCancel={handleCancelComment}
+                                            onPublish={handlePublishComment}
+                                            isPublishing={isPublishingComment}
+                                            error={publishError}
+                                        />
+                                    )}
                                 </div>
-                            ) : isAuthenticated === null ? (
-                                <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
-                                    Checking access...
-                                </div>
-                            ) : (
-                                <ForumThreadCommentInput
-                                    title={forumThreadPageData.commentInput.title}
-                                    placeholder={forumThreadPageData.commentInput.placeholder}
-                                    cancelLabel={forumThreadPageData.commentInput.cancelLabel}
-                                    publishLabel={forumThreadPageData.commentInput.publishLabel}
-                                    value={newComment}
-                                    onChange={(value) => {
-                                        setNewComment(value);
-                                        if (publishError) {
-                                            setPublishError('');
-                                        }
-                                    }}
-                                    onCancel={handleCancelComment}
-                                    onPublish={handlePublishComment}
-                                    isPublishing={isPublishingComment}
-                                    error={publishError}
-                                />
                             )}
                         </>
                     )}

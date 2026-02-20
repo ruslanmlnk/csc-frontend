@@ -28,6 +28,39 @@ type UploadAvatarResponse = {
     errors?: Array<{ message?: string }>;
 };
 
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
+
+const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+    if (!url) return null;
+
+    const trimmed = url.trim();
+    if (!trimmed) return null;
+
+    if (trimmed.startsWith('https://') || trimmed.startsWith('http://')) {
+        return trimmed;
+    }
+
+    // Handle malformed protocol values like `https//example.com/file.jpg`.
+    if (trimmed.startsWith('https//')) {
+        return `https://${trimmed.slice('https//'.length)}`;
+    }
+
+    if (trimmed.startsWith('http//')) {
+        return `http://${trimmed.slice('http//'.length)}`;
+    }
+
+    if (trimmed.startsWith('//')) {
+        return `https:${trimmed}`;
+    }
+
+    const normalizedBase = BACKEND_BASE_URL.endsWith('/')
+        ? BACKEND_BASE_URL.slice(0, -1)
+        : BACKEND_BASE_URL;
+    const normalizedPath = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+
+    return `${normalizedBase}${normalizedPath}`;
+};
+
 const SettingsPage: React.FC = () => {
     const [user, setUser] = useState<BackendUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -241,7 +274,8 @@ const SettingsPage: React.FC = () => {
         );
     }
 
-    const avatarUrl = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as AvatarShape).url : null;
+    const avatarRaw = user?.avatar && typeof user.avatar === 'object' ? (user.avatar as AvatarShape).url : null;
+    const avatarUrl = toAbsoluteMediaUrl(avatarRaw);
 
     const ActionButtons = () => (
         <div className="flex flex-col gap-10 w-full mb-10 last:mb-0">
@@ -302,7 +336,7 @@ const SettingsPage: React.FC = () => {
                         <div className="flex flex-col md:flex-row items-center gap-10">
                             <div className="w-[160px] h-[160px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 overflow-hidden relative">
                                 {avatarUrl ? (
-                                    <Image src={`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'}${avatarUrl}`} alt="Avatar" fill className="object-cover" />
+                                    <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
                                 ) : (
                                     <UserIconLarge />
                                 )}

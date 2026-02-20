@@ -5,7 +5,15 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const Footer: React.FC = () => {
-  const menuItems = ['Agency', 'Blog', 'Conferences', 'Services', 'Forum', 'Partnership', 'Jobs'];
+  const menuItems = [
+    { label: 'Agency', href: '/' },
+    { label: 'Blog', href: '/blog' },
+    { label: 'Conferences', href: '/conferences' },
+    { label: 'Services', href: '/services' },
+    { label: 'Forum', href: '/forum' },
+    { label: 'Partnership', href: '/partnerships' },
+    { label: 'Jobs', href: '/jobs' },
+  ];
   const currentYear = new Date().getFullYear();
 
   return (
@@ -27,11 +35,11 @@ const Footer: React.FC = () => {
         <nav className="flex flex-col items-start gap-[40px] self-stretch lg:self-auto lg:flex-row lg:justify-center lg:items-center lg:gap-[40px]">
           {menuItems.map((item) => (
             <Link
-              key={item}
-              href={`/${item.toLowerCase()}`}
+              key={item.label}
+              href={item.href}
               className="text-white font-['Poppins'] text-[20px] font-normal leading-[32px] hover:text-[#F29F04] transition-colors"
             >
-              {item}
+              {item.label}
             </Link>
           ))}
         </nav>
