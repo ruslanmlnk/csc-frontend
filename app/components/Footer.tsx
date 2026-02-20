@@ -21,12 +21,13 @@ const Footer: React.FC = () => {
       <div className="flex flex-col lg:flex-row items-start lg:justify-between self-stretch pt-[80px] pb-[56px] gap-[80px] border-y-[0.5px] border-[#666] lg:py-[120px] lg:pb-[56px] lg:gap-0 lg:border-y-0 lg:border-b lg:border-[#666]">
         {/* Logo Section */}
         <div className="flex flex-col items-start gap-[56px] self-stretch lg:self-auto">
-          <Link href="/" className="relative w-[89px] h-[68px]">
+          <Link href="/" className="block">
             <Image
               src="/logo.svg"
               alt="Logo"
-              fill
-              className="object-contain brightness-0 invert"
+              width={180}
+              height={60}
+              className="h-[60px] w-auto object-contain"
             />
           </Link>
         </div>

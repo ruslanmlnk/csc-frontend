@@ -183,12 +183,13 @@ const Header: React.FC = () => {
             <header className="absolute top-0 left-1/2 z-50 flex w-full max-w-[1320px] -translate-x-1/2 items-center justify-between bg-transparent px-5 py-4 lg:py-[32px]">
                 {/* Logo Container */}
                 <div className="flex items-center gap-[12px] shrink-0">
-                    <Link href="/" className="relative w-[77px] h-[58.69px] block">
+                    <Link href="/" className="block">
                         <Image
                             src="/logo.svg"
                             alt="Logo"
-                            fill
-                            className="object-contain brightness-0 invert"
+                            width={180}
+                            height={60}
+                            className="h-[60px] w-auto object-contain"
                             priority
                         />
                     </Link>
