@@ -4,6 +4,12 @@ export interface JobMedia {
   height?: number | null
 }
 
+export interface JobBanner {
+  caption?: string | null
+  link?: string | null
+  image?: JobMedia | null
+}
+
 export interface JobFilterOption {
   id: string
   name: string
@@ -20,7 +26,7 @@ export interface JobItem {
   badge?: JobBadge | null
   salary: string
   salaryInfo: string
-  sidebarImage?: JobMedia | null
+  sidebarBanner?: JobBanner | null
   content?: unknown
   location: JobFilterOption
   experience: JobFilterOption

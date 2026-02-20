@@ -4,6 +4,12 @@ export interface PartnershipMedia {
   height?: number | null
 }
 
+export interface PartnershipBanner {
+  caption?: string | null
+  link?: string | null
+  image?: PartnershipMedia | null
+}
+
 export interface PartnershipCategory {
   id: string
   name: string
@@ -33,7 +39,7 @@ export interface PartnershipItem {
   minPayment: string
   websiteUrl?: string | null
   logo?: PartnershipMedia | null
-  sidebarImage?: PartnershipMedia | null
+  sidebarBanner?: PartnershipBanner | null
   category?: PartnershipCategory | null
   location?: PartnershipLocation | null
   models?: PartnershipModel[] | null

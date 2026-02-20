@@ -30,10 +30,14 @@ export const GET_PARTNERSHIPS = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
         category {
           id
@@ -73,10 +77,14 @@ export const GET_PARTNERSHIP_BY_SLUG = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
         category {
           id

@@ -45,10 +45,14 @@ export const GET_JOB_BY_SLUG = gql`
         badge
         salary
         salaryInfo
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
         content
         location {

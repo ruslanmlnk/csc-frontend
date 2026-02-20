@@ -4,6 +4,12 @@ export interface ConferenceMedia {
   height?: number | null
 }
 
+export interface ConferenceBanner {
+  caption?: string | null
+  link?: string | null
+  image?: ConferenceMedia | null
+}
+
 export interface ConferenceFilterOption {
   id: string
   name: string
@@ -20,6 +26,6 @@ export interface ConferenceItem {
   websiteUrl?: string | null
   logo?: ConferenceMedia | null
   mainImage?: ConferenceMedia | null
-  sidebarImage?: ConferenceMedia | null
+  sidebarBanner?: ConferenceBanner | null
   content?: unknown
 }

@@ -4,6 +4,12 @@ export interface ServiceMedia {
   height?: number | null
 }
 
+export interface ServiceBanner {
+  caption?: string | null
+  link?: string | null
+  image?: ServiceMedia | null
+}
+
 export interface ServiceCategory {
   id: string
   name: string
@@ -20,7 +26,7 @@ export interface ServiceItem {
   handle?: string | null
   logo?: ServiceMedia | null
   mainImage?: ServiceMedia | null
-  sidebarImage?: ServiceMedia | null
+  sidebarBanner?: ServiceBanner | null
   promoCode?: string | null
   promoDescription?: string | null
   content?: unknown

@@ -43,7 +43,10 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
   const locationName = currentJob.location?.name || 'Job'
   const workFormat = currentJob.format?.name || 'Not specified'
   const experience = currentJob.experience?.name || 'Not specified'
-  const sidebarImageUrl = withBackendUrl(currentJob.sidebarImage?.url, backendUrl) || promoBannerSrc
+  const sidebarBannerImageUrl = withBackendUrl(currentJob.sidebarBanner?.image?.url, backendUrl) || promoBannerSrc
+  const sidebarBannerHref = currentJob.sidebarBanner?.link?.trim() || null
+  const sidebarBannerAlt = currentJob.sidebarBanner?.caption?.trim() || 'Jobs sidebar banner'
+  const isSidebarBannerExternal = Boolean(sidebarBannerHref && /^https?:\/\//i.test(sidebarBannerHref))
 
   const similarJobsByLocation = allJobs.filter(
     (item) =>
@@ -84,29 +87,65 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
             </div>
 
             <div className="mx-auto w-full max-w-[380px] xl:hidden">
-              <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                <Image
-                  src={sidebarImageUrl}
-                  alt="Jobs sidebar banner"
-                  fill
-                  sizes="(max-width: 1280px) 100vw, 380px"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              {sidebarBannerHref ? (
+                <a
+                  href={sidebarBannerHref}
+                  target={isSidebarBannerExternal ? '_blank' : undefined}
+                  rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                  className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                  aria-label={sidebarBannerAlt}
+                >
+                  <Image
+                    src={sidebarBannerImageUrl}
+                    alt={sidebarBannerAlt}
+                    fill
+                    sizes="(max-width: 1280px) 100vw, 380px"
+                    className="h-full w-full object-cover"
+                  />
+                </a>
+              ) : (
+                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                  <Image
+                    src={sidebarBannerImageUrl}
+                    alt={sidebarBannerAlt}
+                    fill
+                    sizes="(max-width: 1280px) 100vw, 380px"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           </div>
 
           <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
             <div className="sticky top-[140px]">
-              <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                <Image
-                  src={sidebarImageUrl}
-                  alt="Jobs sidebar banner"
-                  fill
-                  sizes="380px"
-                  className="h-full w-full object-cover"
-                />
-              </div>
+              {sidebarBannerHref ? (
+                <a
+                  href={sidebarBannerHref}
+                  target={isSidebarBannerExternal ? '_blank' : undefined}
+                  rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                  className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                  aria-label={sidebarBannerAlt}
+                >
+                  <Image
+                    src={sidebarBannerImageUrl}
+                    alt={sidebarBannerAlt}
+                    fill
+                    sizes="380px"
+                    className="h-full w-full object-cover"
+                  />
+                </a>
+              ) : (
+                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                  <Image
+                    src={sidebarBannerImageUrl}
+                    alt={sidebarBannerAlt}
+                    fill
+                    sizes="380px"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
             </div>
           </aside>
         </div>

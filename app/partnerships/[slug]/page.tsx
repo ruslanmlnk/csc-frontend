@@ -49,7 +49,11 @@ const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: strin
   }
 
   const currentPartnership = partnership as PartnershipItem
-  const sidebarImageUrl = withBackendUrl(currentPartnership.sidebarImage?.url, backendUrl)
+  const sidebarBannerImageUrl = withBackendUrl(currentPartnership.sidebarBanner?.image?.url, backendUrl)
+  const sidebarBannerHref = currentPartnership.sidebarBanner?.link?.trim() || null
+  const sidebarBannerAlt =
+    currentPartnership.sidebarBanner?.caption?.trim() || `${currentPartnership.title} sidebar banner`
+  const isSidebarBannerExternal = Boolean(sidebarBannerHref && /^https?:\/\//i.test(sidebarBannerHref))
 
   const similarByCategory = allPartnerships.filter(
     (item) =>
@@ -97,33 +101,69 @@ const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: strin
               </div>
             </div>
 
-            {sidebarImageUrl ? (
+            {sidebarBannerImageUrl ? (
               <div className="mx-auto w-full max-w-[380px] xl:hidden">
-                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                  <Image
-                    src={sidebarImageUrl}
-                    alt={`${currentPartnership.title} sidebar banner`}
-                    fill
-                    sizes="(max-width: 1280px) 100vw, 380px"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                {sidebarBannerHref ? (
+                  <a
+                    href={sidebarBannerHref}
+                    target={isSidebarBannerExternal ? '_blank' : undefined}
+                    rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                    className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                    aria-label={sidebarBannerAlt}
+                  >
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="(max-width: 1280px) 100vw, 380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                ) : (
+                  <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="(max-width: 1280px) 100vw, 380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
 
-          {sidebarImageUrl ? (
+          {sidebarBannerImageUrl ? (
             <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
               <div className="sticky top-[140px]">
-                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                  <Image
-                    src={sidebarImageUrl}
-                    alt={`${currentPartnership.title} sidebar banner`}
-                    fill
-                    sizes="380px"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                {sidebarBannerHref ? (
+                  <a
+                    href={sidebarBannerHref}
+                    target={isSidebarBannerExternal ? '_blank' : undefined}
+                    rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                    className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                    aria-label={sidebarBannerAlt}
+                  >
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                ) : (
+                  <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </aside>
           ) : null}

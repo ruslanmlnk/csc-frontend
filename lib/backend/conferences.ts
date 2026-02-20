@@ -31,10 +31,14 @@ export const GET_CONFERENCES = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
       }
     }
@@ -71,10 +75,14 @@ export const GET_CONFERENCE_BY_SLUG = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
       }
     }

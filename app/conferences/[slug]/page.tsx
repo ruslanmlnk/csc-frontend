@@ -61,7 +61,11 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
 
   const currentConference = conference as ConferenceItem
   const mainImageUrl = withBackendUrl(currentConference.mainImage?.url, backendUrl)
-  const sidebarImageUrl = withBackendUrl(currentConference.sidebarImage?.url, backendUrl)
+  const sidebarBannerImageUrl = withBackendUrl(currentConference.sidebarBanner?.image?.url, backendUrl)
+  const sidebarBannerHref = currentConference.sidebarBanner?.link?.trim() || null
+  const sidebarBannerAlt =
+    currentConference.sidebarBanner?.caption?.trim() || `${currentConference.title} sidebar banner`
+  const isSidebarBannerExternal = Boolean(sidebarBannerHref && /^https?:\/\//i.test(sidebarBannerHref))
 
   const similarConferences = allConferences.filter((item) => item.id !== currentConference.id).slice(0, 3)
   const conferenceWebsiteUrl = currentConference.websiteUrl?.trim() ? currentConference.websiteUrl : null
@@ -101,33 +105,69 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
               </div>
             ) : null}
 
-            {sidebarImageUrl ? (
+            {sidebarBannerImageUrl ? (
               <div className="mx-auto w-full max-w-[380px] xl:hidden">
-                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                  <Image
-                    src={sidebarImageUrl}
-                    alt={`${currentConference.title} sidebar banner`}
-                    fill
-                    sizes="(max-width: 1280px) 100vw, 380px"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                {sidebarBannerHref ? (
+                  <a
+                    href={sidebarBannerHref}
+                    target={isSidebarBannerExternal ? '_blank' : undefined}
+                    rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                    className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                    aria-label={sidebarBannerAlt}
+                  >
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="(max-width: 1280px) 100vw, 380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                ) : (
+                  <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="(max-width: 1280px) 100vw, 380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             ) : null}
           </div>
 
-          {sidebarImageUrl ? (
+          {sidebarBannerImageUrl ? (
             <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
               <div className="sticky top-[140px]">
-                <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
-                  <Image
-                    src={sidebarImageUrl}
-                    alt={`${currentConference.title} sidebar banner`}
-                    fill
-                    sizes="380px"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
+                {sidebarBannerHref ? (
+                  <a
+                    href={sidebarBannerHref}
+                    target={isSidebarBannerExternal ? '_blank' : undefined}
+                    rel={isSidebarBannerExternal ? 'noopener noreferrer' : undefined}
+                    className="relative block h-[727px] w-full overflow-hidden rounded-[20px]"
+                    aria-label={sidebarBannerAlt}
+                  >
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </a>
+                ) : (
+                  <div className="relative h-[727px] w-full overflow-hidden rounded-[20px]">
+                    <Image
+                      src={sidebarBannerImageUrl}
+                      alt={sidebarBannerAlt}
+                      fill
+                      sizes="380px"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
               </div>
             </aside>
           ) : null}

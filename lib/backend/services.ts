@@ -37,10 +37,14 @@ export const GET_SERVICES = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
         category {
           id
@@ -76,10 +80,14 @@ export const GET_SERVICE_BY_SLUG = gql`
           width
           height
         }
-        sidebarImage {
-          url
-          width
-          height
+        sidebarBanner {
+          caption
+          link
+          image {
+            url
+            width
+            height
+          }
         }
         category {
           id
