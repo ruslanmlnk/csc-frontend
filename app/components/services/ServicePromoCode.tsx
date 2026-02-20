@@ -29,16 +29,16 @@ const ServicePromoCode: React.FC<ServicePromoCodeProps> = ({
             </div>
 
             {/* Code Box */}
-            <div className="flex justify-between items-center self-stretch relative">
-                <div className="flex px-[24px] py-[16px] justify-between items-center flex-1 rounded-[16px] bg-[#1A1A1A] border border-transparent">
-                    <div className="font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999]">
+            <div className="flex items-end gap-[24px] self-stretch">
+                <div className="flex flex-1 flex-col items-center justify-end gap-[24px] rounded-[16px] border border-transparent bg-[#1A1A1A] px-[24px] py-[16px] md:flex-row md:items-center md:justify-between">
+                    <div className="w-full font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999]">
                         {promoCode}
                     </div>
                     <button
                         onClick={handleCopy}
-                        className="flex px-[24px] py-[12px] justify-center items-center gap-[12px] rounded-[80px] bg-[#F29F04] hover:bg-[#d88d03] transition-colors"
+                        className="flex h-[50px] w-full shrink-0 items-center justify-center gap-[12px] rounded-[80px] bg-[#F29F04] px-[20px] py-[12px] transition-colors hover:bg-[#d88d03] md:h-auto md:w-auto md:px-[24px]"
                     >
-                        <span className="text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px]">
+                        <span className="text-center font-poppins text-[14px] font-medium leading-[16px] text-[#0D0D0D] md:text-[16px] md:leading-[26px]">
                             Copy
                         </span>
                     </button>

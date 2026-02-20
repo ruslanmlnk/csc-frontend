@@ -109,7 +109,7 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
             ) : null}
 
             {currentService.promoCode ? (
-              <div className="flex p-[32px_40px] justify-center items-center gap-[24px] self-stretch rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] overflow-hidden relative">
+              <div className="relative flex items-center justify-center gap-[24px] self-stretch overflow-hidden rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-[24px] md:p-[32px_40px]">
                 <div
                   className="absolute inset-0 pointer-events-none opacity-40"
                   style={{
