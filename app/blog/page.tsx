@@ -8,7 +8,7 @@ import BlogFilters from '../components/blog/BlogFilters';
 import BlogGrid from '../components/blog/BlogGrid';
 import ForumPagination from '../components/forum/ForumPagination';
 import BlogCTA from '../components/blog/BlogCTA';
-import { Article, Category } from '../types/blog';
+import { Article, Banner as BlogBanner, Category } from '../types/blog';
 import { getBackendUrl } from '@/lib/auth-server';
 
 const BlogPageContent = () => {
@@ -17,12 +17,19 @@ const BlogPageContent = () => {
     const [activeTag, setActiveTag] = useState('');
     const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<string[]>(['All Articles']);
+    const [blogBanner, setBlogBanner] = useState<BlogBanner | null>(null);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const searchParams = useSearchParams();
 
     const backendUrl = getBackendUrl();
+
+    const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+        if (!url) return null;
+        if (url.startsWith('http://') || url.startsWith('https://')) return url;
+        return url.startsWith('/') ? `${backendUrl}${url}` : `${backendUrl}/${url}`;
+    };
 
     useEffect(() => {
         const handleResize = () => {
@@ -56,7 +63,7 @@ const BlogPageContent = () => {
                 }
 
                 const [articlesPayload, categoriesPayload] = await Promise.all([
-                    articlesResponse.json() as Promise<{ articles?: Article[] }>,
+                    articlesResponse.json() as Promise<{ articles?: Article[]; banner?: BlogBanner | null }>,
                     categoriesResponse.json() as Promise<{ categories?: Category[] }>,
                 ]);
 
@@ -64,6 +71,7 @@ const BlogPageContent = () => {
                 const loadedCategories = Array.isArray(categoriesPayload?.categories) ? categoriesPayload.categories : [];
 
                 setArticles(loadedArticles);
+                setBlogBanner(articlesPayload?.banner || null);
                 setCategories(['All Articles', ...loadedCategories.map((c: Category) => c.name)]);
             } catch (error) {
                 console.error('Error fetching blog data:', error);
@@ -98,7 +106,7 @@ const BlogPageContent = () => {
         return matchesCategory && matchesSearch && matchesTag;
     });
 
-    const pageSize = isMobile ? 4 : 13; // 4 articles + 1 banner = 5 items (mobile), 13 articles + 2 banners = 15 items (desktop)
+    const pageSize = isMobile ? 5 : 13; // 5 articles + 1 banner = 6 items (mobile), 13 articles + 2 banners = 15 items (desktop)
     const totalPages = Math.max(1, Math.ceil(filteredArticles.length / pageSize));
     const normalizedPage = Math.min(currentPage, totalPages);
     const startIndex = (normalizedPage - 1) * pageSize;
@@ -134,6 +142,14 @@ const BlogPageContent = () => {
     };
 
     const formattedArticles = paginatedArticles.map(formatArticle);
+    const blogGridBannerUrl = toAbsoluteMediaUrl(blogBanner?.image?.url);
+    const blogGridBanner = blogGridBannerUrl
+        ? {
+            src: blogGridBannerUrl,
+            alt: blogBanner?.caption?.trim() || 'Blog banner',
+            href: blogBanner?.link?.trim() || undefined,
+        }
+        : null;
 
     if (loading) {
         return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
@@ -169,6 +185,7 @@ const BlogPageContent = () => {
 
                 <BlogGrid
                     articles={formattedArticles}
+                    banner={blogGridBanner}
                 />
 
                 {filteredArticles.length > 0 ? (

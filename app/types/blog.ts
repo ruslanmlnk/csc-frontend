@@ -2,6 +2,12 @@ export interface Media {
     url: string;
 }
 
+export interface Banner {
+    caption?: string | null;
+    link?: string | null;
+    image?: Media | null;
+}
+
 export interface Category {
     id: string;
     name: string;
@@ -49,4 +55,9 @@ export interface Article {
     author?: Author | null;
     tags?: Tag[];
     relatedArticles?: RelatedArticleSelection[];
+    sidebarBanner?: Banner | null;
+}
+
+export interface BlogPageData {
+    banner?: Banner | null;
 }

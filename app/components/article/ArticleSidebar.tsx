@@ -15,6 +15,11 @@ type ArticleSidebarProps = {
   tags?: Tag[]
   categories?: string[]
   latestPosts?: SidebarLatestPost[]
+  banner?: {
+    src: string
+    alt: string
+    href?: string | null
+  } | null
 }
 
 const buildBlogFilterHref = (filters: {
@@ -40,19 +45,41 @@ const buildBlogFilterHref = (filters: {
   return query ? `/blog?${query}` : '/blog'
 }
 
-const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, latestPosts }) => {
+const DEFAULT_SIDEBAR_BANNER =
+  'https://api.builder.io/api/v1/image/assets/TEMP/3e844bee26ad8ec77ac05689c0767ff3c1e8fc96?width=760'
+
+const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, latestPosts, banner }) => {
   const hasLatestPosts = (latestPosts?.length || 0) > 0
+  const normalizedBannerHref = banner?.href?.trim()
+  const isExternalBannerHref = Boolean(normalizedBannerHref && /^https?:\/\//i.test(normalizedBannerHref))
 
   return (
     <aside className="w-full lg:w-[380px] flex flex-col gap-16 shrink-0">
-      <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
-        <Image
-          src="https://api.builder.io/api/v1/image/assets/TEMP/3e844bee26ad8ec77ac05689c0767ff3c1e8fc96?width=760"
-          alt="Sidebar Promo"
-          fill
-          className="object-cover"
-        />
-      </div>
+      {normalizedBannerHref ? (
+        <a
+          href={normalizedBannerHref}
+          target={isExternalBannerHref ? '_blank' : undefined}
+          rel={isExternalBannerHref ? 'noopener noreferrer' : undefined}
+          aria-label={banner?.alt || 'Sidebar Promo'}
+          className="relative block w-full aspect-[380/727] rounded-[20px] overflow-hidden"
+        >
+          <Image
+            src={banner?.src || DEFAULT_SIDEBAR_BANNER}
+            alt={banner?.alt || 'Sidebar Promo'}
+            fill
+            className="object-cover"
+          />
+        </a>
+      ) : (
+        <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
+          <Image
+            src={banner?.src || DEFAULT_SIDEBAR_BANNER}
+            alt={banner?.alt || 'Sidebar Promo'}
+            fill
+            className="object-cover"
+          />
+        </div>
+      )}
 
       <div className="flex flex-col p-8 rounded-[20px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] gap-10">
         <form action="/blog" method="get" className="flex items-center h-[50px] px-4 gap-2 rounded-[80px] border border-[#FCFCFC]">

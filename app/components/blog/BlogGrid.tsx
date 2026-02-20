@@ -15,29 +15,51 @@ interface BlogPost {
 
 interface BlogGridProps {
     articles: BlogPost[];
+    banner?: {
+        src: string;
+        alt: string;
+        href?: string;
+    } | null;
 }
 
-const BlogGrid: React.FC<BlogGridProps> = ({ articles }) => {
+const BlogGrid: React.FC<BlogGridProps> = ({ articles, banner }) => {
     // Promo banner component
     const PromoBanner = () => (
-        <div className="relative w-full aspect-[397/517] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)]">
-            <Image
-                src="https://api.builder.io/api/v1/image/assets/TEMP/575debb1f4b5a5e3bc39f8bef505c2d24f8200f0?width=794"
-                alt="Promo Sidebar"
-                fill
-                className="object-cover"
-            />
-        </div>
+        banner?.href ? (
+            <a
+                href={banner.href}
+                target={/^https?:\/\//i.test(banner.href) ? '_blank' : undefined}
+                rel={/^https?:\/\//i.test(banner.href) ? 'noopener noreferrer' : undefined}
+                aria-label={banner.alt}
+                className="relative block w-full aspect-[397/517] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)]"
+            >
+                <Image
+                    src={banner.src}
+                    alt={banner.alt}
+                    fill
+                    className="object-cover"
+                />
+            </a>
+        ) : (
+            <div className="relative w-full aspect-[397/517] rounded-[40px] overflow-hidden border border-[rgba(74,74,74,0.7)]">
+                <Image
+                    src={banner?.src || "https://api.builder.io/api/v1/image/assets/TEMP/575debb1f4b5a5e3bc39f8bef505c2d24f8200f0?width=794"}
+                    alt={banner?.alt || 'Promo Sidebar'}
+                    fill
+                    className="object-cover"
+                />
+            </div>
+        )
     );
 
     // Create a list with interjected banners
-    // Logic: 4 articles -> 1 banner -> 4 articles -> 1 banner -> rest of articles
+    // Logic: 5 articles -> 1 banner -> 5 articles -> 1 banner -> rest of articles
     const gridItems: (BlogPost | { type: 'banner'; id: string })[] = [];
 
     articles.forEach((article, index) => {
         gridItems.push(article);
-        // Interject banner after the 4th, 8th etc item (index 3, 7...)
-        if ((index + 1) % 4 === 0) {
+        // Interject banner after every 5th item.
+        if ((index + 1) % 5 === 0) {
             gridItems.push({ type: 'banner', id: `banner-${index}` });
         }
     });

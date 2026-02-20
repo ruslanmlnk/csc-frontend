@@ -18,6 +18,11 @@ const withBackendUrl = (url: string | undefined, backendUrl: string): string => 
     return url.startsWith('/') ? `${backendUrl}${url}` : url
 }
 
+const toAbsoluteUrl = (url: string | undefined, backendUrl: string): string | null => {
+    if (!url) return null
+    return url.startsWith('/') ? `${backendUrl}${url}` : url
+}
+
 const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params
     const backendUrl = getBackendUrl()
@@ -101,6 +106,9 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
         }))
 
     const sidebarCategories = categories.map((c) => c.name)
+    const sidebarBannerImageUrl = toAbsoluteUrl(article.sidebarBanner?.image?.url, backendUrl)
+    const sidebarBannerHref = article.sidebarBanner?.link?.trim() || null
+    const sidebarBannerAlt = article.sidebarBanner?.caption?.trim() || 'Sidebar Promo'
 
     return (
         <div className="relative min-h-screen bg-[#0D0D0D] pt-[162.69px]">
@@ -136,6 +144,15 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                         tags={article.tags}
                         categories={sidebarCategories}
                         latestPosts={sidebarLatestPosts}
+                        banner={
+                            sidebarBannerImageUrl
+                                ? {
+                                    src: sidebarBannerImageUrl,
+                                    alt: sidebarBannerAlt,
+                                    href: sidebarBannerHref,
+                                }
+                                : null
+                        }
                     />
                 </div>
 
