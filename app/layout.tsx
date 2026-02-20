@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Inferra | Scaling traffic with data-driven decisions",
   description: "We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics.",
   icons: {
-    icon: "/logo.svg",
+    icon: "/Inferra.png",
   },
 };
 
