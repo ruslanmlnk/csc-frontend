@@ -11,7 +11,7 @@ import { forumThreadPageData } from './data';
 
 type UnknownRecord = Record<string, unknown>;
 
-const DEFAULT_AVATAR = '/images/logo.png';
+const DEFAULT_AVATAR = '/logo.svg';
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000';
 
 const asRecord = (value: unknown): UnknownRecord | null => {

@@ -185,7 +185,7 @@ const Header: React.FC = () => {
                 <div className="flex items-center gap-[12px] shrink-0">
                     <Link href="/" className="relative w-[77px] h-[58.69px] block">
                         <Image
-                            src="/images/logo.png"
+                            src="/logo.svg"
                             alt="Logo"
                             fill
                             className="object-contain brightness-0 invert"

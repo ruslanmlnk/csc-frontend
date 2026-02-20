@@ -417,7 +417,7 @@ const ProfilePage: React.FC = () => {
                   authorName={displayName}
                   date={formatThreadDate(thread.createdAt)}
                   replyCount={thread.commentsCount}
-                  authorAvatar={avatarUrl || '/images/logo.png'}
+                  authorAvatar={avatarUrl || '/logo.svg'}
                 />
               </Link>
             );

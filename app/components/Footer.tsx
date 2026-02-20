@@ -23,7 +23,7 @@ const Footer: React.FC = () => {
         <div className="flex flex-col items-start gap-[56px] self-stretch lg:self-auto">
           <Link href="/" className="relative w-[89px] h-[68px]">
             <Image
-              src="/images/logo.png"
+              src="/logo.svg"
               alt="Logo"
               fill
               className="object-contain brightness-0 invert"

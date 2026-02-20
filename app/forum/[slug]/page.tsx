@@ -32,7 +32,7 @@ type ThreadCardData = {
 }
 
 const THREADS_PER_PAGE = 12
-const DEFAULT_AVATAR = '/images/logo.png'
+const DEFAULT_AVATAR = '/logo.svg'
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 const CATEGORY_BANNER_IMAGE =
   'https://api.builder.io/api/v1/image/assets/TEMP/320fdcece1f77a65a87ca9821ec5eac14d2d2e21?width=1545'
