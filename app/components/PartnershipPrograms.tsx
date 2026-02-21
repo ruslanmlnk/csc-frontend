@@ -154,13 +154,13 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
         See More
       </Link>
 
-      {(banner?.image?.url || !banner) && (
+      {banner?.image?.url && (
         <div className="mt-[55px] hidden w-full max-w-[1240px] md:block">
           <div className="relative aspect-[1240/158] w-full overflow-hidden rounded-[40px]">
             {banner?.link ? (
               <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
                 <Image
-                  src={banner.image?.url || '/images/partnership-banner.png'}
+                  src={banner.image.url}
                   alt={banner.caption || 'Partnership Banner'}
                   fill
                   sizes="1240px"
@@ -169,8 +169,8 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
               </Link>
             ) : (
               <Image
-                src={banner?.image?.url || '/images/partnership-banner.png'}
-                alt={banner?.caption || 'Partnership Banner'}
+                src={banner.image.url}
+                alt={banner.caption || 'Partnership Banner'}
                 fill
                 sizes="1240px"
                 className="object-cover"

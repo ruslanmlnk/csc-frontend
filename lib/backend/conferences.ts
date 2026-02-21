@@ -40,6 +40,7 @@ export const GET_CONFERENCES = gql`
             height
           }
         }
+        noindex
       }
     }
   }
@@ -84,6 +85,7 @@ export const GET_CONFERENCE_BY_SLUG = gql`
             height
           }
         }
+        noindex
       }
     }
   }

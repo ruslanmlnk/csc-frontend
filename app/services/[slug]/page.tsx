@@ -1,9 +1,20 @@
+import type { Metadata } from 'next'
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getBackendUrl } from '@/lib/auth-server'
 import { getServiceBySlug, getServices } from '@/lib/backend/services'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const service = await getServiceBySlug(slug)
+  if (!service) return {}
+
+  return {
+    robots: service.noindex ? { index: false, follow: true } : undefined,
+  }
+}
 import ServiceDetailHero from '@/app/components/services/ServiceDetailHero'
 import ServicePromoCode from '@/app/components/services/ServicePromoCode'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
@@ -173,8 +184,8 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
             ) : null}
           </div>
 
-          {sidebarBannerImageUrl ? (
-            <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
+          <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
+            {sidebarBannerImageUrl ? (
               <div className="sticky top-[140px]">
                 {sidebarBannerHref ? (
                   <a
@@ -204,8 +215,10 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
                   </div>
                 )}
               </div>
-            </aside>
-          ) : null}
+            ) : (
+              <div className="sticky top-[140px] h-[727px] w-full invisible" />
+            )}
+          </aside>
         </div>
       </div>
 

@@ -56,6 +56,7 @@ export interface Article {
     tags?: Tag[];
     relatedArticles?: RelatedArticleSelection[];
     sidebarBanner?: Banner | null;
+    noindex?: boolean | null;
 }
 
 export interface BlogPageData {

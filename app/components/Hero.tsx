@@ -104,11 +104,11 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
         </div>
 
         {/* Bottom Hero Image (Image 7 in Figma) */}
-        {(banner?.image?.url || !banner) && (
+        {banner?.image?.url && (
           <Banner
-            src={banner?.image?.url || '/images/hero-graphic.webp'}
-            alt={banner?.caption || 'Hero Graphic'}
-            href={banner?.link || undefined}
+            src={banner.image.url}
+            alt={banner.caption || 'Hero Graphic'}
+            href={banner.link || undefined}
             className="mt-12 hidden md:block md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
             containerStyle={{ maxWidth: '100%' }}
           />

@@ -1,8 +1,19 @@
+import type { Metadata } from 'next'
 import React from 'react'
 import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getBackendUrl } from '@/lib/auth-server'
 import { getConferenceBySlug, getConferences } from '@/lib/backend/conferences'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  const conference = await getConferenceBySlug(slug)
+  if (!conference) return {}
+
+  return {
+    robots: conference.noindex ? { index: false, follow: true } : undefined,
+  }
+}
 import ConferenceDetailHero from '@/app/components/conferences/ConferenceDetailHero'
 import ConferenceCard from '@/app/components/conferences/ConferenceCard'
 import RichText from '@/app/components/blog/RichText'
@@ -138,8 +149,8 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
             ) : null}
           </div>
 
-          {sidebarBannerImageUrl ? (
-            <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
+          <aside className="hidden w-full max-w-[380px] shrink-0 xl:block">
+            {sidebarBannerImageUrl ? (
               <div className="sticky top-[140px]">
                 {sidebarBannerHref ? (
                   <a
@@ -169,8 +180,10 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
                   </div>
                 )}
               </div>
-            </aside>
-          ) : null}
+            ) : (
+              <div className="sticky top-[140px] h-[727px] w-full invisible" />
+            )}
+          </aside>
         </div>
       </div>
 

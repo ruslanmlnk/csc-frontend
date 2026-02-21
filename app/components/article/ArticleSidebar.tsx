@@ -55,30 +55,34 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
 
   return (
     <aside className="w-full lg:w-[380px] flex flex-col gap-16 shrink-0">
-      {normalizedBannerHref ? (
-        <a
-          href={normalizedBannerHref}
-          target={isExternalBannerHref ? '_blank' : undefined}
-          rel={isExternalBannerHref ? 'noopener noreferrer' : undefined}
-          aria-label={banner?.alt || 'Sidebar Promo'}
-          className="relative block w-full aspect-[380/727] rounded-[20px] overflow-hidden"
-        >
-          <Image
-            src={banner?.src || DEFAULT_SIDEBAR_BANNER}
-            alt={banner?.alt || 'Sidebar Promo'}
-            fill
-            className="object-cover"
-          />
-        </a>
+      {banner?.src ? (
+        normalizedBannerHref ? (
+          <a
+            href={normalizedBannerHref}
+            target={isExternalBannerHref ? '_blank' : undefined}
+            rel={isExternalBannerHref ? 'noopener noreferrer' : undefined}
+            aria-label={banner?.alt || 'Sidebar Promo'}
+            className="relative block w-full aspect-[380/727] rounded-[20px] overflow-hidden"
+          >
+            <Image
+              src={banner.src}
+              alt={banner?.alt || 'Sidebar Promo'}
+              fill
+              className="object-cover"
+            />
+          </a>
+        ) : (
+          <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
+            <Image
+              src={banner.src}
+              alt={banner?.alt || 'Sidebar Promo'}
+              fill
+              className="object-cover"
+            />
+          </div>
+        )
       ) : (
-        <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
-          <Image
-            src={banner?.src || DEFAULT_SIDEBAR_BANNER}
-            alt={banner?.alt || 'Sidebar Promo'}
-            fill
-            className="object-cover"
-          />
-        </div>
+        <div className="hidden lg:block relative w-full aspect-[380/727] rounded-[20px] overflow-hidden invisible" />
       )}
 
       <div className="flex flex-col p-8 rounded-[20px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] gap-10">

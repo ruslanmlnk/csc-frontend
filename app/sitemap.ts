@@ -14,6 +14,7 @@ type ForumThread = {
   categorySlug: string
   createdAt?: string | null
   updatedAt?: string | null
+  noindex?: boolean | null
 }
 
 const STATIC_ROUTES = ['/', '/blog', '/conferences', '/services', '/partnerships', '/jobs', '/forum', '/login', '/register', '/pagetest']
@@ -38,6 +39,13 @@ const asString = (value: unknown): string | null => {
   }
 
   return null
+}
+
+const asBoolean = (value: unknown): boolean => {
+  if (typeof value === 'boolean') {
+    return value
+  }
+  return false
 }
 
 const toDate = (value?: string | null): Date | undefined => {
@@ -129,6 +137,7 @@ const getForumThreads = async (): Promise<ForumThread[]> => {
       categorySlug,
       createdAt: asString(record.createdAt),
       updatedAt: asString(record.updatedAt),
+      noindex: asBoolean(record.noindex),
     })
 
     return acc
@@ -158,38 +167,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const entries: MetadataRoute.Sitemap = []
 
+  // Note: For static routes, we could fetch their respective Globals to check for noindex
+  // but for now we follow the user requirement for items first.
   for (const route of STATIC_ROUTES) {
     appendRoute(entries, siteUrl, route, now)
   }
 
   for (const article of articles) {
-    if (!article.slug) continue
+    if (!article.slug || article.noindex) continue
     appendRoute(entries, siteUrl, `/blog/${encodeURIComponent(article.slug)}`, toDate(article.publishedDate) || now)
   }
 
   for (const conference of conferences) {
-    if (!conference.slug) continue
+    if (!conference.slug || conference.noindex) continue
     appendRoute(entries, siteUrl, `/conferences/${encodeURIComponent(conference.slug)}`, toDate(conference.conferenceDate) || now)
   }
 
   for (const service of services) {
-    if (!service.slug) continue
+    if (!service.slug || service.noindex) continue
     appendRoute(entries, siteUrl, `/services/${encodeURIComponent(service.slug)}`, now)
   }
 
   for (const partnership of partnerships) {
-    if (!partnership.slug) continue
+    if (!partnership.slug || partnership.noindex) continue
     appendRoute(entries, siteUrl, `/partnerships/${encodeURIComponent(partnership.slug)}`, now)
   }
 
   for (const job of jobs) {
-    if (!job.slug) continue
+    if (!job.slug || job.noindex) continue
     appendRoute(entries, siteUrl, `/jobs/${encodeURIComponent(job.slug)}`, toDate(job.createdAt) || now)
   }
 
   const categoryDates = new Map<string, Date>()
 
   for (const thread of forumThreads) {
+    if (thread.noindex) continue
     const categorySlug = thread.categorySlug
     if (!categorySlug) continue
 

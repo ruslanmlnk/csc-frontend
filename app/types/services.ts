@@ -31,4 +31,5 @@ export interface ServiceItem {
   promoDescription?: string | null
   content?: unknown
   category: ServiceCategory
+  noindex?: boolean | null
 }

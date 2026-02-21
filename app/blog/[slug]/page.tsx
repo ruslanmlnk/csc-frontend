@@ -1,6 +1,17 @@
+import type { Metadata } from 'next'
 import React from 'react'
 import BlogCTA from '../../components/blog/BlogCTA'
 import { getArticleBySlug, getArticles, getCategories } from '@/lib/backend/blog'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params
+    const article = await getArticleBySlug(slug)
+    if (!article) return {}
+
+    return {
+        robots: article.noindex ? { index: false, follow: true } : undefined,
+    }
+}
 import { Article, Category } from '../../types/blog'
 import { getBackendUrl } from '@/lib/auth-server'
 import ArticleNotFound from '@/app/components/article/ArticleNotFound'

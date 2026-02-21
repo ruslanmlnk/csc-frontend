@@ -31,4 +31,5 @@ export interface JobItem {
   location: JobFilterOption
   experience: JobFilterOption
   format: JobFilterOption
+  noindex?: boolean | null
 }

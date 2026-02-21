@@ -224,13 +224,13 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
         See More Posts
       </Link>
 
-      {(banner?.image?.url || !banner) && (
+      {banner?.image?.url && (
         <div className="mt-16 hidden w-full max-w-[1240px] md:block">
           <div className="relative aspect-[1240/158] w-full overflow-hidden rounded-[40px]">
             {banner?.link ? (
               <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
                 <Image
-                  src={banner.image?.url || '/images/latest-posts-bottom-banner.png'}
+                  src={banner.image.url}
                   alt={banner.caption || 'Join Us Banner'}
                   fill
                   className="object-cover"
@@ -238,8 +238,8 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
               </Link>
             ) : (
               <Image
-                src={banner?.image?.url || '/images/latest-posts-bottom-banner.png'}
-                alt={banner?.caption || 'Join Us Banner'}
+                src={banner.image.url}
+                alt={banner.caption || 'Join Us Banner'}
                 fill
                 className="object-cover"
               />

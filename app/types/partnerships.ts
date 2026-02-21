@@ -45,4 +45,5 @@ export interface PartnershipItem {
   models?: PartnershipModel[] | null
   offers?: PartnershipOffer[] | null
   content?: unknown
+  noindex?: boolean | null
 }

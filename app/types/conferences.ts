@@ -28,4 +28,5 @@ export interface ConferenceItem {
   mainImage?: ConferenceMedia | null
   sidebarBanner?: ConferenceBanner | null
   content?: unknown
+  noindex?: boolean | null
 }

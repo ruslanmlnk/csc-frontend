@@ -29,6 +29,7 @@ export const GET_JOBS = gql`
           name
           slug
         }
+        noindex
       }
     }
   }
@@ -70,6 +71,7 @@ export const GET_JOB_BY_SLUG = gql`
           name
           slug
         }
+        noindex
       }
     }
   }

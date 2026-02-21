@@ -55,6 +55,7 @@ export const GET_PARTNERSHIPS = gql`
         offers {
           offer
         }
+        noindex
       }
     }
   }
@@ -102,6 +103,7 @@ export const GET_PARTNERSHIP_BY_SLUG = gql`
         offers {
           offer
         }
+        noindex
       }
     }
   }

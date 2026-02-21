@@ -20,6 +20,7 @@ export const GET_ARTICLES = gql`
         tags {
           tag
         }
+        noindex
       }
     }
   }
@@ -77,6 +78,7 @@ export const GET_ARTICLE_BY_SLUG = gql`
             name
           }
         }
+        noindex
       }
     }
   }

@@ -51,6 +51,7 @@ export const GET_SERVICES = gql`
           name
           slug
         }
+        noindex
       }
     }
   }
@@ -94,6 +95,7 @@ export const GET_SERVICE_BY_SLUG = gql`
           name
           slug
         }
+        noindex
       }
     }
   }
