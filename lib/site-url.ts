@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = 'http://localhost:3001'
+const DEFAULT_SITE_URL = 'https://inferra.media'
 
 const withProtocol = (value: string) => {
   if (value.startsWith('http://') || value.startsWith('https://')) {
