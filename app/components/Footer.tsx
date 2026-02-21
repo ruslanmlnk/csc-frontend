@@ -49,7 +49,7 @@ const Footer: React.FC = () => {
       {/* Copyright Section */}
       <div className="text-[#BDBDBD] text-center font-['Poppins'] text-[16px] font-normal leading-[26px] opacity-70">
         <span className="lg:hidden">
-          &copy; {currentYear}, ClickStorm Corporation.
+          &copy; {currentYear}, InferraMedia Corporation.
           <br />
           All Rights Reserved.
         </span>
