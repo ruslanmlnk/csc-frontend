@@ -55,7 +55,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
 
   return (
     <aside className="w-full lg:w-[380px] flex flex-col gap-16 shrink-0">
-      {banner?.src ? (
+      {banner?.src && (
         normalizedBannerHref ? (
           <a
             href={normalizedBannerHref}
@@ -81,8 +81,6 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
             />
           </div>
         )
-      ) : (
-        <div className="hidden lg:block relative w-full aspect-[380/727] rounded-[20px] overflow-hidden invisible" />
       )}
 
       <div className="flex flex-col p-8 rounded-[20px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] gap-10">
