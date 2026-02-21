@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
           <br />
           All Rights Reserved.
         </span>
-        <span className="hidden lg:inline">&copy; {currentYear}, ClickStorm Corporation. All Rights Reserved.</span>
+        <span className="hidden lg:inline">&copy; {currentYear}, InferraMedia Corporation. All Rights Reserved.</span>
       </div>
     </footer>
   );
