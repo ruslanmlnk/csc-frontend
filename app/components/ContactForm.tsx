@@ -10,6 +10,18 @@ type FormState = {
   message: string
 }
 
+type ContactFormContent = {
+  title?: string | null
+  description?: string | null
+  phone?: string | null
+  email?: string | null
+  address?: string | null
+}
+
+type ContactFormProps = {
+  data?: ContactFormContent
+}
+
 const initialState: FormState = {
   firstName: '',
   lastName: '',
@@ -18,11 +30,18 @@ const initialState: FormState = {
   message: '',
 }
 
-const ContactForm: React.FC = () => {
+const ContactForm: React.FC<ContactFormProps> = ({ data }) => {
   const [form, setForm] = useState<FormState>(initialState)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const title = data?.title || 'Connect with Us Today'
+  const description =
+    data?.description ||
+    'Our team is here to help you with any inquiries about our services and features.'
+  const phone = data?.phone || '+1 (800) 555-0199'
+  const contactEmail = data?.email || 'support@coinzy.com'
+  const address = data?.address || '123 Blockchain Ave, Crypto City, CC 10101'
 
   const setField =
     (field: keyof FormState) =>
@@ -97,10 +116,10 @@ const ContactForm: React.FC = () => {
         <div className="flex flex-col items-start gap-[40px] flex-1 self-stretch">
           <div className="flex flex-col justify-center items-start gap-[24px] self-stretch">
             <h2 className="self-stretch font-poppins text-[40px] md:text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)]">
-              Connect with Us Today
+              {title}
             </h2>
             <p className="self-stretch text-[#BDBDBD] font-poppins text-[16px] font-normal leading-[26px]">
-              Our team is here to help you with any inquiries about our services and features.
+              {description}
             </p>
           </div>
 
@@ -119,7 +138,7 @@ const ContactForm: React.FC = () => {
                   <span className="text-[#EEE] font-poppins text-[16px] font-normal leading-[26px]">Phone</span>
                 </div>
                 <span className="self-stretch text-[#FCFCFC] font-poppins text-[20px] font-medium leading-[32px]">
-                  +1 (800) 555-0199
+                  {phone}
                 </span>
               </div>
 
@@ -134,7 +153,7 @@ const ContactForm: React.FC = () => {
                   <span className="text-[#EEE] font-poppins text-[16px] font-normal leading-[26px]">E-mail</span>
                 </div>
                 <span className="self-stretch text-[#FCFCFC] font-poppins text-[20px] font-medium leading-[32px]">
-                  support@coinzy.com
+                  {contactEmail}
                 </span>
               </div>
             </div>
@@ -150,7 +169,7 @@ const ContactForm: React.FC = () => {
                 <span className="text-[#EEE] font-poppins text-[16px] font-normal leading-[26px]">Address</span>
               </div>
               <span className="self-stretch text-[#FCFCFC] font-poppins text-[20px] font-medium leading-[32px]">
-                123 Blockchain Ave, Crypto City, CC 10101
+                {address}
               </span>
             </div>
           </div>
@@ -260,4 +279,3 @@ const ContactForm: React.FC = () => {
 }
 
 export default ContactForm
-

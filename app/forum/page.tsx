@@ -32,6 +32,8 @@ type ForumThreadItem = {
   dateLabel: string
   subCategoryId: string
   subCategorySlug?: string
+  orderId: number
+  createdAtTimestamp: number
 }
 
 const FORUM_BANNER_IMAGE =
@@ -55,6 +57,21 @@ const asString = (value: unknown): string | null => {
 
   if (typeof value === 'number') {
     return String(value)
+  }
+
+  return null
+}
+
+const asNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
   }
 
   return null
@@ -178,7 +195,7 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
   const root = asRecord(payload)
   const docs = Array.isArray(root?.docs) ? root.docs : []
 
-  return docs.reduce<ForumThreadItem[]>((acc, item) => {
+  const parsedThreads = docs.reduce<ForumThreadItem[]>((acc, item) => {
     const record = asRecord(item)
     if (!record) {
       return acc
@@ -196,6 +213,8 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
 
     const subCategoryValue = asRecord(record.category)
     const subCategorySlug = asString(subCategoryValue?.slug) || undefined
+    const createdAtRaw = asString(record.createdAt)
+    const createdAtTimestamp = createdAtRaw ? new Date(createdAtRaw).getTime() : NaN
 
     acc.push({
       id,
@@ -203,11 +222,21 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
       subCategorySlug,
       title: asString(record.title) || 'Untitled thread',
       authorName: resolveAuthorName(record.author),
-      dateLabel: formatDateLabel(asString(record.createdAt)),
+      dateLabel: formatDateLabel(createdAtRaw),
+      orderId: asNumber(record.orderId) || 0,
+      createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,
     })
 
     return acc
   }, [])
+
+  return parsedThreads.sort((a, b) => {
+    if (b.orderId !== a.orderId) {
+      return b.orderId - a.orderId
+    }
+
+    return b.createdAtTimestamp - a.createdAtTimestamp
+  })
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -237,7 +266,7 @@ export default async function ForumPage() {
     backendRequest<Record<string, unknown>>('/api/forum-sub-categories?limit=500&sort=name&depth=1', {
       cache: 'no-store',
     }),
-    backendRequest<Record<string, unknown>>('/api/threads?limit=500&sort=-createdAt&depth=2', {
+    backendRequest<Record<string, unknown>>('/api/threads?limit=500&sort=-orderId,-createdAt&depth=2', {
       cache: 'no-store',
     }),
     getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG),

@@ -51,6 +51,13 @@ type HomeQueryResponse = {
         } | null;
       }[] | null;
     } | null;
+    contactForm?: {
+      title?: string | null;
+      description?: string | null;
+      phone?: string | null;
+      email?: string | null;
+      address?: string | null;
+    } | null;
     seo?: {
       title?: string | null;
       description?: string | null;
@@ -110,6 +117,13 @@ const HOME_QUERY = gql`
           }
         }
       }
+      contactForm {
+        title
+        description
+        phone
+        email
+        address
+      }
       seo {
         title
         description
@@ -158,6 +172,7 @@ const Home: React.FC = async () => {
     : undefined;
   const whatWeDo = data?.Home?.whatWeDo ?? undefined;
   const coreValues = data?.Home?.coreValues ?? undefined;
+  const contactForm = data?.Home?.contactForm ?? undefined;
 
   const backendUrl = getBackendUrl();
   const processBanner = (banner: BannerData | undefined) => {
@@ -187,7 +202,7 @@ const Home: React.FC = async () => {
       <UsefulServices />
       <PartnershipPrograms banner={partnershipsProgramsBanner} />
       <Vacancies />
-      <ContactForm />
+      <ContactForm data={contactForm} />
     </main>
   );
 };

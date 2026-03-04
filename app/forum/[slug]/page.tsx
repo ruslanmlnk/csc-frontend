@@ -57,6 +57,21 @@ const asString = (value: unknown): string | null => {
   return null
 }
 
+const asNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+
+  return null
+}
+
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   if (!url) {
     return null
@@ -325,7 +340,7 @@ export default function ForumCategoryPage() {
 
       try {
         const response = await fetch(
-          `/api/threads?page=${currentPage}&limit=${THREADS_PER_PAGE}&depth=2&sort=-createdAt&categoryId=${encodeURIComponent(subCategory.id)}`,
+          `/api/threads?page=${currentPage}&limit=${THREADS_PER_PAGE}&depth=2&sort=-orderId,-createdAt&categoryId=${encodeURIComponent(subCategory.id)}`,
           { cache: 'no-store' },
         )
         const payload = (await response.json().catch(() => null)) as
@@ -352,20 +367,33 @@ export default function ForumCategoryPage() {
               return null
             }
 
+            const createdAtRaw = asString(doc.createdAt)
+            const createdAtTimestamp = createdAtRaw ? new Date(createdAtRaw).getTime() : NaN
+
             return {
               id: threadId,
               title: asString(doc.title) || 'Untitled thread',
               description: subCategory.description || 'We read, delve into, discuss',
               authorName: resolveAuthorName(doc.author),
-              date: formatDate(asString(doc.createdAt)),
+              date: formatDate(createdAtRaw),
               authorAvatar: resolveAuthorAvatar(doc.author),
+              orderId: asNumber(doc.orderId) || 0,
+              createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,
             }
           })
           .filter(
             (
               item,
-            ): item is Omit<ThreadCardData, 'replyCount'> => Boolean(item),
+            ): item is (Omit<ThreadCardData, 'replyCount'> & { orderId: number; createdAtTimestamp: number }) =>
+              Boolean(item),
           )
+          .sort((a, b) => {
+            if (b.orderId !== a.orderId) {
+              return b.orderId - a.orderId
+            }
+
+            return b.createdAtTimestamp - a.createdAtTimestamp
+          })
 
         const counts = await Promise.all(
           cardsBase.map(async (item) => ({
@@ -376,7 +404,12 @@ export default function ForumCategoryPage() {
         const countsMap = new Map(counts.map((item) => [item.id, item.replyCount]))
 
         const cards: ThreadCardData[] = cardsBase.map((item) => ({
-          ...item,
+          id: item.id,
+          title: item.title,
+          description: item.description,
+          authorName: item.authorName,
+          date: item.date,
+          authorAvatar: item.authorAvatar,
           replyCount: countsMap.get(item.id) || 0,
         }))
 
