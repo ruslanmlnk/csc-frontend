@@ -39,6 +39,7 @@ export const GET_ARTICLE_BY_SLUG = gql`
         title
         slug
         publishedDate
+        views
         cardPoster {
           url
         }
@@ -148,6 +149,21 @@ const asString = (value: unknown): string | null => {
   return trimmed || null
 }
 
+const asNumber = (value: unknown): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return parsed
+    }
+  }
+
+  return null
+}
+
 const resolveBanner = (value: unknown): Banner | null => {
   const bannerRecord = asRecord(value)
   if (!bannerRecord) {
@@ -173,6 +189,22 @@ export async function getArticles() {
 export async function getArticleBySlug(slug: string) {
   const data = await client.request<ArticlesResponse>(GET_ARTICLE_BY_SLUG, { slug })
   return data.Articles.docs[0] || null
+}
+
+export async function incrementArticleViews(slug: string): Promise<number | null> {
+  const { ok, data } = await backendRequest<{ views?: unknown }>(
+    `/api/articles/${encodeURIComponent(slug)}/view`,
+    {
+      method: 'POST',
+      cache: 'no-store',
+    },
+  )
+
+  if (!ok || !data) {
+    return null
+  }
+
+  return asNumber(data.views)
 }
 
 export async function getCategories() {

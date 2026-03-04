@@ -59,6 +59,7 @@ export interface Article {
     title: string;
     slug: string;
     publishedDate: string;
+    views?: number | null;
     content: unknown; // Lexical rich text
     image: Media;
     cardPoster?: Media | null;

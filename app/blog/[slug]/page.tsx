@@ -29,6 +29,7 @@ import ArticleNotFound from '@/app/components/article/ArticleNotFound'
 import ArticleBackLink from '@/app/components/article/ArticleBackLink'
 import ArticleHero from '@/app/components/article/ArticleHero'
 import ArticleContent from '@/app/components/article/ArticleContent'
+import ArticlePublicationStats from '@/app/components/article/ArticlePublicationStats'
 import ArticleAuthorCard from '@/app/components/article/ArticleAuthorCard'
 import ArticleSidebar from '@/app/components/article/ArticleSidebar'
 import ArticleRelated from '@/app/components/article/ArticleRelated'
@@ -151,6 +152,12 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                             content={article.content}
                             backendUrl={backendUrl}
                             tags={article.tags}
+                        />
+
+                        <ArticlePublicationStats
+                            slug={article.slug}
+                            publishedDateLabel={publishedDateLabel}
+                            initialViews={article.views}
                         />
 
                         <ArticleAuthorCard
