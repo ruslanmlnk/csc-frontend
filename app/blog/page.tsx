@@ -126,7 +126,7 @@ const BlogPageContent = () => {
 
     // Map articles to the format expected by components
     const formatArticle = (article: Article) => {
-        let imageUrl = article.image.url;
+        let imageUrl = article.cardPoster?.url || article.image?.url || '/images/blog-post-1.png';
         if (imageUrl.startsWith('/')) {
             imageUrl = `${backendUrl}${imageUrl}`;
         }

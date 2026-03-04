@@ -174,7 +174,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   for (const article of articles) {
-    if (!article.slug || article.noindex) continue
+    if (!article.slug || article.seo?.noindex) continue
     appendRoute(entries, siteUrl, `/blog/${encodeURIComponent(article.slug)}`, toDate(article.publishedDate) || now)
   }
 

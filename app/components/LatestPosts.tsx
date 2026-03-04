@@ -11,6 +11,9 @@ type BlogApiArticle = {
   title?: string | null
   slug?: string | null
   publishedDate?: string | null
+  cardPoster?: {
+    url?: string | null
+  } | null
   image?: {
     url?: string | null
   } | null
@@ -109,7 +112,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
               title,
               date: formatPublishedDate(article.publishedDate),
               category: article.category?.name?.trim() || 'Uncategorized',
-              image: toAbsoluteMediaUrl(article.image?.url) || '/images/blog-post-1.png',
+              image: toAbsoluteMediaUrl(article.cardPoster?.url || article.image?.url) || '/images/blog-post-1.png',
               slug: article.slug || null,
               publishedDate: article.publishedDate || null,
             }

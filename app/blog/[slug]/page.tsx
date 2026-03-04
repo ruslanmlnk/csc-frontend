@@ -8,8 +8,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const article = await getArticleBySlug(slug)
     if (!article) return {}
 
+    const seoTitle = article.seo?.title?.trim()
+    const seoDescription = article.seo?.description?.trim()
+    const ogImageUrl = article.seo?.ogImage?.url
+
     return {
-        robots: article.noindex ? { index: false, follow: true } : undefined,
+        title: seoTitle || article.title,
+        description: seoDescription || undefined,
+        openGraph: {
+            title: seoTitle || article.title,
+            description: seoDescription || undefined,
+            images: ogImageUrl ? [{ url: ogImageUrl }] : [],
+        },
+        robots: article.seo?.noindex ? { index: false, follow: true } : undefined,
     }
 }
 import { Article, Category } from '../../types/blog'
@@ -82,7 +93,7 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
             publishedDate: a.publishedDate,
             categoryName: a.category.name,
             title: a.title,
-            image: withBackendUrl(a.image.url, backendUrl),
+            image: withBackendUrl(a.cardPoster?.url || a.image.url, backendUrl),
         }))
 
     const fallbackRelatedArticles = allArticles
@@ -94,7 +105,7 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
             publishedDate: a.publishedDate,
             categoryName: a.category.name,
             title: a.title,
-            image: withBackendUrl(a.image.url, backendUrl),
+            image: withBackendUrl(a.cardPoster?.url || a.image.url, backendUrl),
         }))
 
     const formattedRelatedArticles = manualRelatedArticles.length > 0

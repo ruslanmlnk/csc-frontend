@@ -11,6 +11,9 @@ export const GET_ARTICLES = gql`
         title
         slug
         publishedDate
+        cardPoster {
+          url
+        }
         image {
           url
         }
@@ -20,7 +23,9 @@ export const GET_ARTICLES = gql`
         tags {
           tag
         }
-        noindex
+        seo {
+          noindex
+        }
       }
     }
   }
@@ -34,6 +39,9 @@ export const GET_ARTICLE_BY_SLUG = gql`
         title
         slug
         publishedDate
+        cardPoster {
+          url
+        }
         author {
           id
           name
@@ -71,6 +79,9 @@ export const GET_ARTICLE_BY_SLUG = gql`
           title
           slug
           publishedDate
+          cardPoster {
+            url
+          }
           image {
             url
           }
@@ -78,7 +89,14 @@ export const GET_ARTICLE_BY_SLUG = gql`
             name
           }
         }
-        noindex
+        seo {
+          title
+          description
+          ogImage {
+            url
+          }
+          noindex
+        }
       }
     }
   }

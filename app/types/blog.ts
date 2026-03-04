@@ -36,12 +36,22 @@ export interface RelatedArticleSelection {
     title: string;
     slug: string;
     publishedDate: string;
+    cardPoster?: {
+        url: string;
+    } | null;
     image: {
         url: string;
     };
     category: {
         name: string;
     };
+}
+
+export interface ArticleSEO {
+    title?: string | null;
+    description?: string | null;
+    ogImage?: Media | null;
+    noindex?: boolean | null;
 }
 
 export interface Article {
@@ -51,12 +61,13 @@ export interface Article {
     publishedDate: string;
     content: unknown; // Lexical rich text
     image: Media;
+    cardPoster?: Media | null;
     category: Category;
     author?: Author | null;
     tags?: Tag[];
     relatedArticles?: RelatedArticleSelection[];
     sidebarBanner?: Banner | null;
-    noindex?: boolean | null;
+    seo?: ArticleSEO | null;
 }
 
 export interface BlogPageData {

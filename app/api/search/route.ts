@@ -75,7 +75,7 @@ export async function GET(request: Request) {
               href: article.slug ? `/blog/${article.slug}` : '/blog',
               category: article.category?.name || 'Blog',
               publishedDate: article.publishedDate || null,
-              imageUrl: article.image?.url || null,
+              imageUrl: article.cardPoster?.url || article.image?.url || null,
             })),
           MAX_RESULTS_PER_TYPE,
         )
