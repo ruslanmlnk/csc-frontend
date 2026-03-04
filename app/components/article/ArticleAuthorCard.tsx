@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import { Facebook, Globe, Instagram, Linkedin, Music2, Send } from 'lucide-react'
 import React from 'react'
+import { toTelegramHref } from '@/lib/socialLinks'
 
 type AuthorSocialLinks = {
   facebook?: string
@@ -56,7 +57,7 @@ const ArticleAuthorCard: React.FC<ArticleAuthorCardProps> = ({
     {
       key: 'telegram',
       label: 'Telegram',
-      href: toExternalUrl(authorSocials?.telegram),
+      href: toTelegramHref(authorSocials?.telegram),
       icon: <Send className="w-4 h-4" />,
     },
     {

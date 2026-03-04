@@ -7,6 +7,7 @@ import { Plus, UserRound, Users, Loader2, Globe } from 'lucide-react';
 import CreateThreadModal from './CreateThreadModal';
 import { BackendUser } from '@/lib/backend/users';
 import { getProfilePageGlobals, type ProfilePageBanner } from '@/lib/backend/profilePageGlobals';
+import { toTelegramHref } from '@/lib/socialLinks';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
 import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
@@ -311,6 +312,7 @@ const ProfilePage: React.FC = () => {
   const profileBannerAlt = profileBanner?.alt || 'Profile banner';
   const profileBannerHref = profileBanner?.href?.trim() || null;
   const isExternalProfileBannerHref = Boolean(profileBannerHref && /^https?:\/\//i.test(profileBannerHref));
+  const telegramHref = toTelegramHref(user?.telegram);
 
   return (
     <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black pb-20">
@@ -348,8 +350,8 @@ const ProfilePage: React.FC = () => {
                       <InstagramIcon size={24} />
                     </Link>
                   )}
-                  {user?.telegram && (
-                    <Link href={`https://t.me/${user.telegram.replace('@', '')}`} target="_blank" className="hover:opacity-80 transition-opacity">
+                  {telegramHref && (
+                    <Link href={telegramHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
                       <TelegramIcon size={24} />
                     </Link>
                   )}

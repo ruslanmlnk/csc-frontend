@@ -9,6 +9,7 @@ import ForumCategoryThreadCard from '@/app/components/forum/ForumCategoryThreadC
 import { backendRequest } from '@/lib/backend/client';
 import { getThreadComments } from '@/lib/backend/comments';
 import { getProfilePageGlobals } from '@/lib/backend/profilePageGlobals';
+import { toTelegramHref } from '@/lib/socialLinks';
 import { getThreads } from '@/lib/backend/threads';
 
 type UnknownRecord = Record<string, unknown>;
@@ -334,7 +335,7 @@ export default async function PublicProfilePage({
     const bio = user.bio || 'Description not filled in';
     const avatarUrl = user.avatarUrl || DEFAULT_AVATAR;
     const instagramHandle = normalizeSocialHandle(user.instagram);
-    const telegramHandle = normalizeSocialHandle(user.telegram);
+    const telegramHref = toTelegramHref(user.telegram);
     const tiktokHandle = normalizeSocialHandle(user.tiktok);
     const websiteHref = toWebsiteHref(user.website);
     const profileBannerSrc = profilePageGlobals.banner?.src || '/images/profile-banner.png';
@@ -361,8 +362,8 @@ export default async function PublicProfilePage({
                                             <InstagramIcon size={24} />
                                         </a>
                                     ) : null}
-                                    {telegramHandle ? (
-                                        <a href={`https://t.me/${telegramHandle}`} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity" aria-label="Telegram">
+                                    {telegramHref ? (
+                                        <a href={telegramHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity" aria-label="Telegram">
                                             <TelegramIcon size={24} />
                                         </a>
                                     ) : null}
