@@ -168,6 +168,10 @@ const Header: React.FC = () => {
         };
     }, [isAccountPopupOpen]);
 
+    useEffect(() => {
+        setIsSearchOpen(false);
+    }, [pathname]);
+
     const avatarRaw =
         typeof currentUser?.avatar === 'string'
             ? currentUser.avatar

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Plus, UserRound, Users, Loader2, Globe } from 'lucide-react';
 import CreateThreadModal from './CreateThreadModal';
 import { BackendUser } from '@/lib/backend/users';
+import { getProfilePageGlobals, type ProfilePageBanner } from '@/lib/backend/profilePageGlobals';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
 import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
@@ -187,6 +188,7 @@ const ProfilePage: React.FC = () => {
   const [user, setUser] = useState<BackendUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [profileBanner, setProfileBanner] = useState<ProfilePageBanner | null>(null);
 
   useEffect(() => {
     const loadUser = async () => {
@@ -205,6 +207,24 @@ const ProfilePage: React.FC = () => {
       }
     };
     loadUser();
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadProfileBanner = async () => {
+      const { banner } = await getProfilePageGlobals();
+
+      if (active) {
+        setProfileBanner(banner);
+      }
+    };
+
+    loadProfileBanner();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const refreshUserThreads = useCallback(async () => {
@@ -287,6 +307,10 @@ const ProfilePage: React.FC = () => {
         : null;
   const avatarUrl = toAbsoluteMediaUrl(avatarRaw);
   const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
+  const profileBannerSrc = profileBanner?.src || '/images/profile-banner.png';
+  const profileBannerAlt = profileBanner?.alt || 'Profile banner';
+  const profileBannerHref = profileBanner?.href?.trim() || null;
+  const isExternalProfileBannerHref = Boolean(profileBannerHref && /^https?:\/\//i.test(profileBannerHref));
 
   return (
     <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black pb-20">
@@ -367,7 +391,19 @@ const ProfilePage: React.FC = () => {
         </section>
 
         <section className="relative w-full h-[158px] rounded-[40px] overflow-hidden mt-[54px]">
-          <Image src="/images/profile-banner.png" alt="Profile banner" fill className="object-cover" />
+          {profileBannerHref ? (
+            <Link
+              href={profileBannerHref}
+              target={isExternalProfileBannerHref ? '_blank' : undefined}
+              rel={isExternalProfileBannerHref ? 'noopener noreferrer' : undefined}
+              aria-label={profileBannerAlt}
+              className="block h-full w-full"
+            >
+              <Image src={profileBannerSrc} alt={profileBannerAlt} fill className="object-cover" />
+            </Link>
+          ) : (
+            <Image src={profileBannerSrc} alt={profileBannerAlt} fill className="object-cover" />
+          )}
         </section>
 
         <section className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-6">

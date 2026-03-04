@@ -8,6 +8,7 @@ import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
 import ForumCategoryThreadCard from '@/app/components/forum/ForumCategoryThreadCard';
 import { backendRequest } from '@/lib/backend/client';
 import { getThreadComments } from '@/lib/backend/comments';
+import { getProfilePageGlobals } from '@/lib/backend/profilePageGlobals';
 import { getThreads } from '@/lib/backend/threads';
 
 type UnknownRecord = Record<string, unknown>;
@@ -325,7 +326,10 @@ export default async function PublicProfilePage({
         notFound();
     }
 
-    const threads = await getPublicThreads(user.id);
+    const [threads, profilePageGlobals] = await Promise.all([
+        getPublicThreads(user.id),
+        getProfilePageGlobals(),
+    ]);
     const displayName = user.name || 'Member';
     const bio = user.bio || 'Description not filled in';
     const avatarUrl = user.avatarUrl || DEFAULT_AVATAR;
@@ -333,6 +337,10 @@ export default async function PublicProfilePage({
     const telegramHandle = normalizeSocialHandle(user.telegram);
     const tiktokHandle = normalizeSocialHandle(user.tiktok);
     const websiteHref = toWebsiteHref(user.website);
+    const profileBannerSrc = profilePageGlobals.banner?.src || '/images/profile-banner.png';
+    const profileBannerAlt = profilePageGlobals.banner?.alt || 'Profile banner';
+    const profileBannerHref = profilePageGlobals.banner?.href?.trim() || null;
+    const isExternalProfileBannerHref = Boolean(profileBannerHref && /^https?:\/\//i.test(profileBannerHref));
 
     return (
         <div className="relative min-h-screen bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black pb-20">
@@ -396,7 +404,19 @@ export default async function PublicProfilePage({
                 </section>
 
                 <section className="relative w-full h-[158px] rounded-[40px] overflow-hidden mt-[54px]">
-                    <Image src="/images/profile-banner.png" alt="Profile banner" fill className="object-cover" />
+                    {profileBannerHref ? (
+                        <Link
+                            href={profileBannerHref}
+                            target={isExternalProfileBannerHref ? '_blank' : undefined}
+                            rel={isExternalProfileBannerHref ? 'noopener noreferrer' : undefined}
+                            aria-label={profileBannerAlt}
+                            className="block h-full w-full"
+                        >
+                            <Image src={profileBannerSrc} alt={profileBannerAlt} fill className="object-cover" />
+                        </Link>
+                    ) : (
+                        <Image src={profileBannerSrc} alt={profileBannerAlt} fill className="object-cover" />
+                    )}
                 </section>
 
                 <section className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
