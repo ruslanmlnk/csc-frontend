@@ -70,12 +70,14 @@ type PageGlobalResponse = {
       | string
       | null
   } | null
+  pins?: unknown
 }
 
 export type PageGlobalData = {
   heroV2: PageHeroV2
   sidebarBanner: PageSidebarBanner
   seo: PageSeo
+  pins: unknown[]
 }
 
 const asRecord = (value: unknown): UnknownRecord | null => {
@@ -123,6 +125,7 @@ export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> =
       heroV2: null,
       sidebarBanner: null,
       seo: null,
+      pins: [],
     }
   }
 
@@ -168,5 +171,6 @@ export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> =
           ogImage: ogImageUrl ? { url: ogImageUrl } : null,
         }
       : null,
+    pins: Array.isArray(data.pins) ? data.pins : [],
   }
 }

@@ -98,6 +98,27 @@ const resolveEntityId = (value: unknown): string | null => {
   return asString(objectValue.id)
 }
 
+const parsePinnedThreadIds = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const unique = new Set<string>()
+  const orderedIds: string[] = []
+
+  for (const item of value) {
+    const id = resolveEntityId(item)
+    if (!id || unique.has(id)) {
+      continue
+    }
+
+    unique.add(id)
+    orderedIds.push(id)
+  }
+
+  return orderedIds
+}
+
 const formatDateLabel = (value: string | null): string => {
   if (!value) {
     return 'Unknown date'
@@ -287,6 +308,12 @@ export default async function ForumPage() {
     forumSubCategories.map((subCategory) => [subCategory.id, subCategory.slug]),
   )
 
+  const threadById = new Map(forumThreads.map((thread) => [thread.id, thread]))
+  const pinnedThreadIds = parsePinnedThreadIds(forumPageGlobal.pins)
+  const pinnedThreads = pinnedThreadIds
+    .map((threadId) => threadById.get(threadId))
+    .filter((thread): thread is ForumThreadItem => Boolean(thread))
+
   const sectionsFromCategories: ForumThreadsColumnSection[] = forumCategories
     .map((category) => {
       const subCategoryCards = forumSubCategories
@@ -332,7 +359,8 @@ export default async function ForumPage() {
           },
         ].filter((section) => section.threads.length > 0)
 
-  const popularThreads: ForumSidebarThread[] = forumThreads.slice(0, 3).map((thread) => {
+  const popularThreadsSource = pinnedThreads.length > 0 ? pinnedThreads : forumThreads
+  const popularThreads: ForumSidebarThread[] = popularThreadsSource.slice(0, 3).map((thread) => {
     const subCategorySlug = thread.subCategorySlug || subCategorySlugById.get(thread.subCategoryId)
     const href = subCategorySlug
       ? `/forum/${encodeURIComponent(subCategorySlug)}/${encodeURIComponent(thread.id)}`
