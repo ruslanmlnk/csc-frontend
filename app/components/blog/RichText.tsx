@@ -14,6 +14,12 @@ interface LexicalNode {
     listType?: string
     url?: string
     level?: number
+    src?: string
+    alt?: string
+    altText?: string
+    width?: number
+    height?: number
+    value?: unknown
     fields?: {
         [key: string]: unknown
     }
@@ -32,11 +38,19 @@ interface RichTextProps {
 
 const BANNER_MARKER_REGEX = /\[\[BANNER(?::([^\]]+))?\]\]/
 const DEFAULT_BANNER_SRC = '/images/latest-posts-bottom-banner.png'
-const ARTICLE_HEADING_CLASS = 'text-[#FCFCFC] text-[32px] font-medium leading-[40px] tracking-[-0.64px] my-0'
-const ARTICLE_H5_CLASS = 'text-[#FCFCFC] text-[20px] font-normal leading-[32px] tracking-normal my-0 !mb-5'
+const DEFAULT_HEADING_CLASS = 'text-[#FCFCFC] text-[32px] font-medium leading-[40px] tracking-[-0.64px] my-0'
+const ARTICLE_HEADING_CLASSES: Record<HeadingTag, string> = {
+    h1: 'text-[#FCFCFC] text-[48px] font-medium leading-[56px] tracking-[-1.2px] my-0',
+    h2: 'text-[#FCFCFC] text-[40px] font-medium leading-[48px] tracking-[-0.96px] my-0',
+    h3: 'text-[#FCFCFC] text-[32px] font-medium leading-[40px] tracking-[-0.64px] my-0',
+    h4: 'text-[#FCFCFC] text-[28px] font-medium leading-[36px] tracking-[-0.48px] my-0',
+    h5: 'text-[#FCFCFC] text-[24px] font-medium leading-[32px] tracking-[-0.32px] my-0',
+    h6: 'text-[#FCFCFC] text-[20px] font-medium leading-[28px] tracking-normal my-0',
+}
 const ARTICLE_UNORDERED_LIST_CLASS = 'my-0 list-disc pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_ORDERED_LIST_CLASS = 'my-0 list-decimal pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_LIST_ITEM_CLASS = 'last:mb-0 text-[#9E9E9E] font-poppins text-[20px] font-normal leading-[32px] tracking-normal'
+const ARTICLE_IMAGE_SIZES = '(max-width: 860px) 100vw, 796px'
 const ARTICLE_TEXT_BANNER_STYLE: React.CSSProperties = {
     width: '100%',
     maxWidth: 796,
@@ -92,6 +106,58 @@ const CONTACT_FALLBACK_ICON = (
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null
+
+const asString = (value: unknown): string | null => {
+    if (typeof value !== 'string') {
+        return null
+    }
+
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : null
+}
+
+const asPositiveInt = (value: unknown): number | null => {
+    if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+        return Math.round(value)
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+        const parsed = Number(value)
+        if (Number.isFinite(parsed) && parsed > 0) {
+            return Math.round(parsed)
+        }
+    }
+
+    return null
+}
+
+const pickFirstString = (...values: Array<string | null | undefined>): string | null => {
+    for (const value of values) {
+        if (typeof value === 'string' && value.trim().length > 0) {
+            return value
+        }
+    }
+
+    return null
+}
+
+const pickFirstPositiveInt = (...values: Array<number | null | undefined>): number | null => {
+    for (const value of values) {
+        if (typeof value === 'number' && Number.isFinite(value) && value > 0) {
+            return Math.round(value)
+        }
+    }
+
+    return null
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null => {
+    if (!isObject(value)) {
+        return null
+    }
+
+    return value
+}
 
 const isHeadingTag = (value: string | undefined): value is HeadingTag =>
     value === 'h1'
@@ -185,6 +251,73 @@ const getMediaUrlFromRelation = (relation: unknown): string | undefined => {
 
     const mediaDoc = value as MediaDoc
     return typeof mediaDoc.url === 'string' ? mediaDoc.url : undefined
+}
+
+type ImageRenderData = {
+    src: string
+    alt: string
+    width: number
+    height: number
+}
+
+const getImageRenderData = (node: LexicalNode, backendUrl: string | undefined): ImageRenderData | null => {
+    const nodeRecord = asRecord(node)
+    const fieldsRecord = asRecord(node.fields)
+    const valueRecord = asRecord(node.value)
+    const nestedValueRecord = asRecord(valueRecord?.value)
+
+    const rawSrc = pickFirstString(
+        getMediaUrlFromRelation(node.value),
+        getMediaUrlFromRelation(fieldsRecord?.image),
+        getMediaUrlFromRelation(fieldsRecord?.media),
+        asString(node.src),
+        asString(node.url),
+        asString(nodeRecord?.url),
+        asString(valueRecord?.url),
+        asString(valueRecord?.src),
+        asString(nestedValueRecord?.url),
+        asString(nestedValueRecord?.src),
+    )
+
+    if (!rawSrc) {
+        return null
+    }
+
+    const resolvedSrc = withBackendUrl(rawSrc, backendUrl) || rawSrc
+    const alt = pickFirstString(
+        asString(node.altText),
+        asString(node.alt),
+        asString(nodeRecord?.alt),
+        asString(nodeRecord?.altText),
+        asString(fieldsRecord?.alt),
+        asString(valueRecord?.alt),
+        asString(valueRecord?.altText),
+        asString(nestedValueRecord?.alt),
+        asString(nestedValueRecord?.altText),
+    ) || 'Article image'
+
+    const width = pickFirstPositiveInt(
+        asPositiveInt(node.width),
+        asPositiveInt(nodeRecord?.width),
+        asPositiveInt(fieldsRecord?.width),
+        asPositiveInt(valueRecord?.width),
+        asPositiveInt(nestedValueRecord?.width),
+    ) || 1200
+
+    const height = pickFirstPositiveInt(
+        asPositiveInt(node.height),
+        asPositiveInt(nodeRecord?.height),
+        asPositiveInt(fieldsRecord?.height),
+        asPositiveInt(valueRecord?.height),
+        asPositiveInt(nestedValueRecord?.height),
+    ) || 675
+
+    return {
+        src: resolvedSrc,
+        alt,
+        width,
+        height,
+    }
 }
 
 const isRichTextContent = (value: unknown): value is RichTextContent => {
@@ -360,6 +493,28 @@ const RichText: React.FC<RichTextProps> = ({
         return <Fragment key={parentIndex}>{blocks}</Fragment>
     }
 
+    const renderArticleImage = (
+        image: ImageRenderData,
+        key: string,
+        withTopSpacing: boolean,
+    ) => {
+        return (
+            <figure
+                key={key}
+                className={`${withTopSpacing ? 'mt-8' : ''} my-0 overflow-hidden rounded-[30px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A]`.trim()}
+            >
+                <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    sizes={ARTICLE_IMAGE_SIZES}
+                    className="h-auto w-full object-cover"
+                />
+            </figure>
+        )
+    }
+
     const renderNodes = (nodes: LexicalNode[]) => {
         return nodes.map((node, index) => {
             const previousNode = index > 0 ? nodes[index - 1] : undefined
@@ -392,13 +547,25 @@ const RichText: React.FC<RichTextProps> = ({
                     const previousHasInlineBanner = paragraphHasBannerMarker(previousNode)
                     const headingSpacingClass = (index === 0 || previousIsBannerBlock || previousHasInlineBanner) ? 'mt-0' : 'mt-[20px]'
                     const headingTypographyClass =
-                        variant === 'article' && HeadingTag === 'h5'
-                            ? ARTICLE_H5_CLASS
-                            : ARTICLE_HEADING_CLASS
+                        variant === 'article'
+                            ? ARTICLE_HEADING_CLASSES[HeadingTag as HeadingTag]
+                            : DEFAULT_HEADING_CLASS
                     return (
                         <HeadingTag key={index} className={`${headingTypographyClass} ${headingSpacingClass}`}>
                             {node.children ? renderNodes(node.children) : null}
                         </HeadingTag>
+                    )
+                case 'upload':
+                case 'image':
+                    const imageData = getImageRenderData(node, backendUrl)
+                    if (!imageData) {
+                        return null
+                    }
+
+                    return renderArticleImage(
+                        imageData,
+                        `image-${index}`,
+                        previousNode?.type === 'paragraph',
                     )
                 case 'list':
                     const ListTag = node.listType === 'number' ? 'ol' : 'ul'
@@ -443,6 +610,19 @@ const RichText: React.FC<RichTextProps> = ({
                         </div>
                     )
                 case 'block':
+                    if (node.fields?.blockType === 'image' || node.fields?.blockType === 'media') {
+                        const blockImage = getImageRenderData(node, backendUrl)
+                        if (!blockImage) {
+                            return null
+                        }
+
+                        return renderArticleImage(
+                            blockImage,
+                            `block-image-${index}`,
+                            previousNode?.type === 'paragraph',
+                        )
+                    }
+
                     if (node.fields?.blockType === 'banner') {
                         const bannerFromRelation = getBannerFromRelation(node.fields.banner)
                         const relationSrc = withBackendUrl(bannerFromRelation?.src, backendUrl)
