@@ -13,6 +13,10 @@ interface LexicalNode {
     tag?: string
     listType?: string
     url?: string
+    href?: string
+    target?: string
+    rel?: string
+    newTab?: boolean
     level?: number
     src?: string
     alt?: string
@@ -60,6 +64,13 @@ const ARTICLE_TEXT_BANNER_STYLE: React.CSSProperties = {
     position: 'relative',
 }
 const ARTICLE_TEXT_BANNER_SIZES = '(max-width: 860px) 100vw, 796px'
+const INTERNAL_LINK_PREFIX_BY_COLLECTION: Record<string, string> = {
+    articles: '/blog',
+    services: '/services',
+    jobs: '/jobs',
+    conferences: '/conferences',
+    partnerships: '/partnerships',
+}
 
 type BannerTokenPart =
     | {
@@ -131,6 +142,25 @@ const asPositiveInt = (value: unknown): number | null => {
     return null
 }
 
+const asBoolean = (value: unknown): boolean | null => {
+    if (typeof value === 'boolean') {
+        return value
+    }
+
+    if (typeof value === 'string') {
+        const normalized = value.trim().toLowerCase()
+        if (normalized === 'true') {
+            return true
+        }
+
+        if (normalized === 'false') {
+            return false
+        }
+    }
+
+    return null
+}
+
 const pickFirstString = (...values: Array<string | null | undefined>): string | null => {
     for (const value of values) {
         if (typeof value === 'string' && value.trim().length > 0) {
@@ -157,6 +187,106 @@ const asRecord = (value: unknown): Record<string, unknown> | null => {
     }
 
     return value
+}
+
+const normalizeHref = (href: string | null | undefined): string | undefined => {
+    if (!href) {
+        return undefined
+    }
+
+    const trimmed = href.trim()
+    if (!trimmed) {
+        return undefined
+    }
+
+    if (
+        trimmed.startsWith('/')
+        || trimmed.startsWith('#')
+        || /^https?:\/\//i.test(trimmed)
+        || /^mailto:/i.test(trimmed)
+        || /^tel:/i.test(trimmed)
+    ) {
+        return trimmed
+    }
+
+    if (/^www\./i.test(trimmed)) {
+        return `https://${trimmed}`
+    }
+
+    return trimmed
+}
+
+const resolveInternalLinkHref = (doc: unknown): string | undefined => {
+    const docRecord = asRecord(doc)
+    if (!docRecord) {
+        return undefined
+    }
+
+    const relationTo = asString(docRecord.relationTo)
+    const valueRecord = asRecord(docRecord.value)
+    const nestedDocRecord = asRecord(docRecord.doc)
+    const nestedValueRecord = asRecord(valueRecord?.value)
+    const slug = pickFirstString(
+        asString(valueRecord?.slug),
+        asString(nestedValueRecord?.slug),
+        asString(nestedDocRecord?.slug),
+    )
+
+    if (!relationTo || !slug) {
+        return undefined
+    }
+
+    if (relationTo === 'categories') {
+        return `/blog?category=${encodeURIComponent(slug)}`
+    }
+
+    const basePath = INTERNAL_LINK_PREFIX_BY_COLLECTION[relationTo] || `/${relationTo}`
+    return `${basePath}/${slug}`
+}
+
+const resolveLexicalLinkHref = (node: LexicalNode): string | undefined => {
+    const nodeRecord = asRecord(node)
+    const fieldsRecord = asRecord(node.fields)
+    const valueRecord = asRecord(node.value)
+
+    return normalizeHref(
+        pickFirstString(
+            asString(node.url),
+            asString(node.href),
+            asString(nodeRecord?.url),
+            asString(nodeRecord?.href),
+            asString(fieldsRecord?.url),
+            asString(fieldsRecord?.href),
+            asString(valueRecord?.url),
+            asString(valueRecord?.href),
+            resolveInternalLinkHref(fieldsRecord?.doc),
+            resolveInternalLinkHref(nodeRecord?.doc),
+            resolveInternalLinkHref(valueRecord?.doc),
+        ),
+    )
+}
+
+const shouldOpenLinkInNewTab = (node: LexicalNode, href: string): boolean => {
+    const nodeRecord = asRecord(node)
+    const fieldsRecord = asRecord(node.fields)
+    const valueRecord = asRecord(node.value)
+
+    const explicitNewTab = pickFirstString(
+        asBoolean(node.newTab) === null ? null : String(asBoolean(node.newTab)),
+        asBoolean(nodeRecord?.newTab) === null ? null : String(asBoolean(nodeRecord?.newTab)),
+        asBoolean(fieldsRecord?.newTab) === null ? null : String(asBoolean(fieldsRecord?.newTab)),
+        asBoolean(valueRecord?.newTab) === null ? null : String(asBoolean(valueRecord?.newTab)),
+    )
+
+    if (explicitNewTab !== null) {
+        return explicitNewTab === 'true'
+    }
+
+    if (node.target === '_blank' || nodeRecord?.target === '_blank' || fieldsRecord?.target === '_blank') {
+        return true
+    }
+
+    return /^https?:\/\//i.test(href)
 }
 
 const isHeadingTag = (value: string | undefined): value is HeadingTag =>
@@ -587,8 +717,22 @@ const RichText: React.FC<RichTextProps> = ({
                         </li>
                     )
                 case 'link':
+                case 'autolink':
+                    const linkHref = resolveLexicalLinkHref(node)
+                    if (!linkHref) {
+                        return node.children ? <Fragment key={index}>{renderNodes(node.children)}</Fragment> : null
+                    }
+
+                    const linkTarget = shouldOpenLinkInNewTab(node, linkHref) ? '_blank' : undefined
+
                     return (
-                        <a key={index} href={node.url} target="_blank" rel="noopener noreferrer" className="text-[#F29F04] hover:underline">
+                        <a
+                            key={index}
+                            href={linkHref}
+                            target={linkTarget}
+                            rel={linkTarget ? 'noopener noreferrer' : undefined}
+                            className="break-words text-[#F29F04] hover:underline"
+                        >
                             {node.children ? renderNodes(node.children) : null}
                         </a>
                     )
