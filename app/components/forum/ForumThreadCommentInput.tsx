@@ -69,7 +69,7 @@ const ForumThreadCommentInput: React.FC<ForumThreadCommentInputProps> = ({
                     <button
                         type="button"
                         onClick={onPublish}
-                        className="flex w-[200px] py-3 px-6 justify-center items-center gap-3 self-stretch rounded-[80px] bg-[#F29F04] text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/80 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex w-[200px] py-3 px-6 justify-center items-center gap-3 self-stretch rounded-[80px] bg-[#F29F04] text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px] transition-colors hover:bg-[#F29F04]/80 disabled:cursor-not-allowed disabled:bg-[#7A5510] disabled:text-[#151515] disabled:hover:bg-[#7A5510]"
                         disabled={isPublishDisabled}
                     >
                         {isPublishing ? 'Publishing...' : publishLabel}

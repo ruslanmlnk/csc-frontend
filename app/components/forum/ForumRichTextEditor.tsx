@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Bold, ImagePlus, Italic, Link2, List, ListOrdered, Strikethrough, Underline } from 'lucide-react'
 import { createEmptyForumRichText, createForumUploadNode, extractPlainTextFromForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument, type ForumRichTextNode } from '@/lib/forumRichText'
 
@@ -262,12 +262,52 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     onChange(documentValue, plainText)
   }
 
-  useEffect(() => {
-    onChange(createEmptyForumRichText(), '')
-  }, [onChange])
-
   const focusEditor = () => {
     editorRef.current?.focus()
+  }
+
+  const placeCaretInside = (element: HTMLElement) => {
+    const selection = window.getSelection()
+    if (!selection) {
+      return
+    }
+
+    const range = document.createRange()
+    range.selectNodeContents(element)
+    range.collapse(false)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  }
+
+  const appendUploadedImageBlock = (payload: {
+    id?: string | number
+    url: string
+    altText: string
+    width?: number
+    height?: number
+  }) => {
+    const editor = editorRef.current
+    if (!editor) {
+      return
+    }
+
+    const figure = document.createElement('figure')
+    figure.dataset.forumUpload = 'true'
+
+    const image = document.createElement('img')
+    image.src = payload.url
+    image.alt = payload.altText
+    figure.appendChild(image)
+
+    const paragraph = document.createElement('p')
+    paragraph.appendChild(document.createElement('br'))
+
+    editor.appendChild(figure)
+    editor.appendChild(paragraph)
+
+    focusEditor()
+    placeCaretInside(paragraph)
+    syncEditorState()
   }
 
   const runCommand = (command: string, value?: string) => {
@@ -309,21 +349,13 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
       }
 
       focusEditor()
-      const uploadNode = createForumUploadNode({
+      appendUploadedImageBlock({
         id: payload.id ?? undefined,
         url: payload.url,
         altText: payload.altText || file.name,
         width: payload.width,
         height: payload.height,
       })
-
-      document.execCommand(
-        'insertHTML',
-        false,
-        `<figure data-forum-upload="true"><img src="${uploadNode.src}" alt="${uploadNode.altText}" /></figure><p><br></p>`,
-      )
-
-      syncEditorState()
     } catch (error) {
       window.alert(error instanceof Error ? error.message : 'Unable to upload image.')
     } finally {
