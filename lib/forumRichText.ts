@@ -2,7 +2,7 @@ export type ForumRichTextNode = {
   type: string
   children?: ForumRichTextNode[]
   text?: string
-  format?: number
+  format?: number | ''
   url?: string
   listType?: string
   src?: string

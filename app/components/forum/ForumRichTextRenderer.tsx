@@ -42,22 +42,23 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   return `${normalizedBase}${normalizedPath}`
 }
 
-const applyTextFormatting = (value: React.ReactNode, format?: number) => {
+const applyTextFormatting = (value: React.ReactNode, format?: number | '') => {
+  const normalizedFormat = typeof format === 'number' ? format : 0
   let rendered = value
 
-  if (format && (format & 16)) {
+  if (normalizedFormat & 16) {
     rendered = <code className="rounded bg-[#1A1A1A] px-1.5 py-0.5 text-[#F5D27A]">{rendered}</code>
   }
-  if (format && (format & 8)) {
+  if (normalizedFormat & 8) {
     rendered = <span className="underline">{rendered}</span>
   }
-  if (format && (format & 4)) {
+  if (normalizedFormat & 4) {
     rendered = <span className="line-through">{rendered}</span>
   }
-  if (format && (format & 2)) {
+  if (normalizedFormat & 2) {
     rendered = <em>{rendered}</em>
   }
-  if (format && (format & 1)) {
+  if (normalizedFormat & 1) {
     rendered = <strong className="font-semibold text-white">{rendered}</strong>
   }
 
