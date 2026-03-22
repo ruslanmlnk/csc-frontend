@@ -497,7 +497,7 @@ export const messages = {
     },
     blog: {
       allArticles: 'Усі статті',
-      heroTitle: 'Всередині performance marketing',
+      heroTitle: 'Внутрішній маркетинг ефективності',
       heroDescription:
         'Реальні кейси, глибокі інсайти та практичний досвід із live traffic, affiliate-кампаній та performance-стратегій',
       loading: 'Завантаження...',
