@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ForumRichTextRenderer from './ForumRichTextRenderer';
 
 interface ForumThreadOriginalPostProps {
     threadTitle: string;
@@ -9,7 +10,7 @@ interface ForumThreadOriginalPostProps {
     authorAvatar: string;
     authorProfileHref?: string | null;
     date: string;
-    content: string;
+    content: unknown;
 }
 
 const ForumThreadOriginalPost: React.FC<ForumThreadOriginalPostProps> = ({
@@ -130,9 +131,9 @@ const ForumThreadOriginalPost: React.FC<ForumThreadOriginalPostProps> = ({
 
                         <div className="flex flex-col justify-center items-end gap-4 self-stretch">
                             <div className="flex p-6 items-center gap-2.5 self-stretch rounded-[30px] bg-[#262626]">
-                                <p className="text-white font-poppins text-[20px] font-medium leading-[32px] whitespace-pre-line">
-                                    {content}
-                                </p>
+                                <div className="w-full">
+                                    <ForumRichTextRenderer content={content} />
+                                </div>
                             </div>
                         </div>
                     </div>

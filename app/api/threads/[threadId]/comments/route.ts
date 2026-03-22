@@ -4,9 +4,10 @@ import { createComment, getThreadComments } from '@/lib/backend/comments'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { clearAuthCookie } from '@/lib/auth-server'
 import { getThreadById } from '@/lib/backend/threads'
+import { hasVisibleForumRichTextContent } from '@/lib/forumRichText'
 
 type CommentPayload = {
-  comment?: string
+  comment?: unknown
 }
 
 type RouteContext = {
@@ -62,9 +63,9 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const body = (await request.json().catch(() => null)) as CommentPayload | null
-  const comment = body?.comment?.trim()
+  const comment = body?.comment
 
-  if (!comment) {
+  if (!hasVisibleForumRichTextContent(comment)) {
     return NextResponse.json({ error: 'Comment cannot be empty.' }, { status: 400 })
   }
 

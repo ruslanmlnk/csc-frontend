@@ -8,6 +8,7 @@ import ForumPagination from '@/app/components/forum/ForumPagination';
 import ForumThreadCommentInput from '@/app/components/forum/ForumThreadCommentInput';
 import { useParams, useRouter } from 'next/navigation';
 import { forumThreadPageData } from './data';
+import { createEmptyForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -206,7 +207,8 @@ export default function ForumThreadPage() {
     const [thread, setThread] = useState<UnknownRecord | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [newComment, setNewComment] = useState('');
+    const [newComment, setNewComment] = useState<ForumRichTextDocument>(createEmptyForumRichText());
+    const [commentEditorKey, setCommentEditorKey] = useState(0);
     const [isPublishingComment, setIsPublishingComment] = useState(false);
     const [publishError, setPublishError] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -301,9 +303,7 @@ export default function ForumThreadPage() {
     const threadTitle = typeof thread?.title === 'string' && thread.title.trim()
         ? thread.title
         : forumThreadPageData.originalPost.threadTitle;
-    const threadContent = typeof thread?.content === 'string' && thread.content.trim()
-        ? thread.content
-        : forumThreadPageData.originalPost.content;
+    const threadContent = thread?.content ?? forumThreadPageData.originalPost.content;
     const threadDate = formatThreadDate(
         typeof thread?.createdAt === 'string' ? thread.createdAt : undefined,
     );
@@ -317,10 +317,8 @@ export default function ForumThreadPage() {
     const replies = useMemo(() => {
         return extractThreadComments(thread)
             .map((comment, index) => {
-                const content = typeof comment.comment === 'string'
-                    ? comment.comment.trim()
-                    : '';
-                if (!content) {
+                const content = comment.comment;
+                if (!hasVisibleForumRichTextContent(content)) {
                     return null;
                 }
 
@@ -346,7 +344,7 @@ export default function ForumThreadPage() {
                 authorAvatar: string;
                 authorProfileHref: string | null;
                 date: string;
-                content: string;
+                content: unknown;
             } => Boolean(reply));
     }, [thread]);
 
@@ -355,7 +353,8 @@ export default function ForumThreadPage() {
     const backLink = slug ? `/forum/${slug}` : fallbackSlug ? `/forum/${fallbackSlug}` : '/forum';
 
     const handleCancelComment = () => {
-        setNewComment('');
+        setNewComment(createEmptyForumRichText());
+        setCommentEditorKey((value) => value + 1);
         setPublishError('');
     };
 
@@ -391,9 +390,7 @@ export default function ForumThreadPage() {
     };
 
     const handlePublishComment = async () => {
-        const commentToPublish = newComment.trim();
-
-        if (!threadId || !commentToPublish) {
+        if (!threadId || !hasVisibleForumRichTextContent(newComment)) {
             return;
         }
 
@@ -416,7 +413,7 @@ export default function ForumThreadPage() {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ comment: commentToPublish }),
+                body: JSON.stringify({ comment: newComment }),
             });
 
             const payload = await response.json().catch(() => null);
@@ -445,7 +442,8 @@ export default function ForumThreadPage() {
                 }
             }
 
-            setNewComment('');
+            setNewComment(createEmptyForumRichText());
+            setCommentEditorKey((value) => value + 1);
         } catch (commentError) {
             setPublishError(
                 commentError instanceof Error
@@ -546,6 +544,7 @@ export default function ForumThreadPage() {
                                             cancelLabel={forumThreadPageData.commentInput.cancelLabel}
                                             publishLabel={forumThreadPageData.commentInput.publishLabel}
                                             value={newComment}
+                                            editorKey={commentEditorKey}
                                             onChange={(value) => {
                                                 setNewComment(value);
                                                 if (publishError) {

@@ -1,12 +1,13 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ForumRichTextRenderer from './ForumRichTextRenderer';
 
 interface ForumThreadReplyProps {
     authorName: string;
     authorAvatar: string;
     date: string;
-    content: string;
+    content: unknown;
     authorProfileHref?: string | null;
     // Optional: Is this the current user's reply? (for styling nuances if needed later)
 }
@@ -65,9 +66,9 @@ const ForumThreadReply: React.FC<ForumThreadReplyProps> = ({
 
                 <div className="flex flex-col justify-center items-end gap-4 self-stretch">
                     <div className="flex p-6 items-center gap-2.5 self-stretch rounded-[30px] bg-[#262626]">
-                        <p className="text-white font-poppins text-[20px] font-medium leading-[32px] whitespace-pre-line">
-                            {content}
-                        </p>
+                        <div className="w-full">
+                            <ForumRichTextRenderer content={content} />
+                        </div>
                     </div>
                 </div>
 

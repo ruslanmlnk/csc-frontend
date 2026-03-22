@@ -2,7 +2,7 @@ import { backendRequest } from './client'
 
 export type CreateCommentInput = {
   thread: string | number
-  comment: string
+  comment: unknown
 }
 
 export const getThreadComments = (

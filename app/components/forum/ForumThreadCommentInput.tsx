@@ -1,12 +1,15 @@
 import React from 'react';
+import ForumRichTextEditor from './ForumRichTextEditor';
+import { hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
 
 interface ForumThreadCommentInputProps {
     title: string;
     placeholder: string;
     cancelLabel: string;
     publishLabel: string;
-    value: string;
-    onChange: (value: string) => void;
+    value: ForumRichTextDocument | null;
+    editorKey: number;
+    onChange: (value: ForumRichTextDocument, plainText: string) => void;
     onCancel: () => void;
     onPublish: () => void;
     isPublishing?: boolean;
@@ -19,13 +22,14 @@ const ForumThreadCommentInput: React.FC<ForumThreadCommentInputProps> = ({
     cancelLabel,
     publishLabel,
     value,
+    editorKey,
     onChange,
     onCancel,
     onPublish,
     isPublishing = false,
     error,
 }) => {
-    const isPublishDisabled = isPublishing || !value.trim();
+    const isPublishDisabled = isPublishing || !hasVisibleForumRichTextContent(value);
 
     return (
         <div className="flex flex-col items-start gap-6 self-stretch rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6">
@@ -38,12 +42,12 @@ const ForumThreadCommentInput: React.FC<ForumThreadCommentInputProps> = ({
                     </div>
                 </div>
 
-                <div className="flex h-[150px] p-6 items-start gap-2.5 self-stretch rounded-[30px] bg-[#262626]">
-                    <textarea
-                        className="w-full h-full bg-transparent border-none outline-none text-[#6C6C6C] text-left font-poppins text-[18px] font-normal leading-[16px] resize-none placeholder-[#6C6C6C]"
+                <div className="w-full">
+                    <ForumRichTextEditor
+                        key={editorKey}
                         placeholder={placeholder}
-                        value={value}
-                        onChange={(event) => onChange(event.target.value)}
+                        disabled={isPublishing}
+                        onChange={onChange}
                     />
                 </div>
 

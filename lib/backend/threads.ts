@@ -4,7 +4,7 @@ export type CreateThreadInput = {
   title: string
   category: string | number
   tags: string[]
-  content: string
+  content: unknown
 }
 
 type GetThreadsParams = {

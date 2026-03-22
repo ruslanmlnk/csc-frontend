@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useState, type FormEvent } from 'react';
+import ForumRichTextEditor from '@/app/components/forum/ForumRichTextEditor';
+import { createEmptyForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
 
 interface CreateThreadModalProps {
     isOpen: boolean;
@@ -26,7 +28,8 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 }) => {
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
-    const [content, setContent] = useState('');
+    const [content, setContent] = useState<ForumRichTextDocument>(createEmptyForumRichText());
+    const [editorKey, setEditorKey] = useState(0);
     const [selectedPlatform, setSelectedPlatform] = useState('Facebook');
     const [subCategories, setSubCategories] = useState<CategoryOption[]>([]);
     const [isSubCategoriesLoading, setIsSubCategoriesLoading] = useState(false);
@@ -37,7 +40,8 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     const resetForm = () => {
         setTitle('');
         setCategory('');
-        setContent('');
+        setContent(createEmptyForumRichText());
+        setEditorKey((value) => value + 1);
         setSelectedPlatform('Facebook');
         setSubmitError('');
     };
@@ -143,7 +147,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
         event.preventDefault();
         setSubmitError('');
 
-        if (!title.trim() || !category || !content.trim()) {
+        if (!title.trim() || !category || !hasVisibleForumRichTextContent(content)) {
             setSubmitError('Please fill in all required fields.');
             return;
         }
@@ -157,7 +161,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                 body: JSON.stringify({
                     title: title.trim(),
                     category,
-                    content: content.trim(),
+                    content,
                     tags: [selectedPlatform.toLowerCase()],
                 }),
             });
@@ -291,13 +295,14 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                             <span className="text-[#9E9E9E]">Content </span>
                             <span className="text-[#F29F04]">*</span>
                         </label>
-                        <div className="flex h-[250px] p-[16px_24px] items-start gap-[10px] rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                            <textarea
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
+                        <div className="rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] p-4">
+                            <ForumRichTextEditor
+                                key={editorKey}
                                 placeholder="Write the content of your thread..."
-                                className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full h-full resize-none placeholder-[#A5A5A5]"
                                 disabled={isSubmitting}
+                                onChange={(value) => {
+                                    setContent(value);
+                                }}
                             />
                         </div>
                     </div>

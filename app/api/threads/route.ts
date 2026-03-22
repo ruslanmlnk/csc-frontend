@@ -3,12 +3,13 @@ import { NextResponse } from 'next/server'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { createThread, getThreads } from '@/lib/backend/threads'
 import { clearAuthCookie } from '@/lib/auth-server'
+import { hasVisibleForumRichTextContent } from '@/lib/forumRichText'
 
 type ThreadPayload = {
   title: string
   category: string | number
   tags?: string[]
-  content: string
+  content?: unknown
 }
 
 export async function GET(request: Request) {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as ThreadPayload | null
 
   const title = typeof body?.title === 'string' ? body.title.trim() : ''
-  const content = typeof body?.content === 'string' ? body.content.trim() : ''
+  const content = body?.content
   const rawCategory = body?.category
 
   const category =
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
         ? rawCategory.trim()
         : ''
 
-  if (!title || !category || !content) {
+  if (!title || !category || !hasVisibleForumRichTextContent(content)) {
     return NextResponse.json({ error: 'All required fields must be filled.' }, { status: 400 })
   }
 
