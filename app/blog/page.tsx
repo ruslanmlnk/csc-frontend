@@ -18,6 +18,7 @@ const BlogPageContent = () => {
     const [articles, setArticles] = useState<Article[]>([]);
     const [categories, setCategories] = useState<string[]>(['All Articles']);
     const [blogBanner, setBlogBanner] = useState<BlogBanner | null>(null);
+    const [horizontalBanner, setHorizontalBanner] = useState<BlogBanner | null>(null);
     const [loading, setLoading] = useState(true);
     const [isMobile, setIsMobile] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -63,7 +64,11 @@ const BlogPageContent = () => {
                 }
 
                 const [articlesPayload, categoriesPayload] = await Promise.all([
-                    articlesResponse.json() as Promise<{ articles?: Article[]; banner?: BlogBanner | null }>,
+                    articlesResponse.json() as Promise<{
+                        articles?: Article[];
+                        banner?: BlogBanner | null;
+                        horizontalBanner?: BlogBanner | null;
+                    }>,
                     categoriesResponse.json() as Promise<{ categories?: Category[] }>,
                 ]);
 
@@ -72,6 +77,7 @@ const BlogPageContent = () => {
 
                 setArticles(loadedArticles);
                 setBlogBanner(articlesPayload?.banner || null);
+                setHorizontalBanner(articlesPayload?.horizontalBanner || null);
                 setCategories(['All Articles', ...loadedCategories.map((c: Category) => c.name)]);
             } catch (error) {
                 console.error('Error fetching blog data:', error);
@@ -150,6 +156,10 @@ const BlogPageContent = () => {
             href: blogBanner?.link?.trim() || undefined,
         }
         : null;
+    const defaultHorizontalBannerSrc = 'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480';
+    const horizontalBannerSrc = toAbsoluteMediaUrl(horizontalBanner?.image?.url) || defaultHorizontalBannerSrc;
+    const horizontalBannerAlt = horizontalBanner?.caption?.trim() || 'Promo Banner';
+    const horizontalBannerHref = horizontalBanner?.link?.trim() || undefined;
 
     if (loading) {
         return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
@@ -164,8 +174,9 @@ const BlogPageContent = () => {
 
             <main className="w-full max-w-[1280px] mx-auto px-5 flex flex-col gap-[64px] pb-[120px]">
                 <Banner
-                    src="https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480"
-                    alt="Promo Banner"
+                    src={horizontalBannerSrc}
+                    alt={horizontalBannerAlt}
+                    href={horizontalBannerHref}
                     className="hidden md:block"
                 />
 

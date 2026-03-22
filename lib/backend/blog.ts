@@ -130,6 +130,7 @@ type UnknownRecord = Record<string, unknown>
 
 type BlogGlobalResponse = {
   banner?: unknown
+  horizontalBanner?: unknown
 }
 
 const asRecord = (value: unknown): UnknownRecord | null => {
@@ -223,5 +224,6 @@ export async function getBlogPageData(): Promise<BlogPageData> {
 
   return {
     banner: resolveBanner(data.banner),
+    horizontalBanner: resolveBanner(data.horizontalBanner),
   }
 }

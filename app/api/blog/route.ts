@@ -4,7 +4,11 @@ import { getArticles, getBlogPageData } from '@/lib/backend/blog'
 export async function GET() {
   try {
     const [articles, blogPageData] = await Promise.all([getArticles(), getBlogPageData()])
-    return NextResponse.json({ articles, banner: blogPageData.banner || null })
+    return NextResponse.json({
+      articles,
+      banner: blogPageData.banner || null,
+      horizontalBanner: blogPageData.horizontalBanner || null,
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to load blog articles.'
     return NextResponse.json({ error: message }, { status: 500 })

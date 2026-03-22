@@ -73,4 +73,5 @@ export interface Article {
 
 export interface BlogPageData {
     banner?: Banner | null;
+    horizontalBanner?: Banner | null;
 }
