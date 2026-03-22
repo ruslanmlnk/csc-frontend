@@ -10,6 +10,7 @@ import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import ForumPagination from '@/app/components/forum/ForumPagination'
 import type { ServiceCategory, ServiceItem } from '@/app/types/services'
 import type { PageHeroV2 } from '@/lib/backend/pageGlobals'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 type ServicesApiResponse = {
   services?: ServiceItem[]
@@ -43,9 +44,10 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 }
 
 const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }) => {
+  const { language, messages: t } = useLanguage()
   const [services, setServices] = useState<ServiceItem[]>([])
-  const [categories, setCategories] = useState<string[]>(['All Services'])
-  const [activeCategory, setActiveCategory] = useState('All Services')
+  const [categories, setCategories] = useState<string[]>([t.services.allServices])
+  const [activeCategory, setActiveCategory] = useState<string>(t.services.allServices)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -66,11 +68,11 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
         const categoriesData = (await categoriesResponse.json().catch(() => null)) as ServiceCategoriesApiResponse | null
 
         if (!servicesResponse.ok) {
-          throw new Error(servicesData?.error || 'Unable to load services.')
+          throw new Error(servicesData?.error || t.services.loading)
         }
 
         if (!categoriesResponse.ok) {
-          throw new Error(categoriesData?.error || 'Unable to load service categories.')
+          throw new Error(categoriesData?.error || t.services.loading)
         }
 
         if (!active) {
@@ -81,14 +83,14 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
         const loadedCategories = Array.isArray(categoriesData?.categories) ? categoriesData.categories : []
 
         setServices(loadedServices)
-        setCategories(['All Services', ...loadedCategories.map((item) => item.name)])
+        setCategories([t.services.allServices, ...loadedCategories.map((item) => item.name)])
       } catch (loadError) {
         if (!active) {
           return
         }
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load services.')
+        setError(loadError instanceof Error ? loadError.message : t.services.loading)
         setServices([])
-        setCategories(['All Services'])
+        setCategories([t.services.allServices])
       } finally {
         if (active) {
           setIsLoading(false)
@@ -101,19 +103,19 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
     return () => {
       active = false
     }
-  }, [])
+  }, [t.services.allServices, t.services.loading])
 
   const filteredServices = useMemo(() => {
-    if (activeCategory === 'All Services') {
+    if (activeCategory === t.services.allServices) {
       return services
     }
 
     return services.filter((service) => service.category?.name === activeCategory)
-  }, [activeCategory, services])
+  }, [activeCategory, services, t.services.allServices])
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
   const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
-  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Promo banner'
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || (language === 'uk' ? '\u0411\u0430\u043d\u0435\u0440 \u0441\u0435\u0440\u0432\u0456\u0441\u0456\u0432' : 'Services banner')
   const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
@@ -122,13 +124,12 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
         title={
           heroTitle || (
             <>
-              Sharing experience <br className="hidden md:block" /> with the industry
+              {t.services.heroTitle}
             </>
           )
         }
         description={
-          heroDescription
-          || 'We participate in and speak at major affiliate and marketing conferences, sharing insights, strategies, and real case studies from active campaigns'
+          heroDescription || t.services.heroDescription
         }
       />
 
@@ -152,7 +153,7 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
           <div className="w-full flex flex-col gap-6">
             {isLoading && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-                Loading services...
+                {t.services.loading}
               </div>
             )}
 
@@ -164,7 +165,7 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
 
             {!isLoading && !error && filteredServices.length === 0 && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-                No services found.
+                {t.services.noResults}
               </div>
             )}
 
@@ -188,7 +189,7 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
                             height={service.logo?.height}
                           />
                         )}
-                        category={service.category?.name || 'Service'}
+                        category={service.category?.name || t.services.defaultCategory}
                         name={service.title}
                         description={service.description}
                         pricing={service.priceLabel}
@@ -209,7 +210,7 @@ const ServicesPageClient: React.FC<ServicesPageClientProps> = ({ initialHeroV2 }
                   total={filteredServices.length}
                   currentPage={1}
                   totalPages={1}
-                  itemLabel="services"
+                  itemLabel={t.services.itemLabel}
                   onPageChange={() => undefined}
                 />
               </div>

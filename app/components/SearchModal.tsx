@@ -14,6 +14,8 @@ import type {
   SearchResultItem,
   SearchResultType,
 } from '@/app/types/search'
+import { useLanguage } from './i18n/LanguageProvider'
+import { formatDateValue } from '@/lib/i18n'
 
 interface SearchModalProps {
   isOpen: boolean
@@ -36,15 +38,6 @@ const MIN_QUERY_LENGTH = 3
 const SEARCH_DEBOUNCE_MS = 250
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 
-const scopeOptions: { label: string; value: SearchScope }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Blog', value: 'blog' },
-  { label: 'Conferences', value: 'conferences' },
-  { label: 'Services', value: 'services' },
-  { label: 'Partnership', value: 'partnerships' },
-  { label: 'Jobs', value: 'jobs' },
-]
-
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
@@ -55,28 +48,29 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   return `${normalizedBase}${normalizedPath}`
 }
 
-const formatBlogDate = (value?: string | null): string => {
+const formatBlogDate = (value: string | null | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
 
-  return date.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+  return formatDateValue(date, language, { month: 'short', day: '2-digit', year: 'numeric' })
 }
 
-const formatJobDate = (value?: string | null): string => {
+const formatJobDate = (value: string | null | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
 
-  const day = date.toLocaleDateString('en-GB', { day: '2-digit' })
-  const month = date.toLocaleDateString('en-GB', { month: 'short' })
-  const year = date.toLocaleDateString('en-GB', { year: 'numeric' })
+  const day = formatDateValue(date, language, { day: '2-digit' })
+  const month = formatDateValue(date, language, { month: 'short' })
+  const year = formatDateValue(date, language, { year: 'numeric' })
   return `${day} ${month}, ${year}`
 }
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
+  const { language, messages: t } = useLanguage()
   const inputRef = useRef<HTMLInputElement>(null)
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState<SearchScope>('all')
@@ -135,7 +129,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         const payload = (await response.json().catch(() => null)) as SearchApiResponse | SearchApiError | null
 
         if (!response.ok) {
-          throw new Error((payload as SearchApiError | null)?.error || 'Unable to perform search.')
+          throw new Error((payload as SearchApiError | null)?.error || t.searchModal.unableToSearch)
         }
 
         const loadedResults = Array.isArray((payload as SearchApiResponse | null)?.results)
@@ -149,7 +143,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         }
 
         setResults([])
-        setError(searchError instanceof Error ? searchError.message : 'Unable to perform search.')
+        setError(searchError instanceof Error ? searchError.message : t.searchModal.unableToSearch)
       } finally {
         if (!controller.signal.aborted) {
           setIsLoading(false)
@@ -161,13 +155,21 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       controller.abort()
       window.clearTimeout(timeoutId)
     }
-  }, [isOpen, query, scope])
+  }, [isOpen, query, scope, t.searchModal.unableToSearch])
 
   const normalizedQuery = query.trim()
   const typedQueryLength = normalizedQuery.length
   const isQueryShort = normalizedQuery.length < MIN_QUERY_LENGTH
   const isTypingHintState = typedQueryLength > 0 && isQueryShort
   const showNoResults = !isQueryShort && !isLoading && !error && results.length === 0
+  const scopeOptions: { label: string; value: SearchScope }[] = [
+    { label: t.searchModal.scopeAll, value: 'all' },
+    { label: t.searchModal.scopeBlog, value: 'blog' },
+    { label: t.searchModal.scopeConferences, value: 'conferences' },
+    { label: t.searchModal.scopeServices, value: 'services' },
+    { label: t.searchModal.scopePartnerships, value: 'partnerships' },
+    { label: t.searchModal.scopeJobs, value: 'jobs' },
+  ]
 
   const handleClearSearch = () => {
     setQuery('')
@@ -190,7 +192,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             <BlogCard
               post={{
                 id: item.id,
-                date: formatBlogDate(item.publishedDate),
+                date: formatBlogDate(item.publishedDate, language),
                 category: item.category,
                 title: item.title,
                 image: toAbsoluteMediaUrl(item.imageUrl) || '/images/blog-post-1.png',
@@ -207,9 +209,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           title={item.title}
           imageSrc={toAbsoluteMediaUrl(item.mainImageUrl)}
           location={item.location}
-          dateLabel={formatConferenceDate(item.conferenceDate)}
+          dateLabel={formatConferenceDate(item.conferenceDate, language)}
           topicsLabel={item.vertical}
           detailsHref={item.href}
+          detailsLabel={t.common.moreDetails}
         />
       )
     }
@@ -263,13 +266,18 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
           minPayment={item.minPayment || '-'}
           offers={item.offers}
           detailsHref={item.href}
+          foundedLabel={language === 'uk' ? '\u0417\u0430\u0441\u043d\u043e\u0432\u0430\u043d\u043e' : 'Founded'}
+          modelsLabel={language === 'uk' ? '\u041c\u043e\u0434\u0435\u043b\u0456' : 'Models'}
+          geoLabel={language === 'uk' ? '\u0413\u0435\u043e' : 'Geo'}
+          minPaymentLabel={language === 'uk' ? '\u041c\u0456\u043d\u0456\u043c\u0430\u043b\u044c\u043d\u0430 \u0432\u0438\u043f\u043b\u0430\u0442\u0430' : 'Minimum payment'}
+          detailsLabel={t.common.moreDetails}
         />
       )
     }
 
     return (
       <JobVacancyCard
-        dateLabel={formatJobDate(item.createdAt)}
+        dateLabel={formatJobDate(item.createdAt, language)}
         badge={item.badge}
         title={item.title}
         location={item.location}
@@ -278,6 +286,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         salary={item.salary}
         salaryInfo={item.salaryInfo}
         detailsHref={item.href}
+        detailsLabel={t.common.moreDetails}
       />
     )
   }
@@ -307,7 +316,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                     type="text"
                     value={query}
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Search"
+                    placeholder={t.searchModal.placeholder}
                     className="w-full border-none bg-transparent font-poppins text-[16px] font-medium leading-[26px] text-white outline-none placeholder-[#9E9E9E]"
                   />
                 </div>
@@ -317,7 +326,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
             <button
               onClick={onClose}
               className="p-2 transition-all hover:rotate-90 active:scale-95"
-              aria-label="Close search"
+              aria-label={t.searchModal.closeAria}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                 <path d="M20.4853 20.4852C20.2977 20.6727 20.0434 20.7781 19.7782 20.7781C19.513 20.7781 19.2586 20.6727 19.0711 20.4852L12 13.4141L4.92893 20.4852C4.7414 20.6727 4.48704 20.7781 4.22183 20.7781C3.95661 20.7781 3.70226 20.6727 3.51472 20.4852C3.32718 20.2976 3.22183 20.0433 3.22183 19.7781C3.22183 19.5128 3.32718 19.2585 3.51472 19.071L10.5858 11.9999L3.51472 4.92882C3.32718 4.74129 3.22182 4.48693 3.22183 4.22172C3.22183 3.9565 3.32718 3.70215 3.51472 3.51461C3.70225 3.32707 3.95661 3.22172 4.22182 3.22172C4.48704 3.22172 4.7414 3.32707 4.92893 3.51461L12 10.5857L19.0711 3.51461C19.2586 3.32707 19.513 3.22172 19.7782 3.22172C20.0434 3.22172 20.2977 3.32707 20.4853 3.51461C20.6728 3.70215 20.7782 3.9565 20.7782 4.22172C20.7782 4.48693 20.6728 4.74129 20.4853 4.92882L13.4142 11.9999L20.4853 19.071C20.6728 19.2585 20.7782 19.5128 20.7782 19.7781C20.7782 20.0433 20.6728 20.2976 20.4853 20.4852Z" fill="#D9D9D9" />
@@ -351,16 +360,16 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex flex-col items-center gap-[16px]">
                 <h2 className="text-center font-poppins text-[24px] font-medium leading-[32px] text-white">
-                  {isTypingHintState ? 'Keep Typing...' : 'Start Your Search'}
+                  {isTypingHintState ? t.searchModal.keepTypingTitle : t.searchModal.startTitle}
                 </h2>
                 <p className="text-center font-poppins text-[16px] font-normal leading-[26px] text-[#BDBDBD]">
                   {isTypingHintState
-                    ? `Please enter at least ${MIN_QUERY_LENGTH} characters to start searching.`
-                    : `Enter at least ${MIN_QUERY_LENGTH} characters to search through our content`}
+                    ? t.searchModal.keepTypingDescription
+                    : t.searchModal.startDescription}
                 </p>
                 {isTypingHintState && (
                   <p className="text-center font-poppins text-[14px] font-normal leading-[16px] text-[#757575]">
-                    {typedQueryLength}/{MIN_QUERY_LENGTH} characters
+                    {typedQueryLength}/{MIN_QUERY_LENGTH} {t.searchModal.charactersCount}
                   </p>
                 )}
               </div>
@@ -369,7 +378,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
           {!isQueryShort && isLoading && (
             <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#262626] px-6 py-5 font-poppins text-[16px] leading-[26px] text-[#BDBDBD]">
-              Searching...
+              {t.searchModal.searching}
             </div>
           )}
 
@@ -391,15 +400,15 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
               <div className="flex flex-col items-center gap-4">
                 <h2 className="text-center font-poppins text-[24px] font-medium leading-[32px] text-white">
-                  No Results Found
+                  {t.searchModal.noResultsTitle}
                 </h2>
                 <p className="text-center font-poppins text-[16px] font-normal leading-[26px]">
-                  <span className="text-[#BDBDBD]">We couldn&apos;t find anything matching &quot;</span>
+                  <span className="text-[#BDBDBD]">{t.searchModal.noResultsPrefix}</span>
                   <span className="font-medium text-white">{normalizedQuery}</span>
-                  <span className="text-[#BDBDBD]">&quot;</span>
+                  <span className="text-[#BDBDBD]">{t.searchModal.noResultsSuffix}</span>
                 </p>
                 <p className="text-center font-poppins text-[14px] font-normal leading-[16px] text-[#757575]">
-                  Try adjusting your search or check for typos
+                  {t.searchModal.noResultsHint}
                 </p>
               </div>
 
@@ -408,7 +417,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                 onClick={handleClearSearch}
                 className="flex items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-all hover:brightness-110 active:scale-95"
               >
-                Clear Search
+                {t.common.clearSearch}
               </button>
             </div>
           )}

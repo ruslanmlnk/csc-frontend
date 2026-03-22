@@ -1,7 +1,10 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import Banner from './Banner';
+import { useLanguage } from './i18n/LanguageProvider';
 
 interface HeroProps {
   data?: {
@@ -26,6 +29,8 @@ interface HeroProps {
 }
 
 const Hero: React.FC<HeroProps> = ({ data, banner }) => {
+  const { messages: t } = useLanguage();
+
   return (
     <section className="relative w-full min-h-[760px] md:min-h-[907px] bg-[#1A1A1A] flex flex-col items-center overflow-hidden">
       {/* --- Background Image & Effects --- */}
@@ -54,7 +59,7 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
             {/* Top Badge (Product Hunt Style) */}
             <div className="relative flex items-center justify-center w-full max-w-[345px] h-[48px] px-[18px] pl-[12px] rounded-[99px] border border-[#F29F04] bg-[rgba(242,159,4,0.08)] backdrop-blur-[8px] overflow-hidden">
               <span className="text-white font-poppins font-normal text-[13px] md:text-[14px] leading-[16px] whitespace-nowrap overflow-hidden text-ellipsis max-w-full">
-                {data?.valueProposition || 'Inferra - built on data, driven by profit'}
+                {data?.valueProposition || t.home.valueProposition}
               </span>
             </div>
 
@@ -68,7 +73,7 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
               drop-shadow-[0_4px_4px_rgba(0,0,0,0.4)]
             "
             >
-              {data?.title || 'Scaling traffic with data-driven decisions'}
+              {data?.title || t.home.title}
             </h1>
 
             {/* Subheadline */}
@@ -81,7 +86,7 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
             "
             >
               {data?.description ||
-                'We help brands, advertisers, and affiliates grow through performance marketing, traffic arbitrage, and advanced analytics. Our focus is on stable ROI, scalable funnels, and long-term results - not short-term hacks.'}
+                t.home.description}
             </p>
           </div>
 
@@ -91,14 +96,14 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
               href={data?.primaryButtonLink || '/partnerships'}
               className="flex items-center justify-center w-full sm:w-[180px] h-[50px] bg-[#F29F04] rounded-[80px] text-[#0D0D0D] font-medium text-[16px] leading-[26px] transition-all hover:brightness-110 active:scale-95 shadow-[0_0_20px_rgba(242,159,4,0.4)]"
             >
-              {data?.primaryButtonText || 'Become a partner'}
+              {data?.primaryButtonText || t.home.primaryButton}
             </Link>
 
             <Link
               href={data?.secondaryButtonLink || '/jobs'}
               className="flex items-center justify-center w-full sm:w-[180px] h-[50px] border border-[#FCC660] rounded-[80px] text-[#FCC660] font-medium text-[16px] leading-[26px] transition-all hover:bg-[#FCC660]/10 active:scale-95"
             >
-              {data?.secondaryButtonText || 'Join the team'}
+              {data?.secondaryButtonText || t.home.secondaryButton}
             </Link>
           </div>
         </div>
@@ -107,7 +112,7 @@ const Hero: React.FC<HeroProps> = ({ data, banner }) => {
         {banner?.image?.url && (
           <Banner
             src={banner.image.url}
-            alt={banner.caption || 'Hero Graphic'}
+            alt={banner.caption || t.home.title}
             href={banner.link || undefined}
             className="mt-12 hidden md:block md:mt-[137.93px] h-[126px] sm:h-[140px] md:h-[158px] rounded-[24px] md:rounded-[40px]"
             containerStyle={{ maxWidth: '100%' }}

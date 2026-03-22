@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, type FormEvent } from 'react';
 import ForumRichTextEditor from '@/app/components/forum/ForumRichTextEditor';
 import { createEmptyForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 interface CreateThreadModalProps {
     isOpen: boolean;
@@ -26,6 +27,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     initialSubCategoryId,
     initialSubCategorySlug,
 }) => {
+    const { messages: t } = useLanguage();
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
     const [content, setContent] = useState<ForumRichTextDocument>(createEmptyForumRichText());
@@ -148,7 +150,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
         setSubmitError('');
 
         if (!title.trim() || !category || !hasVisibleForumRichTextContent(content)) {
-            setSubmitError('Please fill in all required fields.');
+            setSubmitError(t.forum.fillRequiredFields);
             return;
         }
 
@@ -169,7 +171,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
             const data = await response.json().catch(() => null) as { error?: string } | null;
 
             if (!response.ok) {
-                throw new Error(data?.error || 'Unable to create thread.');
+                throw new Error(data?.error || t.common.create);
             }
 
             if (onSuccess) {
@@ -178,7 +180,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
 
             handleClose(true);
         } catch (error) {
-            const message = error instanceof Error ? error.message : 'Unable to create thread.';
+            const message = error instanceof Error ? error.message : t.common.create;
             setSubmitError(message);
         } finally {
             setIsSubmitting(false);
@@ -204,7 +206,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                 {/* Header */}
                 <div className="flex justify-between items-center w-full">
                     <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">
-                        Create a new thread
+                        {t.forum.createNewThreadTitle}
                     </h2>
                     <button onClick={() => handleClose()} className="p-2 transition-all hover:rotate-90 active:scale-95 text-[#D9D9D9]">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -217,7 +219,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                     {/* Thread Title */}
                     <div className="flex flex-col gap-4">
                         <label className="font-poppins text-[16px] leading-[26px]">
-                            <span className="text-[#9E9E9E]">Thread title </span>
+                            <span className="text-[#9E9E9E]">{t.forum.threadTitleLabel} </span>
                             <span className="text-[#F29F04]">*</span>
                         </label>
                         <div className="flex p-[16px_24px] items-center gap-[10px] rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
@@ -225,7 +227,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                                 type="text"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
-                                placeholder="Enter the name of the thread..."
+                                placeholder={t.forum.threadTitlePlaceholder}
                                 className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]"
                                 disabled={isSubmitting}
                             />
@@ -235,7 +237,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                     {/* SubCategory Dropdown */}
                     <div className="flex flex-col gap-4">
                         <label className="font-poppins text-[16px] leading-[26px]">
-                            <span className="text-[#9E9E9E]">SubCategory </span>
+                            <span className="text-[#9E9E9E]">{t.forum.subCategoryLabel} </span>
                             <span className="text-[#F29F04]">*</span>
                         </label>
                         <div className="relative">
@@ -246,7 +248,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                                 className="w-full appearance-none rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] p-[16px_24px] text-[16px] leading-[32px] font-poppins text-white outline-none disabled:cursor-not-allowed disabled:text-[#A5A5A5]"
                             >
                                 <option value="" disabled>
-                                    {isSubCategoriesLoading ? 'Loading subcategories...' : 'Select a subcategory'}
+                                    {isSubCategoriesLoading ? t.forum.loadingSubcategories : t.forum.selectSubcategory}
                                 </option>
                                 {subCategories.map((item) => (
                                     <option key={item.id} value={item.id} className="bg-[#262626] text-white">
@@ -269,7 +271,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                     {/* Tag Platform */}
                     <div className="flex flex-col gap-4">
                         <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">
-                            Tag platform
+                            {t.forum.tagPlatform}
                         </label>
                         <div className="flex p-[8px_16px_8px_8px] items-center gap-[16px] rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#262626] w-fit">
                             {platforms.map((p) => (
@@ -292,13 +294,13 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                     {/* Content */}
                     <div className="flex flex-col gap-4">
                         <label className="font-poppins text-[16px] leading-[26px]">
-                            <span className="text-[#9E9E9E]">Content </span>
+                            <span className="text-[#9E9E9E]">{t.forum.contentLabel} </span>
                             <span className="text-[#F29F04]">*</span>
                         </label>
                         <div className="rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] p-4">
                             <ForumRichTextEditor
                                 key={editorKey}
-                                placeholder="Write the content of your thread..."
+                                placeholder={t.forum.contentPlaceholder}
                                 disabled={isSubmitting}
                                 onChange={(value) => {
                                     setContent(value);
@@ -319,14 +321,14 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                         disabled={isSubmitting}
                         className="flex flex-1 py-[12px] px-[24px] justify-center items-center rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:bg-[#FCC660]/10"
                     >
-                        Cancel
+                        {t.common.cancel}
                     </button>
                     <button
                         type="submit"
                         disabled={isSubmitting}
                         className="flex flex-1 py-[12px] px-[24px] justify-center items-center rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:brightness-110 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        {isSubmitting ? 'Creating...' : 'Create a thread'}
+                        {isSubmitting ? t.common.creating : t.forum.createThreadButton}
                     </button>
                 </div>
                 </form>

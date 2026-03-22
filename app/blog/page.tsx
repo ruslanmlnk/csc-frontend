@@ -10,13 +10,17 @@ import ForumPagination from '../components/forum/ForumPagination';
 import BlogCTA from '../components/blog/BlogCTA';
 import { Article, Banner as BlogBanner, Category } from '../types/blog';
 import { getBackendUrl } from '@/lib/auth-server';
+import { formatDateValue } from '@/lib/i18n';
+import { useLanguage } from '../components/i18n/LanguageProvider';
 
 const BlogPageContent = () => {
-    const [activeCategory, setActiveCategory] = useState('All Articles');
+    const { language, messages: t } = useLanguage();
+    const allArticlesLabel = t.blog.allArticles;
+    const [activeCategory, setActiveCategory] = useState<string>(allArticlesLabel);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTag, setActiveTag] = useState('');
     const [articles, setArticles] = useState<Article[]>([]);
-    const [categories, setCategories] = useState<string[]>(['All Articles']);
+    const [categories, setCategories] = useState<string[]>([allArticlesLabel]);
     const [blogBanner, setBlogBanner] = useState<BlogBanner | null>(null);
     const [horizontalBanner, setHorizontalBanner] = useState<BlogBanner | null>(null);
     const [loading, setLoading] = useState(true);
@@ -47,9 +51,9 @@ const BlogPageContent = () => {
         const urlTag = (searchParams.get('tag')?.trim() || '').replace(/^#/, '');
 
         setSearchQuery(urlSearch);
-        setActiveCategory(urlCategory || 'All Articles');
+        setActiveCategory(urlCategory || allArticlesLabel);
         setActiveTag(urlTag);
-    }, [searchParams]);
+    }, [allArticlesLabel, searchParams]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -60,7 +64,7 @@ const BlogPageContent = () => {
                 ]);
 
                 if (!articlesResponse.ok || !categoriesResponse.ok) {
-                    throw new Error('Failed to load blog data');
+                    throw new Error(t.blog.failedToLoadData);
                 }
 
                 const [articlesPayload, categoriesPayload] = await Promise.all([
@@ -78,7 +82,7 @@ const BlogPageContent = () => {
                 setArticles(loadedArticles);
                 setBlogBanner(articlesPayload?.banner || null);
                 setHorizontalBanner(articlesPayload?.horizontalBanner || null);
-                setCategories(['All Articles', ...loadedCategories.map((c: Category) => c.name)]);
+                setCategories([allArticlesLabel, ...loadedCategories.map((c: Category) => c.name)]);
             } catch (error) {
                 console.error('Error fetching blog data:', error);
             } finally {
@@ -86,17 +90,17 @@ const BlogPageContent = () => {
             }
         };
         fetchData();
-    }, []);
+    }, [allArticlesLabel, t.blog.failedToLoadData]);
 
     useEffect(() => {
         if (loading) {
             return;
         }
 
-        if (activeCategory !== 'All Articles' && !categories.includes(activeCategory)) {
-            setActiveCategory('All Articles');
+        if (activeCategory !== allArticlesLabel && !categories.includes(activeCategory)) {
+            setActiveCategory(allArticlesLabel);
         }
-    }, [activeCategory, categories, loading]);
+    }, [activeCategory, allArticlesLabel, categories, loading]);
 
     const filteredArticles = articles.filter(article => {
         const normalizedSearch = searchQuery.toLowerCase().trim();
@@ -105,7 +109,7 @@ const BlogPageContent = () => {
             .map((tag) => tag?.tag?.toLowerCase().trim())
             .filter((tag): tag is string => Boolean(tag));
 
-        const matchesCategory = activeCategory === 'All Articles' || article.category.name === activeCategory;
+        const matchesCategory = activeCategory === allArticlesLabel || article.category.name === activeCategory;
         const matchesSearch = !normalizedSearch || article.title.toLowerCase().includes(normalizedSearch);
         const matchesTag = !normalizedTag || articleTags.includes(normalizedTag);
 
@@ -139,7 +143,7 @@ const BlogPageContent = () => {
 
         return {
             id: article.id,
-            date: new Date(article.publishedDate).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+            date: formatDateValue(new Date(article.publishedDate), language, { month: 'short', day: '2-digit', year: 'numeric' }),
             category: article.category.name,
             title: article.title,
             image: imageUrl,
@@ -158,18 +162,18 @@ const BlogPageContent = () => {
         : null;
     const defaultHorizontalBannerSrc = 'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480';
     const horizontalBannerSrc = toAbsoluteMediaUrl(horizontalBanner?.image?.url) || defaultHorizontalBannerSrc;
-    const horizontalBannerAlt = horizontalBanner?.caption?.trim() || 'Promo Banner';
+    const horizontalBannerAlt = horizontalBanner?.caption?.trim() || t.blog.promoBannerAlt;
     const horizontalBannerHref = horizontalBanner?.link?.trim() || undefined;
 
     if (loading) {
-        return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>;
+        return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">{t.blog.loading}</div>;
     }
 
     return (
         <div className="relative flex flex-col items-start bg-[#0D0D0D] overflow-hidden selection:bg-[#F29F04] selection:text-black">
             <ForumHero
-                title="Inside performance marketing"
-                description="Real cases, deep insights, and hands-on experience from live traffic, affiliate campaigns, and performance-driven strategies"
+                title={t.blog.heroTitle}
+                description={t.blog.heroDescription}
             />
 
             <main className="w-full max-w-[1280px] mx-auto px-5 flex flex-col gap-[64px] pb-[120px]">
@@ -206,7 +210,7 @@ const BlogPageContent = () => {
                         total={filteredArticles.length}
                         currentPage={normalizedPage}
                         totalPages={totalPages}
-                        itemLabel="articles"
+                        itemLabel={t.blog.articleItemLabel}
                         onPageChange={setCurrentPage}
                     />
                 ) : null}
@@ -217,8 +221,14 @@ const BlogPageContent = () => {
     );
 };
 
+const BlogPageFallback = () => {
+    const { messages: t } = useLanguage();
+
+    return <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">{t.blog.loading}</div>;
+};
+
 const BlogPage = () => (
-    <Suspense fallback={<div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-white">Loading...</div>}>
+    <Suspense fallback={<BlogPageFallback />}>
         <BlogPageContent />
     </Suspense>
 );

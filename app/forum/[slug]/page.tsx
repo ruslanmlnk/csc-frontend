@@ -7,6 +7,8 @@ import ForumCategoryHero from '@/app/components/forum/ForumCategoryHero'
 import ForumCategoryThreadCard from '@/app/components/forum/ForumCategoryThreadCard'
 import ForumPagination from '@/app/components/forum/ForumPagination'
 import CreateThreadModal from '@/app/profile/CreateThreadModal'
+import { formatDateValue } from '@/lib/i18n'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -89,27 +91,31 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   return `${normalizedBase}${normalizedPath}`
 }
 
-const formatDate = (value: string | null): string => {
+const formatDate = (
+  value: string | null,
+  language: 'en' | 'uk',
+  unknownDateLabel: string,
+): string => {
   if (!value) {
-    return 'Unknown date'
+    return unknownDateLabel
   }
 
   const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) {
-    return 'Unknown date'
+    return unknownDateLabel
   }
 
-  return parsed.toLocaleDateString('en-US', {
+  return formatDateValue(parsed, language, {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
   })
 }
 
-const resolveAuthorName = (value: unknown): string => {
+const resolveAuthorName = (value: unknown, fallbackAuthorName: string): string => {
   const author = asRecord(value)
   if (!author) {
-    return 'SCS Agency'
+    return fallbackAuthorName
   }
 
   const name = asString(author.name)
@@ -122,7 +128,7 @@ const resolveAuthorName = (value: unknown): string => {
     return email.split('@')[0]
   }
 
-  return 'SCS Agency'
+  return fallbackAuthorName
 }
 
 const resolveAuthorAvatar = (value: unknown): string => {
@@ -181,6 +187,7 @@ const getRepliesCount = async (threadId: string): Promise<number> => {
 }
 
 export default function ForumCategoryPage() {
+  const { language, messages: t } = useLanguage()
   const params = useParams()
   const router = useRouter()
   const slugParam = params.slug
@@ -260,7 +267,7 @@ export default function ForumCategoryPage() {
   useEffect(() => {
     if (!slug) {
       setSubCategory(null)
-      setError('Category slug is missing.')
+      setError(t.forum.categorySlugMissing)
       setIsLoading(false)
       return
     }
@@ -292,19 +299,19 @@ export default function ForumCategoryPage() {
           | null
 
         if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to load category.')
+          throw new Error(payload?.error || t.forum.unableToLoadCategory)
         }
 
         const item = payload?.subCategories?.[0]
         if (!item?.id || !item.name) {
-          throw new Error('Category not found.')
+          throw new Error(t.forum.categoryNotFound)
         }
 
         if (isActive) {
           setSubCategory({
             id: item.id,
             name: item.name,
-            description: item.description || 'All threads in this category',
+            description: item.description || t.forum.allThreadsInCategory,
             banner: item.banner,
           })
         }
@@ -314,7 +321,7 @@ export default function ForumCategoryPage() {
           setThreads([])
           setTotalDocs(0)
           setTotalPages(1)
-          setError(loadError instanceof Error ? loadError.message : 'Unable to load category.')
+          setError(loadError instanceof Error ? loadError.message : t.forum.unableToLoadCategory)
           setIsLoading(false)
         }
       }
@@ -325,7 +332,7 @@ export default function ForumCategoryPage() {
     return () => {
       isActive = false
     }
-  }, [slug])
+  }, [slug, t.forum.allThreadsInCategory, t.forum.categoryNotFound, t.forum.categorySlugMissing, t.forum.unableToLoadCategory])
 
   useEffect(() => {
     if (!subCategory?.id) {
@@ -354,7 +361,7 @@ export default function ForumCategoryPage() {
           | null
 
         if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to load threads.')
+          throw new Error(payload?.error || t.forum.unableToLoadThreads)
         }
 
         const docs = Array.isArray(payload?.docs) ? payload.docs : []
@@ -372,10 +379,10 @@ export default function ForumCategoryPage() {
 
             return {
               id: threadId,
-              title: asString(doc.title) || 'Untitled thread',
-              description: subCategory.description || 'We read, delve into, discuss',
-              authorName: resolveAuthorName(doc.author),
-              date: formatDate(createdAtRaw),
+              title: asString(doc.title) || t.forum.untitledThread,
+              description: subCategory.description || t.forum.defaultThreadDescription,
+              authorName: resolveAuthorName(doc.author, t.forum.defaultAuthorName),
+              date: formatDate(createdAtRaw, language, t.common.unknownDate),
               authorAvatar: resolveAuthorAvatar(doc.author),
               orderId: asNumber(doc.orderId) || 0,
               createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,
@@ -432,7 +439,7 @@ export default function ForumCategoryPage() {
           setThreads([])
           setTotalDocs(0)
           setTotalPages(1)
-          setError(loadError instanceof Error ? loadError.message : 'Unable to load threads.')
+          setError(loadError instanceof Error ? loadError.message : t.forum.unableToLoadThreads)
           setIsLoading(false)
         }
       }
@@ -443,21 +450,32 @@ export default function ForumCategoryPage() {
     return () => {
       isActive = false
     }
-  }, [currentPage, subCategory?.description, subCategory?.id, refreshKey])
+  }, [
+    currentPage,
+    language,
+    refreshKey,
+    subCategory?.description,
+    subCategory?.id,
+    t.common.unknownDate,
+    t.forum.defaultAuthorName,
+    t.forum.defaultThreadDescription,
+    t.forum.unableToLoadThreads,
+    t.forum.untitledThread,
+  ])
 
   const showingFrom = totalDocs === 0 ? 0 : (currentPage - 1) * THREADS_PER_PAGE + 1
   const showingTo = totalDocs === 0 ? 0 : Math.min(currentPage * THREADS_PER_PAGE, totalDocs)
   const categoryBannerImage = toAbsoluteMediaUrl(subCategory?.banner?.imageUrl) || CATEGORY_BANNER_IMAGE
-  const categoryBannerAlt = subCategory?.banner?.caption?.trim() || 'Category Banner'
+  const categoryBannerAlt = subCategory?.banner?.caption?.trim() || t.forum.categoryFallback
   const categoryBannerHref = subCategory?.banner?.link?.trim()
 
   return (
     <main className="min-h-screen bg-[#0D0D0D] text-white flex flex-col items-center">
       <ForumCategoryHero
-        title={subCategory?.name || 'Category'}
-        subtitle={subCategory?.description || 'All threads in this category'}
+        title={subCategory?.name || t.forum.categoryFallback}
+        subtitle={subCategory?.description || t.forum.allThreadsInCategory}
         backLink="/forum"
-        backText="Back to Forum"
+        backText={t.forum.backToForum}
         backgroundImage={categoryBannerImage}
         backgroundAlt={categoryBannerAlt}
         backgroundHref={categoryBannerHref}
@@ -473,13 +491,13 @@ export default function ForumCategoryPage() {
             <svg className="w-5 h-5 lg:w-6 lg:h-6" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M21 12C21 12.1989 20.921 12.3897 20.7803 12.5303C20.6397 12.671 20.4489 12.75 20.25 12.75H12.75V20.25C12.75 20.4489 12.671 20.6397 12.5303 20.7803C12.3897 20.921 12.1989 21 12 21C11.8011 21 11.6103 20.921 11.4697 20.7803C11.329 20.6397 11.25 20.4489 11.25 20.25V12.75H3.75C3.55109 12.75 3.36032 12.671 3.21967 12.5303C3.07902 12.3897 3 12.1989 3 12C3 11.8011 3.07902 11.6103 3.21967 11.4697C3.36032 11.329 3.55109 11.25 3.75 11.25H11.25V3.75C11.25 3.55109 11.329 3.36032 11.4697 3.21967C11.6103 3.07902 11.8011 3 12 3C12.1989 3 12.3897 3.07902 12.5303 3.21967C12.671 3.36032 12.75 3.55109 12.75 3.75V11.25H20.25C20.4489 11.25 20.6397 11.329 20.7803 11.4697C20.921 11.6103 21 11.8011 21 12Z" fill="#FCC660" />
             </svg>
-            Create a thread
+            {t.forum.createThread}
           </button>
         </div>
 
         {isLoading ? (
           <div className="w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-            Loading threads...
+            {t.forum.loadingThreads}
           </div>
         ) : error ? (
           <div className="w-full rounded-[24px] border border-[rgba(255,128,128,0.6)] bg-[rgba(255,128,128,0.08)] px-6 py-5 text-[#FF9C9C] text-[16px] leading-[26px]">
@@ -490,7 +508,7 @@ export default function ForumCategoryPage() {
             <div className="flex flex-col gap-4 w-full">
               {threads.length === 0 ? (
                 <div className="w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-                  No threads in this category yet.
+                  {t.forum.noThreadsYet}
                 </div>
               ) : (
                 threads.map((thread) => (
@@ -518,7 +536,7 @@ export default function ForumCategoryPage() {
               total={totalDocs}
               currentPage={currentPage}
               totalPages={Math.max(totalPages, 1)}
-              itemLabel="threads"
+              itemLabel={t.forum.threadsLabel}
               onPageChange={(page) => setCurrentPage(page)}
             />
           </>

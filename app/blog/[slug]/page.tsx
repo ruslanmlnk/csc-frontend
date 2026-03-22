@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import React from 'react'
 import BlogCTA from '../../components/blog/BlogCTA'
 import { getArticleBySlug, getArticles, getCategories } from '@/lib/backend/blog'
+import { formatDateValue } from '@/lib/i18n'
+import { getServerI18n } from '@/lib/i18n/server'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params
@@ -49,6 +51,7 @@ const toAbsoluteUrl = (url: string | undefined, backendUrl: string): string | nu
 const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
     const { slug } = await params
     const backendUrl = getBackendUrl()
+    const { language, messages: t } = await getServerI18n()
 
     let article: Article | null = null
     let allArticles: Article[] = []
@@ -64,13 +67,13 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
     }
 
     if (!article) {
-        return <ArticleNotFound />
+        return <ArticleNotFound title={t.article.notFoundTitle} ctaLabel={t.article.notFoundCta} />
     }
 
     const articleImage = withBackendUrl(article.image?.url, backendUrl)
-    const authorName = article.author?.name || 'CSC Agency'
-    const authorBio = article.author?.bio || 'Experienced writer and expert in performance marketing and digital industry.'
-    const authorPosition = article.author?.position || 'Writer / Expert'
+    const authorName = article.author?.name || t.article.authorNameFallback
+    const authorBio = article.author?.bio || t.article.authorBioFallback
+    const authorPosition = article.author?.position || t.article.authorPositionFallback
     const authorAvatar = withBackendUrl(article.author?.avatar?.url, backendUrl)
     const authorSocials = {
         facebook: article.author?.facebook,
@@ -80,7 +83,7 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
         tiktok: article.author?.tiktok,
         website: article.author?.website,
     }
-    const publishedDateLabel = new Date(article.publishedDate).toLocaleDateString('en-US', {
+    const publishedDateLabel = formatDateValue(article.publishedDate, language, {
         month: 'long',
         day: 'numeric',
         year: 'numeric',
@@ -121,7 +124,7 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
             slug: a.slug,
             title: a.title,
             categoryName: a.category.name,
-            publishedDateLabel: new Date(a.publishedDate).toLocaleDateString('en-US', {
+            publishedDateLabel: formatDateValue(a.publishedDate, language, {
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric',
@@ -131,12 +134,12 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
     const sidebarCategories = categories.map((c) => c.name)
     const sidebarBannerImageUrl = toAbsoluteUrl(article.sidebarBanner?.image?.url, backendUrl)
     const sidebarBannerHref = article.sidebarBanner?.link?.trim() || null
-    const sidebarBannerAlt = article.sidebarBanner?.caption?.trim() || 'Sidebar Promo'
+    const sidebarBannerAlt = article.sidebarBanner?.caption?.trim() || t.article.sidebarBannerAlt
 
     return (
         <div className="relative min-h-screen bg-[#0D0D0D] pt-[162.69px]">
             <main className="relative z-10 w-full max-w-[1280px] mx-auto px-5 flex flex-col gap-20 pb-20">
-                <ArticleBackLink />
+                <ArticleBackLink label={t.article.backToNews} />
 
                 <ArticleHero
                     authorName={authorName}
@@ -152,12 +155,16 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                             content={article.content}
                             backendUrl={backendUrl}
                             tags={article.tags}
+                            saveAriaLabel={language === 'uk' ? 'Зберегти статтю' : 'Save article'}
+                            shareAriaLabel={language === 'uk' ? 'Поділитися статтею' : 'Share article'}
                         />
 
                         <ArticlePublicationStats
                             slug={article.slug}
                             publishedDateLabel={publishedDateLabel}
                             initialViews={article.views}
+                            viewsSuffix={t.article.viewsSuffix}
+                            language={language}
                         />
 
                         <ArticleAuthorCard
@@ -173,6 +180,12 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                         tags={article.tags}
                         categories={sidebarCategories}
                         latestPosts={sidebarLatestPosts}
+                        searchPlaceholder={t.article.searchPlaceholder}
+                        searchAriaLabel={t.article.searchAria}
+                        categoriesTitle={t.article.categoriesTitle}
+                        latestPostsTitle={t.article.latestPostsTitle}
+                        popularTagsTitle={t.article.popularTagsTitle}
+                        sidebarBannerAlt={t.article.sidebarBannerAlt}
                         banner={
                             sidebarBannerImageUrl
                                 ? {
@@ -185,7 +198,7 @@ const BlogDetailPage = async ({ params }: { params: Promise<{ slug: string }> })
                     />
                 </div>
 
-                <ArticleRelated articles={formattedRelatedArticles} />
+                <ArticleRelated articles={formattedRelatedArticles} title={t.article.relatedTitle} language={language} />
             </main>
 
             <BlogCTA />

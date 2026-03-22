@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import SearchModal from './SearchModal';
 import { BackendUser } from '@/lib/backend/users';
+import { useLanguage } from './i18n/LanguageProvider';
+import LanguageSwitcher from './i18n/LanguageSwitcher';
 
 type AvatarShape = {
     url?: string;
@@ -26,6 +28,7 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 };
 
 const Header: React.FC = () => {
+    const { messages: t } = useLanguage();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isAccountPopupOpen, setIsAccountPopupOpen] = useState(false);
@@ -75,27 +78,27 @@ const Header: React.FC = () => {
 
     const menuItems = [
         {
-            label: 'Blog',
+            label: t.navigation.blog,
             href: '/blog',
             isActive: pathname === '/blog' || pathname?.startsWith('/blog/'),
         },
         {
-            label: 'Conferences',
+            label: t.navigation.conferences,
             href: '/conferences',
             isActive: pathname === '/conferences' || pathname?.startsWith('/conferences/'),
         },
         {
-            label: 'Services',
+            label: t.navigation.services,
             href: '/services',
             isActive: pathname === '/services' || pathname?.startsWith('/services/'),
         },
         {
-            label: 'Forum',
+            label: t.navigation.forum,
             href: '/forum',
             isActive: pathname === '/forum' || pathname?.startsWith('/forum/'),
         },
         {
-            label: 'Partnership',
+            label: t.navigation.partnership,
             href: '/partnerships',
             isActive:
                 pathname === '/partnership' ||
@@ -104,7 +107,7 @@ const Header: React.FC = () => {
                 pathname?.startsWith('/partnerships/'),
         },
         {
-            label: 'Jobs',
+            label: t.navigation.jobs,
             href: '/jobs',
             isActive: pathname === '/jobs' || pathname?.startsWith('/jobs/'),
         },
@@ -179,8 +182,8 @@ const Header: React.FC = () => {
                 ? (currentUser.avatar as AvatarShape).url || null
                 : null;
     const avatarUrl = toAbsoluteMediaUrl(avatarRaw);
-    const avatarAlt = currentUser?.name || currentUser?.email || 'User avatar';
-    const displayName = currentUser?.name || currentUser?.email?.split('@')[0] || 'Profile';
+    const avatarAlt = currentUser?.name || currentUser?.email || t.navigation.profile;
+    const displayName = currentUser?.name || currentUser?.email?.split('@')[0] || t.navigation.profile;
 
     return (
         <>
@@ -215,7 +218,8 @@ const Header: React.FC = () => {
                 </nav>
 
                 {/* Icons Container */}
-                <div className="hidden items-center gap-[25px] lg:flex">
+                <div className="hidden items-center gap-[16px] lg:flex">
+                    <LanguageSwitcher />
                     {/* Search Button */}
                     <button
                         onClick={() => setIsSearchOpen(true)}
@@ -310,7 +314,7 @@ const Header: React.FC = () => {
                                         <path d="M21.1426 25C20.6032 25 20.166 24.5628 20.166 24.0234C20.166 20.2002 17.0556 17.0898 13.2324 17.0898H11.7676C7.94438 17.0898 4.83398 20.2002 4.83398 24.0234C4.83398 24.5628 4.39678 25 3.85742 25C3.31807 25 2.88086 24.5628 2.88086 24.0234C2.88086 19.1233 6.86743 15.1367 11.7676 15.1367H13.2324C18.1326 15.1367 22.1191 19.1233 22.1191 24.0234C22.1191 24.5628 21.6819 25 21.1426 25ZM12.4023 13.1836C8.76763 13.1836 5.81055 10.2265 5.81055 6.5918C5.81055 2.95708 8.76763 0 12.4023 0C16.0371 0 18.9941 2.95708 18.9941 6.5918C18.9941 10.2265 16.0371 13.1836 12.4023 13.1836ZM12.4023 1.95312C9.84458 1.95312 7.76367 4.03403 7.76367 6.5918C7.76367 9.14956 9.84458 11.2305 12.4023 11.2305C14.9601 11.2305 17.041 9.14956 17.041 6.5918C17.041 4.03403 14.9601 1.95312 12.4023 1.95312Z" fill="#F29F04" />
                                     </svg>
                                     <span className="font-poppins text-[16px] font-normal leading-[26px] text-[#BDBDBD]">
-                                        Profile
+                                        {t.navigation.profile}
                                     </span>
                                 </Link>
 
@@ -324,7 +328,7 @@ const Header: React.FC = () => {
                                         <path d="M16.6645 26.5311H7.54453C6.90821 26.5304 6.29813 26.2774 5.84818 25.8274C5.39823 25.3775 5.14517 24.7674 5.14453 24.1311V5.86887C5.14517 5.23255 5.39823 4.62247 5.84818 4.17252C6.29813 3.72257 6.90821 3.46951 7.54453 3.46887H16.6645C16.9032 3.46887 17.1321 3.56369 17.3009 3.73248C17.4697 3.90126 17.5645 4.13018 17.5645 4.36887C17.5645 4.60757 17.4697 4.83649 17.3009 5.00527C17.1321 5.17405 16.9032 5.26887 16.6645 5.26887H7.54453C7.3854 5.26887 7.23279 5.33209 7.12027 5.44461C7.00775 5.55713 6.94453 5.70974 6.94453 5.86887V24.1311C6.94453 24.2902 7.00775 24.4428 7.12027 24.5553C7.23279 24.6679 7.3854 24.7311 7.54453 24.7311H16.6645C16.9032 24.7311 17.1321 24.8259 17.3009 24.9947C17.4697 25.1635 17.5645 25.3924 17.5645 25.6311C17.5645 25.8698 17.4697 26.0987 17.3009 26.2675C17.1321 26.4363 16.9032 26.5311 16.6645 26.5311Z" fill="#F29F04" />
                                     </svg>
                                     <span className="font-poppins text-[16px] font-normal leading-[26px] text-[#BDBDBD]">
-                                        Exit
+                                        {t.navigation.exit}
                                     </span>
                                 </button>
                             </div>
@@ -335,7 +339,7 @@ const Header: React.FC = () => {
                 {/* Mobile Burger */}
                 <button
                     type="button"
-                    aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                    aria-label={isMobileMenuOpen ? t.navigation.closeMenu : t.navigation.openMenu}
                     onClick={() => setIsMobileMenuOpen((prev) => !prev)}
                     className="flex h-8 w-8 items-center justify-center lg:hidden"
                 >
@@ -376,6 +380,9 @@ const Header: React.FC = () => {
                             </nav>
 
                             <div className="mt-6 grid grid-cols-2 gap-3">
+                                <div className="col-span-2 flex justify-center">
+                                    <LanguageSwitcher />
+                                </div>
                                 <button
                                     type="button"
                                     onClick={() => {
@@ -384,7 +391,7 @@ const Header: React.FC = () => {
                                     }}
                                     className="rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#262626] px-4 py-3 font-poppins text-[16px] font-medium leading-[26px] text-white"
                                 >
-                                    Search
+                                    {t.common.search}
                                 </button>
                                 <button
                                     type="button"
@@ -394,7 +401,7 @@ const Header: React.FC = () => {
                                     }}
                                     className="rounded-[80px] bg-[#F29F04] px-4 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]"
                                 >
-                                    Account
+                                    {t.navigation.account}
                                 </button>
                             </div>
                         </div>

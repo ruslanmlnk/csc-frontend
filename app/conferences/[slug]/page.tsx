@@ -19,6 +19,7 @@ import ConferenceCard from '@/app/components/conferences/ConferenceCard'
 import RichText from '@/app/components/blog/RichText'
 import type { ConferenceItem } from '@/app/types/conferences'
 import { formatConferenceDate } from '@/app/components/conferences/formatConferenceDate'
+import { getServerI18n } from '@/lib/i18n/server'
 
 const withBackendUrl = (url: string | undefined | null, backendUrl: string): string | null => {
   if (!url) return null
@@ -63,6 +64,7 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
   const backendUrl = getBackendUrl()
+  const { language, messages: t } = await getServerI18n()
 
   const [conference, allConferences] = await Promise.all([getConferenceBySlug(slug), getConferences()])
 
@@ -80,7 +82,7 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
 
   const similarConferences = allConferences.filter((item) => item.id !== currentConference.id).slice(0, 3)
   const conferenceWebsiteUrl = currentConference.websiteUrl?.trim() ? currentConference.websiteUrl : null
-  const conferenceDateLabel = formatConferenceDate(currentConference.conferenceDate)
+  const conferenceDateLabel = formatConferenceDate(currentConference.conferenceDate, language)
   const conferenceLocationLabel = currentConference.location?.name?.trim() || null
   const conferenceVerticalLabel = currentConference.vertical?.name?.trim() || null
 
@@ -94,6 +96,8 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
           dateLabel={conferenceDateLabel}
           locationLabel={conferenceLocationLabel}
           verticalLabel={conferenceVerticalLabel}
+          backLabel={t.conferences.backToConferences}
+          websiteLabel={t.common.goToWebsite}
         />
 
         <div className="flex items-start gap-6 self-stretch xl:gap-11">
@@ -190,7 +194,7 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
       {similarConferences.length > 0 ? (
         <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center justify-center gap-[64px] overflow-hidden px-5 pb-20 pt-[120px]">
           <h2 className="self-stretch bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999] bg-clip-text text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-            Similar Conferences
+            {t.conferences.similarTitle}
           </h2>
 
           <div className="grid self-stretch grid-cols-1 gap-[24px] md:grid-cols-2">
@@ -200,9 +204,10 @@ const ConferenceDetailPage = async ({ params }: { params: Promise<{ slug: string
                 title={item.title}
                 imageSrc={toAbsoluteMediaUrl(item.mainImage?.url)}
                 location={item.location?.name}
-                dateLabel={formatConferenceDate(item.conferenceDate)}
+                dateLabel={formatConferenceDate(item.conferenceDate, language)}
                 topicsLabel={item.vertical?.name}
                 detailsHref={item.slug ? `/conferences/${item.slug}` : `/conferences/${toSlug(item.title)}`}
+                detailsLabel={t.common.moreDetails}
               />
             ))}
           </div>

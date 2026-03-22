@@ -2,6 +2,7 @@
 
 import React, { useRef, useState } from 'react'
 import { Bold, ImagePlus, Italic, Link2, List, ListOrdered, Strikethrough, Underline } from 'lucide-react'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 import { createEmptyForumRichText, createForumUploadNode, extractPlainTextFromForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument, type ForumRichTextNode } from '@/lib/forumRichText'
 
 type ForumRichTextEditorProps = {
@@ -244,10 +245,22 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
   disabled = false,
   onChange,
 }) => {
+  const { language } = useLanguage()
   const editorRef = useRef<HTMLDivElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [isEmpty, setIsEmpty] = useState(true)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const enterLinkUrlLabel = language === 'uk' ? '\u0412\u0432\u0435\u0434\u0456\u0442\u044c URL \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f' : 'Enter link URL'
+  const uploadErrorLabel = language === 'uk' ? '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f.' : 'Unable to upload image.'
+  const boldLabel = language === 'uk' ? '\u0416\u0438\u0440\u043d\u0438\u0439' : 'Bold'
+  const italicLabel = language === 'uk' ? '\u041a\u0443\u0440\u0441\u0438\u0432' : 'Italic'
+  const underlineLabel = language === 'uk' ? '\u041f\u0456\u0434\u043a\u0440\u0435\u0441\u043b\u0435\u043d\u043d\u044f' : 'Underline'
+  const strikethroughLabel = language === 'uk' ? '\u0417\u0430\u043a\u0440\u0435\u0441\u043b\u0435\u043d\u0438\u0439' : 'Strikethrough'
+  const bulletListLabel = language === 'uk' ? '\u041c\u0430\u0440\u043a\u043e\u0432\u0430\u043d\u0438\u0439 \u0441\u043f\u0438\u0441\u043e\u043a' : 'Bullet List'
+  const numberedListLabel = language === 'uk' ? '\u041d\u0443\u043c\u0435\u0440\u043e\u0432\u0430\u043d\u0438\u0439 \u0441\u043f\u0438\u0441\u043e\u043a' : 'Numbered List'
+  const addLinkLabel = language === 'uk' ? '\u0414\u043e\u0434\u0430\u0442\u0438 \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f' : 'Add Link'
+  const addImageLabel = language === 'uk' ? '\u0414\u043e\u0434\u0430\u0442\u0438 \u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f' : 'Add Image'
+  const uploadingLabel = language === 'uk' ? '\u0417\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0435\u043d\u043d\u044f...' : 'Uploading...'
 
   const syncEditorState = () => {
     if (!editorRef.current) {
@@ -317,7 +330,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
   }
 
   const handleLinkAction = () => {
-    const url = window.prompt('Enter link URL')
+    const url = window.prompt(enterLinkUrlLabel)
     if (!url) {
       return
     }
@@ -345,7 +358,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
 
       const payload = (await response.json().catch(() => null)) as UploadedMediaResponse | null
       if (!response.ok || !payload?.url) {
-        throw new Error(payload?.error || 'Unable to upload image.')
+        throw new Error(payload?.error || uploadErrorLabel)
       }
 
       focusEditor()
@@ -357,7 +370,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
         height: payload.height,
       })
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to upload image.')
+      window.alert(error instanceof Error ? error.message : uploadErrorLabel)
     } finally {
       setIsUploadingImage(false)
       if (fileInputRef.current) {
@@ -369,29 +382,29 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
-        <ToolbarButton label="Bold" onClick={() => runCommand('bold')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={boldLabel} onClick={() => runCommand('bold')} disabled={disabled || isUploadingImage}>
           <Bold size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Italic" onClick={() => runCommand('italic')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={italicLabel} onClick={() => runCommand('italic')} disabled={disabled || isUploadingImage}>
           <Italic size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Underline" onClick={() => runCommand('underline')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={underlineLabel} onClick={() => runCommand('underline')} disabled={disabled || isUploadingImage}>
           <Underline size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Strikethrough" onClick={() => runCommand('strikeThrough')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={strikethroughLabel} onClick={() => runCommand('strikeThrough')} disabled={disabled || isUploadingImage}>
           <Strikethrough size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Bullet List" onClick={() => runCommand('insertUnorderedList')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={bulletListLabel} onClick={() => runCommand('insertUnorderedList')} disabled={disabled || isUploadingImage}>
           <List size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Numbered List" onClick={() => runCommand('insertOrderedList')} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={numberedListLabel} onClick={() => runCommand('insertOrderedList')} disabled={disabled || isUploadingImage}>
           <ListOrdered size={16} />
         </ToolbarButton>
-        <ToolbarButton label="Add Link" onClick={handleLinkAction} disabled={disabled || isUploadingImage}>
+        <ToolbarButton label={addLinkLabel} onClick={handleLinkAction} disabled={disabled || isUploadingImage}>
           <Link2 size={16} />
         </ToolbarButton>
         <ToolbarButton
-          label={isUploadingImage ? 'Uploading...' : 'Add Image'}
+          label={isUploadingImage ? uploadingLabel : addImageLabel}
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || isUploadingImage}
         >

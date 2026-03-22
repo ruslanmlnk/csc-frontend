@@ -9,6 +9,7 @@ import PartnershipProgramCard from '@/app/components/partnerships/PartnershipPro
 import PartnershipsFilters from '@/app/components/partnerships/PartnershipsFilters'
 import type { PartnershipCategory, PartnershipItem } from '@/app/types/partnerships'
 import type { PageHeroV2 } from '@/lib/backend/pageGlobals'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 type PartnershipsApiResponse = {
   partnerships?: PartnershipItem[]
@@ -29,11 +30,6 @@ const promoBannerSrc =
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 
-const ALL_CATEGORIES = 'All Categories'
-const ALL_LOCATIONS = 'Location'
-const ALL_VERTICALS = 'Vertical'
-const ALL_PAYMENT_MODELS = 'Payment model'
-
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   if (!url) return null
   if (url.startsWith('http://') || url.startsWith('https://')) return url
@@ -45,21 +41,26 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 }
 
 const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initialHeroV2 }) => {
+  const { language, messages: t } = useLanguage()
+  const allCategories = t.partnerships.allCategories
+  const allLocations = t.partnerships.allLocations
+  const allVerticals = t.partnerships.allVerticals
+  const allPaymentModels = t.partnerships.allPaymentModels
   const [partnerships, setPartnerships] = useState<PartnershipItem[]>([])
-  const [categories, setCategories] = useState<string[]>([ALL_CATEGORIES])
-  const [activeCategory, setActiveCategory] = useState(ALL_CATEGORIES)
+  const [categories, setCategories] = useState<string[]>([allCategories])
+  const [activeCategory, setActiveCategory] = useState<string>(allCategories)
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [locationFilter, setLocationFilter] = useState(ALL_LOCATIONS)
-  const [verticalFilter, setVerticalFilter] = useState(ALL_VERTICALS)
-  const [paymentModelFilter, setPaymentModelFilter] = useState(ALL_PAYMENT_MODELS)
+  const [locationFilter, setLocationFilter] = useState<string>(allLocations)
+  const [verticalFilter, setVerticalFilter] = useState<string>(allVerticals)
+  const [paymentModelFilter, setPaymentModelFilter] = useState<string>(allPaymentModels)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
   const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
-  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Partnerships banner'
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || (language === 'uk' ? '\u0411\u0430\u043d\u0435\u0440 \u043f\u0430\u0440\u0442\u043d\u0435\u0440\u043e\u043a' : 'Partnerships banner')
   const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   useEffect(() => {
@@ -79,11 +80,11 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
         const categoriesData = (await categoriesResponse.json().catch(() => null)) as PartnershipCategoriesApiResponse | null
 
         if (!partnershipsResponse.ok) {
-          throw new Error(partnershipsData?.error || 'Unable to load partnerships.')
+          throw new Error(partnershipsData?.error || t.partnerships.loading)
         }
 
         if (!categoriesResponse.ok) {
-          throw new Error(categoriesData?.error || 'Unable to load partnership categories.')
+          throw new Error(categoriesData?.error || t.partnerships.loading)
         }
 
         if (!active) return
@@ -92,12 +93,12 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
         const loadedCategories = Array.isArray(categoriesData?.categories) ? categoriesData.categories : []
 
         setPartnerships(loadedPartnerships)
-        setCategories([ALL_CATEGORIES, ...loadedCategories.map((item) => item.name)])
+        setCategories([allCategories, ...loadedCategories.map((item) => item.name)])
       } catch (loadError) {
         if (!active) return
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load partnerships.')
+        setError(loadError instanceof Error ? loadError.message : t.partnerships.loading)
         setPartnerships([])
-        setCategories([ALL_CATEGORIES])
+        setCategories([allCategories])
       } finally {
         if (active) setIsLoading(false)
       }
@@ -108,23 +109,23 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
     return () => {
       active = false
     }
-  }, [])
+  }, [allCategories, t.partnerships.loading])
 
   const locationOptions = useMemo(
     () =>
       [
-        ALL_LOCATIONS,
+        allLocations,
         ...Array.from(
           new Set(partnerships.map((item) => item.location?.name?.trim()).filter((value): value is string => Boolean(value))),
         ),
       ],
-    [partnerships],
+    [allLocations, partnerships],
   )
 
   const verticalOptions = useMemo(
     () =>
       [
-        ALL_VERTICALS,
+        allVerticals,
         ...Array.from(
           new Set(
             partnerships.flatMap((item) =>
@@ -133,13 +134,13 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
           ),
         ),
       ],
-    [partnerships],
+    [allVerticals, partnerships],
   )
 
   const paymentModelOptions = useMemo(
     () =>
       [
-        ALL_PAYMENT_MODELS,
+        allPaymentModels,
         ...Array.from(
           new Set(
             partnerships.flatMap((item) =>
@@ -148,7 +149,7 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
           ),
         ),
       ],
-    [partnerships],
+    [allPaymentModels, partnerships],
   )
 
   const filteredPartnerships = useMemo(() => {
@@ -170,14 +171,14 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
         models.some((value) => value.toLowerCase().includes(loweredQuery)) ||
         offers.some((value) => value.toLowerCase().includes(loweredQuery))
 
-      const categoryMatch = activeCategory === ALL_CATEGORIES || categoryName === activeCategory
-      const locationMatch = locationFilter === ALL_LOCATIONS || locationName === locationFilter
-      const verticalMatch = verticalFilter === ALL_VERTICALS || offers.includes(verticalFilter)
-      const paymentModelMatch = paymentModelFilter === ALL_PAYMENT_MODELS || models.includes(paymentModelFilter)
+      const categoryMatch = activeCategory === allCategories || categoryName === activeCategory
+      const locationMatch = locationFilter === allLocations || locationName === locationFilter
+      const verticalMatch = verticalFilter === allVerticals || offers.includes(verticalFilter)
+      const paymentModelMatch = paymentModelFilter === allPaymentModels || models.includes(paymentModelFilter)
 
       return searchMatch && categoryMatch && locationMatch && verticalMatch && paymentModelMatch
     })
-  }, [activeCategory, locationFilter, partnerships, paymentModelFilter, searchQuery, verticalFilter])
+  }, [activeCategory, allCategories, allLocations, allPaymentModels, allVerticals, locationFilter, partnerships, paymentModelFilter, searchQuery, verticalFilter])
 
   return (
     <div className="relative flex flex-col items-start overflow-x-hidden bg-[#0D0D0D] font-poppins text-white">
@@ -185,13 +186,12 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
         title={
           heroTitle || (
             <>
-              Trusted partnership <br className="hidden md:block" /> programs
+              {t.partnerships.heroTitle}
             </>
           )
         }
         description={
-          heroDescription
-          || 'Discover affiliate programs, compare conditions, and choose the best partner for your traffic and growth goals.'
+          heroDescription || t.partnerships.heroDescription
         }
       />
 
@@ -225,7 +225,7 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
           <div className="flex w-full flex-col gap-6">
             {isLoading && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                Loading partnerships...
+                {t.partnerships.loading}
               </div>
             )}
 
@@ -237,7 +237,7 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
 
             {!isLoading && !error && filteredPartnerships.length === 0 && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                No partnerships found.
+                {t.partnerships.noResults}
               </div>
             )}
 
@@ -272,6 +272,11 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
                       minPayment={partnership.minPayment}
                       offers={(partnership.offers || []).map((item) => item.offer).filter(Boolean)}
                       detailsHref={partnership.slug ? `/partnerships/${partnership.slug}` : '/partnerships'}
+                      foundedLabel={language === 'uk' ? '\u0417\u0430\u0441\u043d\u043e\u0432\u0430\u043d\u043e' : 'Founded'}
+                      modelsLabel={language === 'uk' ? '\u041c\u043e\u0434\u0435\u043b\u0456' : 'Models'}
+                      geoLabel={language === 'uk' ? '\u0413\u0435\u043e' : 'Geo'}
+                      minPaymentLabel={language === 'uk' ? '\u041c\u0456\u043d\u0456\u043c\u0430\u043b\u044c\u043d\u0430 \u0432\u0438\u043f\u043b\u0430\u0442\u0430' : 'Minimum payment'}
+                      detailsLabel={t.common.moreDetails}
                     />
                   )
                 })}
@@ -285,7 +290,7 @@ const PartnershipsPageClient: React.FC<PartnershipsPageClientProps> = ({ initial
                 total={filteredPartnerships.length}
                 currentPage={1}
                 totalPages={1}
-                itemLabel="partnerships"
+                itemLabel={t.partnerships.itemLabel}
                 onPageChange={() => undefined}
               />
             )}

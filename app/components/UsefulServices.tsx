@@ -5,6 +5,7 @@ import Link from 'next/link'
 import UsefulServiceCard from '@/app/components/services/UsefulServiceCard'
 import ServiceCardLogo from '@/app/components/services/ServiceCardLogo'
 import type { ServiceItem } from '@/app/types/services'
+import { useLanguage } from './i18n/LanguageProvider'
 
 type ServicesApiResponse = {
   services?: ServiceItem[]
@@ -26,6 +27,7 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 }
 
 const UsefulServices: React.FC = () => {
+  const { messages: t } = useLanguage()
   const [services, setServices] = useState<ServiceItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -42,7 +44,7 @@ const UsefulServices: React.FC = () => {
         const data = (await response.json().catch(() => null)) as ServicesApiResponse | null
 
         if (!response.ok) {
-          throw new Error(data?.error || 'Unable to load services.')
+          throw new Error(data?.error || t.home.usefulServicesError)
         }
 
         if (!active) return
@@ -51,7 +53,7 @@ const UsefulServices: React.FC = () => {
         setServices(docs.slice(0, 3))
       } catch (loadError) {
         if (!active) return
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load services.')
+        setError(loadError instanceof Error ? loadError.message : t.home.usefulServicesError)
         setServices([])
       } finally {
         if (active) {
@@ -65,25 +67,25 @@ const UsefulServices: React.FC = () => {
     return () => {
       active = false
     }
-  }, [])
+  }, [t.home.usefulServicesError])
 
   return (
     <section className="w-full px-5 flex flex-col gap-16 bg-[#0D0D0D] max-w-[1280px] mx-auto">
       <div className="flex flex-col md:flex-row justify-between items-center w-full gap-8">
         <h2 className="font-['Poppins'] text-[32px] md:text-[56px] font-medium leading-tight md:leading-[72px] tracking-[-1.28px] md:tracking-[-2.24px] text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-[#999] text-center md:text-left">
-          Useful Services
+          {t.home.usefulServicesTitle}
         </h2>
         <Link
           href="/services"
           className="hidden md:flex py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95"
         >
-          See More
+          {t.home.usefulServicesSeeMore}
         </Link>
       </div>
 
       {isLoading ? (
         <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-          Loading services...
+          {t.home.usefulServicesLoading}
         </div>
       ) : null}
 
@@ -109,7 +111,7 @@ const UsefulServices: React.FC = () => {
                       height={service.logo?.height}
                     />
                   )}
-                  category={service.category?.name || 'Service'}
+                  category={service.category?.name || t.home.defaultServiceCategory}
                   name={service.title}
                   description={service.description}
                   pricing={service.priceLabel}
@@ -126,7 +128,7 @@ const UsefulServices: React.FC = () => {
         href="/services"
         className="mt-8 flex md:hidden py-[11px] px-[24px] justify-center items-center gap-[10px] rounded-[80px] border border-[#F29F04] text-[#F29F04] font-['Poppins'] text-[16px] font-medium leading-[26px] hover:bg-[#F29F04]/10 transition-all active:scale-95 self-center"
       >
-        See More
+        {t.home.usefulServicesSeeMore}
       </Link>
     </section>
   )

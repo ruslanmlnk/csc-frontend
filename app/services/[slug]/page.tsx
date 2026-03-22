@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getBackendUrl } from '@/lib/auth-server'
 import { getServiceBySlug, getServices } from '@/lib/backend/services'
+import { getServerI18n } from '@/lib/i18n/server'
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
@@ -58,6 +59,7 @@ const renderServiceLogo = (service: ServiceItem, backendUrl: string) => {
 const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
   const backendUrl = getBackendUrl()
+  const { messages: t } = await getServerI18n()
 
   const [service, allServices] = await Promise.all([getServiceBySlug(slug), getServices()])
 
@@ -87,7 +89,7 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
     similarServicesByCategory.length > 0 ? similarServicesByCategory : similarServicesFallback
   ).slice(0, 3)
 
-  const categoryName = currentService.category?.name || 'Service'
+  const categoryName = currentService.category?.name || t.services.defaultCategory
   const serviceHandle = currentService.handle?.trim() ? currentService.handle : null
   const serviceWebsiteUrl = currentService.websiteUrl?.trim() ? currentService.websiteUrl : null
 
@@ -101,6 +103,8 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
           price={currentService.priceLabel}
           handle={serviceHandle}
           category={categoryName}
+          backLabel={t.services.backToServices}
+          websiteLabel={t.common.goToWebsite}
         />
 
         <div className="flex items-start gap-6 self-stretch xl:gap-11">
@@ -225,7 +229,7 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
       {similarServices.length > 0 ? (
         <div className="flex flex-col justify-center items-center gap-[64px] px-5 pt-[120px] pb-20 w-full max-w-[1280px] mx-auto overflow-hidden">
           <h2 className="text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999] self-stretch">
-            Similar Services
+            {t.services.similarTitle}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[24px] self-stretch">
@@ -244,7 +248,7 @@ const ServiceDetailPage = async ({ params }: { params: Promise<{ slug: string }>
                       height={item.logo?.height}
                     />
                   )}
-                  category={item.category?.name || 'Service'}
+                  category={item.category?.name || t.services.defaultCategory}
                   name={item.title}
                   description={item.description}
                   pricing={item.priceLabel}

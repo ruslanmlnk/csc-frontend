@@ -8,6 +8,7 @@ import { BackendUser } from '@/lib/backend/users';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 import SurfaceCard from '@/app/components/layout/SurfaceCard';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 const UserIconLarge = () => (
     <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -62,6 +63,7 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 };
 
 const SettingsPage: React.FC = () => {
+    const { messages: t } = useLanguage();
     const [user, setUser] = useState<BackendUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -133,13 +135,13 @@ const SettingsPage: React.FC = () => {
             // If password change is requested, verify current password first
             if (formData.newPassword) {
                 if (!formData.currentPassword) {
-                    alert('Please enter your current password to change it');
+                    alert(t.profile.pleaseEnterCurrentPassword);
                     setIsSaving(false);
                     return;
                 }
 
                 if (formData.newPassword !== formData.confirmPassword) {
-                    alert('New passwords do not match');
+                    alert(t.profile.passwordMismatch);
                     setIsSaving(false);
                     return;
                 }
@@ -152,7 +154,7 @@ const SettingsPage: React.FC = () => {
 
                 if (!verifyRes.ok) {
                     const errData = await verifyRes.json();
-                    alert(errData.message || 'Incorrect current password');
+                    alert(errData.message || t.profile.incorrectCurrentPassword);
                     setIsSaving(false);
                     return;
                 }
@@ -191,11 +193,11 @@ const SettingsPage: React.FC = () => {
                 setTimeout(() => setShowSuccess(false), 3000);
             } else {
                 const error = await response.json();
-                alert(error.message || 'Failed to update profile');
+                alert(error.message || t.profile.failedToUpdateProfile);
             }
         } catch (err) {
             console.error('Failed to save', err);
-            alert('Internal error');
+            alert(t.profile.internalError);
         } finally {
             setIsSaving(false);
         }
@@ -206,7 +208,7 @@ const SettingsPage: React.FC = () => {
         if (!file) return;
 
         const uploadFormData = new FormData();
-        const altText = user?.name || user?.email || 'User avatar';
+        const altText = user?.name || user?.email || t.navigation.profile;
         uploadFormData.append('altText', altText);
         uploadFormData.append('file', file);
 
@@ -219,7 +221,7 @@ const SettingsPage: React.FC = () => {
 
             if (!uploadRes.ok) {
                 const err = (await uploadRes.json().catch(() => ({}))) as UploadAvatarResponse;
-                alert(err.message || err.error || 'Failed to upload image. Please check file size and format.');
+                alert(err.message || err.error || t.profile.failedToUploadImage);
                 return;
             }
 
@@ -252,14 +254,14 @@ const SettingsPage: React.FC = () => {
                     }, 1500);
                 } else {
                     const err = (await updateRes.json().catch(() => ({}))) as UploadAvatarResponse;
-                    alert(err.message || err.error || err.errors?.[0]?.message || 'Failed to update user profile with new photo.');
+                    alert(err.message || err.error || err.errors?.[0]?.message || t.profile.failedToUpdatePhoto);
                 }
             } else {
-                alert('Server returned invalid data after upload.');
+                alert(t.profile.invalidUploadResponse);
             }
         } catch (err) {
             console.error('Photo upload failed', err);
-            alert('An error occurred during photo upload.');
+            alert(t.profile.photoUploadError);
         } finally {
             e.target.value = '';
             setIsSaving(false);
@@ -290,20 +292,20 @@ const SettingsPage: React.FC = () => {
                         />
                     </div>
                     <span className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">
-                        Changes saved
+                        {t.profile.changesSaved}
                     </span>
                 </div>
             )}
             <div className="flex items-center gap-[10px] w-full h-[58px]">
                 <Link href="/profile" className="flex flex-1 h-full items-center justify-center rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:bg-[#FCC660]/10">
-                    Cancel changes
+                    {t.profile.cancelChanges}
                 </Link>
                 <button
                     onClick={handleSave}
                     disabled={isSaving}
                     className="flex flex-1 h-full items-center justify-center rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:brightness-110 disabled:opacity-50"
                 >
-                    {isSaving ? <Loader2 className="animate-spin" /> : 'Save changes'}
+                    {isSaving ? <Loader2 className="animate-spin" /> : t.profile.saveChanges}
                 </button>
             </div>
         </div>
@@ -322,33 +324,33 @@ const SettingsPage: React.FC = () => {
             <main className="relative z-10 w-full max-w-[1280px] px-5 pb-[120px] pt-[80px] md:pt-[120px] flex flex-col items-center gap-16 mx-auto">
                 <div className="flex flex-col items-center gap-8 w-full">
                     <h1 className="text-center font-poppins text-[40px] md:text-[80px] font-medium leading-[1.1] tracking-[-3.2px] bg-gradient-to-b from-white to-[#999] bg-clip-text text-transparent [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">
-                        Personal profile settings
+                        {t.profile.settingsTitle}
                     </h1>
                     <Link href="/profile" className="flex items-center gap-4 text-[#FCFCFC] font-poppins text-[24px] transition-opacity hover:opacity-80">
-                        <ArrowLeft size={32} /> Back to profile
+                        <ArrowLeft size={32} /> {t.profile.backToProfile}
                     </Link>
                 </div>
 
                 <div className="flex flex-col gap-16 w-full">
                     {/* Profile Photo */}
                     <SurfaceCard className="flex flex-col p-8 md:p-10 gap-10 overflow-hidden">
-                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Profile Photo</h2>
+                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.profilePhoto}</h2>
                         <div className="flex flex-col md:flex-row items-center gap-10">
                             <div className="w-[160px] h-[160px] rounded-full bg-[#262626] border border-white/50 flex items-center justify-center shrink-0 overflow-hidden relative">
                                 {avatarUrl ? (
-                                    <Image src={avatarUrl} alt="Avatar" fill className="object-cover" />
+                                    <Image src={avatarUrl} alt={t.navigation.profile} fill className="object-cover" />
                                 ) : (
                                     <UserIconLarge />
                                 )}
                             </div>
                             <div className="flex flex-col items-start gap-6">
                                 <div className="flex flex-col gap-3">
-                                    <h3 className="text-white font-poppins text-[24px] font-medium leading-[32px]">Update your photo</h3>
-                                    <p className="text-[#6C6C6C] font-poppins text-[16px] leading-[26px]">Choose a clear photo that represents you well. Maximum file size: 5MB</p>
+                                    <h3 className="text-white font-poppins text-[24px] font-medium leading-[32px]">{t.profile.updatePhotoTitle}</h3>
+                                    <p className="text-[#6C6C6C] font-poppins text-[16px] leading-[26px]">{t.profile.updatePhotoDescription}</p>
                                 </div>
                                 <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" accept="image/*" />
                                 <button onClick={() => fileInputRef.current?.click()} className="flex px-6 py-3 justify-center items-center rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-poppins text-[16px] font-medium leading-[26px] transition-all hover:brightness-110">
-                                    Upload new photo
+                                    {t.profile.uploadNewPhoto}
                                 </button>
                             </div>
                         </div>
@@ -356,24 +358,24 @@ const SettingsPage: React.FC = () => {
 
                     {/* Personal information */}
                     <SurfaceCard className="flex flex-col p-8 md:p-10 gap-10">
-                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Personal information</h2>
+                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.personalInformation}</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                             <div className="flex flex-col gap-4">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Name</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.name}</label>
                                 <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                    <input name="name" value={formData.name} onChange={handleInputChange} type="text" placeholder="Your name" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
+                                    <input name="name" value={formData.name} onChange={handleInputChange} type="text" placeholder={t.profile.name} className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                 </div>
                             </div>
                             <div className="flex flex-col gap-4">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Email</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.email}</label>
                                 <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                    <input name="email" value={formData.email} disabled type="email" placeholder="Your mail" className="bg-transparent border-none outline-none text-white/50 font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5] cursor-not-allowed" />
+                                    <input name="email" value={formData.email} disabled type="email" placeholder={t.profile.email} className="bg-transparent border-none outline-none text-white/50 font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5] cursor-not-allowed" />
                                 </div>
                             </div>
                             <div className="flex flex-col gap-4 col-span-1 md:col-span-2">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">About me</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.aboutMe}</label>
                                 <div className="flex h-[150px] p-[16px_24px] items-start rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                    <textarea name="bio" value={formData.bio} onChange={handleInputChange} placeholder="Description of your activities..." className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full h-full resize-none placeholder-[#A5A5A5]" />
+                                    <textarea name="bio" value={formData.bio} onChange={handleInputChange} placeholder={t.profile.aboutMePlaceholder} className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full h-full resize-none placeholder-[#A5A5A5]" />
                                 </div>
                             </div>
                         </div>
@@ -381,45 +383,45 @@ const SettingsPage: React.FC = () => {
 
                     {/* Team details */}
                     <SurfaceCard className="flex flex-col p-8 md:p-10 gap-10">
-                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Team details</h2>
+                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.teamDetails}</h2>
                         <div className="flex flex-col gap-10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Team name</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.teamName}</label>
                                     <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                        <input name="company" value={formData.company} onChange={handleInputChange} type="text" placeholder="Company" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
+                                        <input name="company" value={formData.company} onChange={handleInputChange} type="text" placeholder={t.profile.teamName} className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Position</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.positionLabel}</label>
                                     <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                        <input name="position" value={formData.position} onChange={handleInputChange} type="text" placeholder="Teamlead" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
+                                        <input name="position" value={formData.position} onChange={handleInputChange} type="text" placeholder={t.profile.positionLabel} className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-4">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Directions (separated by commas)</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.directionsLabel}</label>
                                 <div className="flex p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
-                                    <input name="directions" value={formData.directions} onChange={handleInputChange} type="text" placeholder="Investing, Crypto, Trading" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
+                                    <input name="directions" value={formData.directions} onChange={handleInputChange} type="text" placeholder={t.profile.directionsPlaceholder} className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Instagram</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.instagram}</label>
                                     <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
                                         <InstagramIcon size={28} />
                                         <input name="instagram" value={formData.instagram} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Telegram</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.telegram}</label>
                                     <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
                                         <TelegramIcon size={28} />
                                         <input name="telegram" value={formData.telegram} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">TikTok</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.tiktok}</label>
                                     <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
                                         <TikTokIcon size={28} />
                                         <input name="tiktok" value={formData.tiktok} onChange={handleInputChange} type="text" placeholder="@example" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
@@ -427,7 +429,7 @@ const SettingsPage: React.FC = () => {
                                 </div>
                             </div>
                             <div className="flex flex-col gap-4">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Website</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.website}</label>
                                 <div className="flex p-[16px_24px] items-center gap-4 rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626]">
                                     <Globe size={28} className="text-[#F29F04]" />
                                     <input name="website" value={formData.website} onChange={handleInputChange} type="text" placeholder="example.com" className="bg-transparent border-none outline-none text-white font-poppins text-[16px] leading-[32px] w-full placeholder-[#A5A5A5]" />
@@ -440,17 +442,17 @@ const SettingsPage: React.FC = () => {
 
                     {/* Change password */}
                     <SurfaceCard className="flex flex-col p-8 md:p-10 gap-10">
-                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Change password</h2>
+                        <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.changePassword}</h2>
                         <div className="flex flex-col gap-10">
                             <div className="flex flex-col gap-4">
-                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Current password</label>
+                                <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.currentPassword}</label>
                                 <div className="flex h-16 p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] relative">
                                     <input
                                         name="currentPassword"
                                         value={formData.currentPassword}
                                         onChange={handleInputChange}
                                         type={showPassword.current ? "text" : "password"}
-                                        placeholder="Enter current password"
+                                        placeholder={t.profile.currentPasswordPlaceholder}
                                         className="bg-transparent border-none outline-none text-white w-full pr-12 font-poppins text-[16px]"
                                     />
                                     <button
@@ -464,14 +466,14 @@ const SettingsPage: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">New password</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.newPassword}</label>
                                     <div className="flex h-16 p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] relative">
                                         <input
                                             name="newPassword"
                                             value={formData.newPassword}
                                             onChange={handleInputChange}
                                             type={showPassword.new ? "text" : "password"}
-                                            placeholder="Enter new password"
+                                            placeholder={t.profile.newPasswordPlaceholder}
                                             className="bg-transparent border-none outline-none text-white w-full pr-12 font-poppins text-[16px]"
                                         />
                                         <button
@@ -484,14 +486,14 @@ const SettingsPage: React.FC = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-4">
-                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">Confirm your new password</label>
+                                    <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">{t.profile.confirmNewPassword}</label>
                                     <div className="flex h-16 p-[16px_24px] items-center rounded-[16px] border border-[rgba(74,74,74,0.70)] bg-[#262626] relative">
                                         <input
                                             name="confirmPassword"
                                             value={formData.confirmPassword}
                                             onChange={handleInputChange}
                                             type={showPassword.confirm ? "text" : "password"}
-                                            placeholder="Confirm new password"
+                                            placeholder={t.profile.confirmNewPasswordPlaceholder}
                                             className="bg-transparent border-none outline-none text-white w-full pr-12 font-poppins text-[16px]"
                                         />
                                         <button

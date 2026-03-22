@@ -3,16 +3,18 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from './i18n/LanguageProvider';
 
 const Footer: React.FC = () => {
+  const { messages: t } = useLanguage();
   const menuItems = [
-    { label: 'Agency', href: '/' },
-    { label: 'Blog', href: '/blog' },
-    { label: 'Conferences', href: '/conferences' },
-    { label: 'Services', href: '/services' },
-    { label: 'Forum', href: '/forum' },
-    { label: 'Partnership', href: '/partnerships' },
-    { label: 'Jobs', href: '/jobs' },
+    { label: t.footer.agency, href: '/' },
+    { label: t.navigation.blog, href: '/blog' },
+    { label: t.navigation.conferences, href: '/conferences' },
+    { label: t.navigation.services, href: '/services' },
+    { label: t.navigation.forum, href: '/forum' },
+    { label: t.navigation.partnership, href: '/partnerships' },
+    { label: t.navigation.jobs, href: '/jobs' },
   ];
   const currentYear = new Date().getFullYear();
 
@@ -51,9 +53,9 @@ const Footer: React.FC = () => {
         <span className="lg:hidden">
           &copy; {currentYear}, InferraMedia Corporation.
           <br />
-          All Rights Reserved.
+          {t.footer.rightsReserved}
         </span>
-        <span className="hidden lg:inline">&copy; {currentYear}, InferraMedia Corporation. All Rights Reserved.</span>
+        <span className="hidden lg:inline">&copy; {currentYear}, InferraMedia Corporation. {t.footer.rightsReserved}</span>
       </div>
     </footer>
   );

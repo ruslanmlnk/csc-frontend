@@ -12,6 +12,8 @@ import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
 import ProfileStatCard from '@/app/components/profile/ProfileStatCard';
 import ForumCategoryThreadCard from '@/app/components/forum/ForumCategoryThreadCard';
+import { formatDateValue } from '@/lib/i18n';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 const EditIcon = ({ size = 30 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -99,12 +101,16 @@ const getThreadAuthorId = (author: ProfileThreadDoc['author']): string | null =>
   return null;
 };
 
-const formatThreadDate = (value?: string): string => {
-  if (!value) return 'Unknown date';
+const formatThreadDate = (
+  value: string | undefined,
+  language: 'en' | 'uk',
+  unknownDateLabel: string,
+): string => {
+  if (!value) return unknownDateLabel;
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'Unknown date';
+  if (Number.isNaN(parsed.getTime())) return unknownDateLabel;
 
-  return parsed.toLocaleDateString('en-US', {
+  return formatDateValue(parsed, language, {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
@@ -123,6 +129,7 @@ const toForumCategorySlug = (value?: string | null): string => {
 
 const resolveThreadSubCategory = (
   value: ProfileThreadDoc['category'],
+  generalLabel: string,
 ): { title: string; slug: string } => {
   if (typeof value === 'string' && value.trim()) {
     return {
@@ -142,7 +149,7 @@ const resolveThreadSubCategory = (
   if (value && typeof value === 'object') {
     const name = typeof value.name === 'string' && value.name.trim()
       ? value.name
-      : 'General';
+      : generalLabel;
     const slug = typeof value.slug === 'string' && value.slug.trim()
       ? value.slug
       : toForumCategorySlug(name);
@@ -154,8 +161,8 @@ const resolveThreadSubCategory = (
   }
 
   return {
-    title: 'General',
-    slug: 'general',
+    title: generalLabel,
+    slug: toForumCategorySlug(generalLabel),
   };
 };
 
@@ -182,6 +189,7 @@ const getThreadCommentsCount = async (threadId: string): Promise<number> => {
 };
 
 const ProfilePage: React.FC = () => {
+  const { language, messages: t } = useLanguage();
   const [threadsCount, setThreadsCount] = useState(0);
   const [threads, setThreads] = useState<ProfileThreadWithCounts[]>([]);
   const [threadsError, setThreadsError] = useState('');
@@ -247,7 +255,7 @@ const ProfilePage: React.FC = () => {
       const data = (await response.json().catch(() => null)) as ThreadsResponse | null;
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Unable to load threads.');
+        throw new Error(data?.error || t.profile.unableToLoadThreads);
       }
 
       const docs = Array.isArray(data?.docs) ? data.docs : [];
@@ -277,11 +285,11 @@ const ProfilePage: React.FC = () => {
     } catch (err) {
       setThreads([]);
       setThreadsCount(0);
-      setThreadsError(err instanceof Error ? err.message : 'Unable to load threads.');
+      setThreadsError(err instanceof Error ? err.message : t.profile.unableToLoadThreads);
     } finally {
       setIsThreadsLoading(false);
     }
-  }, [user?.id]);
+  }, [t.profile.unableToLoadThreads, user?.id]);
 
   useEffect(() => {
     refreshUserThreads();
@@ -307,9 +315,9 @@ const ProfilePage: React.FC = () => {
         ? (user.avatar as AvatarShape).url || null
         : null;
   const avatarUrl = toAbsoluteMediaUrl(avatarRaw);
-  const displayName = user?.name || user?.email?.split('@')[0] || 'Member';
+  const displayName = user?.name || user?.email?.split('@')[0] || t.profile.member;
   const profileBannerSrc = profileBanner?.src || '/images/profile-banner.png';
-  const profileBannerAlt = profileBanner?.alt || 'Profile banner';
+  const profileBannerAlt = profileBanner?.alt || t.navigation.profile;
   const profileBannerHref = profileBanner?.href?.trim() || null;
   const isExternalProfileBannerHref = Boolean(profileBannerHref && /^https?:\/\//i.test(profileBannerHref));
   const telegramHref = toTelegramHref(user?.telegram);
@@ -324,12 +332,12 @@ const ProfilePage: React.FC = () => {
             <Link href="/profile/settings" className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
               <span className="md:hidden"><EditIcon size={24} /></span>
               <span className="hidden md:block"><EditIcon /></span>
-              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Edit</span>
+              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">{t.profile.edit}</span>
             </Link>
             <button onClick={handleLogout} className="flex items-center gap-[10px] text-[#BDBDBD] group transition-colors cursor-pointer">
               <span className="md:hidden"><ExitIcon size={24} /></span>
               <span className="hidden md:block"><ExitIcon /></span>
-              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">Exit</span>
+              <span className="text-[16px] leading-[26px] font-poppins font-normal group-hover:text-white transition-colors [text-shadow:0_4px_4px_rgba(0,0,0,0.4)]">{t.profile.exit}</span>
             </button>
           </div>
 
@@ -369,26 +377,26 @@ const ProfilePage: React.FC = () => {
               </div>
             </div>
             <p className="text-[#BDBDBD] text-[16px] leading-[26px] font-poppins text-left md:text-right w-full [text-shadow:0_4px_4px_rgba(0,0,0,0.4)] md:max-w-[602.81px]">
-              {user?.bio || 'Description not filled in'}
+              {user?.bio || t.profile.descriptionNotFilled}
             </p>
           </div>
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <ProfileStatCard
-            label="Team"
+            label={t.profile.team}
             value={user?.company as string | undefined}
             icon={<Users size={32} color="#212121" />}
           />
           <ProfileStatCard
-            label="Position"
+            label={t.profile.position}
             value={user?.position as string | undefined}
             icon={<UserRound size={32} color="#212121" />}
           />
           <ProfileStatCard
-            label="Directions"
+            label={t.profile.directions}
             value={user?.directions as string | undefined}
-            icon={<Image src="/images/profile-directions.png" width={32} height={32} alt="Directions" className="w-8 h-8 object-contain brightness-0" />}
+            icon={<Image src="/images/profile-directions.png" width={32} height={32} alt={t.profile.directions} className="w-8 h-8 object-contain brightness-0" />}
           />
         </section>
 
@@ -410,21 +418,21 @@ const ProfilePage: React.FC = () => {
 
         <section className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-[30px]">
-            <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Threads</h2>
+            <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.threads}</h2>
             <div className="flex items-center gap-[10px]">
               <ThreadPencilIcon />
               <span className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">{threadsCount}</span>
             </div>
           </div>
           <button onClick={() => setIsCreateModalOpen(true)} className="h-[58px] px-6 rounded-[80px] border border-[#FCC660] text-[#FCC660] font-poppins text-[16px] font-medium leading-[26px] flex items-center justify-center gap-[5px] hover:bg-[#FCC660] hover:text-[#0D0D0D] transition-all">
-            <Plus size={24} /> Add a comment
+            <Plus size={24} /> {t.profile.startThread}
           </button>
         </section>
 
         <section className="flex flex-col gap-4">
           {isThreadsLoading && (
             <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-              Loading threads...
+              {t.profile.loadingThreads}
             </div>
           )}
 
@@ -436,13 +444,13 @@ const ProfilePage: React.FC = () => {
 
           {!isThreadsLoading && !threadsError && threads.length === 0 && (
             <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-              No threads yet.
+              {t.profile.noThreadsYet}
             </div>
           )}
 
           {threads.map((thread) => {
             const threadId = String(thread.id);
-            const subCategory = resolveThreadSubCategory(thread.category);
+            const subCategory = resolveThreadSubCategory(thread.category, t.common.general);
             const categorySlug = subCategory.slug;
             const threadHref = `/forum/${categorySlug}/${threadId}`;
             const threadDescription = subCategory.title;
@@ -450,10 +458,10 @@ const ProfilePage: React.FC = () => {
             return (
               <Link key={threadId} href={threadHref} className="block">
                 <ForumCategoryThreadCard
-                  title={thread.title || 'Untitled thread'}
-                  description={threadDescription || 'We read, delve into, discuss'}
+                  title={thread.title || t.forum.untitledThread}
+                  description={threadDescription || t.forum.defaultThreadDescription}
                   authorName={displayName}
-                  date={formatThreadDate(thread.createdAt)}
+                  date={formatThreadDate(thread.createdAt, language, t.common.unknownDate)}
                   replyCount={thread.commentsCount}
                   authorAvatar={avatarUrl || '/logo.svg'}
                 />

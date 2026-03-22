@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import AuthPageLayout from "@/app/components/auth/AuthPageLayout";
 import { AuthOrDivider, TelegramAuthButton } from "@/app/components/auth/AuthShared";
 import type { AuthPageBanner } from "@/lib/backend/authPageGlobals";
+import { useLanguage } from "@/app/components/i18n/LanguageProvider";
 
 type RegisterPageClientProps = {
     leftBanner?: AuthPageBanner | null;
@@ -13,6 +14,7 @@ type RegisterPageClientProps = {
 };
 
 const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rightBanner }) => {
+    const { messages: t } = useLanguage();
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [formData, setFormData] = useState({
@@ -31,7 +33,7 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
         e.preventDefault();
 
         if (formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match');
+            alert(t.auth.passwordsDoNotMatch);
             return;
         }
 
@@ -49,7 +51,7 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-            alert(data?.error || 'Registration failed');
+            alert(data?.error || t.auth.registrationFailed);
             return;
         }
 
@@ -66,16 +68,16 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
             <div className="w-full max-w-[440px] p-8 md:p-[34px_32px] rounded-2xl border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] animate-fadeIn">
                 <div className="flex flex-col gap-2 mb-8">
                     <h1 className="text-[24px] font-medium text-white font-poppins leading-[32px]">
-                        Create an account
+                        {t.auth.registerTitle}
                     </h1>
                     <p className="text-[14px] text-white/60 font-poppins leading-[16px]">
-                        Enter details to create an account
+                        {t.auth.registerSubtitle}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="flex flex-col gap-4">
-                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Login</label>
+                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">{t.auth.loginLabel}</label>
                         <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center">
                             <input
                                 type="text"
@@ -90,7 +92,7 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Email</label>
+                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">{t.auth.email}</label>
                         <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center">
                             <input
                                 type="email"
@@ -105,7 +107,7 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Password</label>
+                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">{t.auth.password}</label>
                         <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center justify-between">
                             <input
                                 type={showPassword ? "text" : "password"}
@@ -126,7 +128,7 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
                     </div>
 
                     <div className="flex flex-col gap-4">
-                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">Confirm Password</label>
+                        <label className="text-[16px] text-[#9E9E9E] font-poppins leading-[26px]">{t.auth.confirmPassword}</label>
                         <div className="relative h-[50px] w-full bg-[#262626] border border-[rgba(74,74,74,0.7)] rounded-xl overflow-hidden px-4 flex items-center justify-between">
                             <input
                                 type={showConfirmPassword ? "text" : "password"}
@@ -147,14 +149,14 @@ const RegisterPageClient: React.FC<RegisterPageClientProps> = ({ leftBanner, rig
                     </div>
 
                     <button type="submit" className="w-full h-[50px] rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-medium font-poppins text-base hover:opacity-90 transition-opacity">
-                        Create Account
+                        {t.auth.createAccount}
                     </button>
                 </form>
 
                 <div className="mt-8 text-center text-sm">
-                    <span className="text-white/80 font-poppins">Already have an account? </span>
+                    <span className="text-white/80 font-poppins">{t.auth.alreadyHaveAccount} </span>
                     <Link href="/login" className="text-[#F29F04] font-medium hover:underline font-poppins">
-                        Log In
+                        {t.common.logIn}
                     </Link>
                 </div>
 

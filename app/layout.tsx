@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Poppins, Poltawski_Nowy } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import { LanguageProvider } from "./components/i18n/LanguageProvider";
+import { getServerLanguage } from "@/lib/i18n/server";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -23,16 +27,15 @@ export const metadata: Metadata = {
   },
 };
 
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialLanguage = await getServerLanguage();
+
   return (
-    <html lang="en">
+    <html lang={initialLanguage}>
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-BLBT382YX0"
@@ -51,9 +54,11 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${poltawskiNowy.variable} antialiased font-poppins bg-[#0D0D0D] text-white`}
       >
-        <Header />
-        {children}
-        <Footer />
+        <LanguageProvider initialLanguage={initialLanguage}>
+          <Header />
+          {children}
+          <Footer />
+        </LanguageProvider>
       </body>
     </html>
   );

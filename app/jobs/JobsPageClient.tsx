@@ -8,6 +8,8 @@ import JobsFilters from '@/app/components/jobs/JobsFilters'
 import type { JobItem } from '@/app/types/jobs'
 import JobVacancyCard from '@/app/components/jobs/JobVacancyCard'
 import type { PageHeroV2 } from '@/lib/backend/pageGlobals'
+import { formatDateValue } from '@/lib/i18n'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 type JobsApiResponse = {
   jobs?: JobItem[]
@@ -28,33 +30,34 @@ interface JobsPageClientProps {
 const promoBannerSrc =
   'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480'
 
-const ALL_LOCATIONS = 'All Locations'
-const ANY_EXPERIENCE = 'Any experience'
-const ANY_FORMAT = 'Any format'
 const JOBS_PER_PAGE = 9
 
-const formatJobDate = (value?: string): string => {
+const formatJobDate = (value: string | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
 
-  const day = date.toLocaleDateString('en-GB', { day: '2-digit' })
-  const month = date.toLocaleDateString('en-GB', { month: 'short' })
-  const year = date.toLocaleDateString('en-GB', { year: 'numeric' })
+  const day = formatDateValue(date, language, { day: '2-digit' })
+  const month = formatDateValue(date, language, { month: 'short' })
+  const year = formatDateValue(date, language, { year: 'numeric' })
   return `${day} ${month}, ${year}`
 }
 
 const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
+  const { language, messages: t } = useLanguage()
+  const allLocations = t.jobs.allLocations
+  const anyExperience = t.jobs.anyExperience
+  const anyFormat = t.jobs.anyFormat
   const [jobs, setJobs] = useState<JobItem[]>([])
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [locationFilter, setLocationFilter] = useState(ALL_LOCATIONS)
-  const [experienceFilter, setExperienceFilter] = useState(ANY_EXPERIENCE)
-  const [formatFilter, setFormatFilter] = useState(ANY_FORMAT)
-  const [locationOptions, setLocationOptions] = useState<string[]>([ALL_LOCATIONS])
-  const [experienceOptions, setExperienceOptions] = useState<string[]>([ANY_EXPERIENCE])
-  const [formatOptions, setFormatOptions] = useState<string[]>([ANY_FORMAT])
+  const [locationFilter, setLocationFilter] = useState<string>(allLocations)
+  const [experienceFilter, setExperienceFilter] = useState<string>(anyExperience)
+  const [formatFilter, setFormatFilter] = useState<string>(anyFormat)
+  const [locationOptions, setLocationOptions] = useState<string[]>([allLocations])
+  const [experienceOptions, setExperienceOptions] = useState<string[]>([anyExperience])
+  const [formatOptions, setFormatOptions] = useState<string[]>([anyFormat])
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -76,11 +79,11 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
         const filtersData = (await filtersResponse.json().catch(() => null)) as JobsFiltersApiResponse | null
 
         if (!jobsResponse.ok) {
-          throw new Error(jobsData?.error || 'Unable to load jobs.')
+          throw new Error(jobsData?.error || t.jobs.loading)
         }
 
         if (!filtersResponse.ok) {
-          throw new Error(filtersData?.error || 'Unable to load job filters.')
+          throw new Error(filtersData?.error || t.jobs.loading)
         }
 
         if (!active) return
@@ -91,16 +94,16 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
         const loadedFormats = Array.isArray(filtersData?.formats) ? filtersData.formats : []
 
         setJobs(loadedJobs)
-        setLocationOptions([ALL_LOCATIONS, ...loadedLocations])
-        setExperienceOptions([ANY_EXPERIENCE, ...loadedExperiences])
-        setFormatOptions([ANY_FORMAT, ...loadedFormats])
+        setLocationOptions([allLocations, ...loadedLocations])
+        setExperienceOptions([anyExperience, ...loadedExperiences])
+        setFormatOptions([anyFormat, ...loadedFormats])
       } catch (loadError) {
         if (!active) return
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load jobs.')
+        setError(loadError instanceof Error ? loadError.message : t.jobs.loading)
         setJobs([])
-        setLocationOptions([ALL_LOCATIONS])
-        setExperienceOptions([ANY_EXPERIENCE])
-        setFormatOptions([ANY_FORMAT])
+        setLocationOptions([allLocations])
+        setExperienceOptions([anyExperience])
+        setFormatOptions([anyFormat])
       } finally {
         if (active) {
           setIsLoading(false)
@@ -113,7 +116,7 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
     return () => {
       active = false
     }
-  }, [])
+  }, [allLocations, anyExperience, anyFormat, t.jobs.loading])
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
@@ -128,12 +131,12 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
         locationName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         experienceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         formatName.toLowerCase().includes(searchQuery.toLowerCase())
-      const locationMatch = locationFilter === ALL_LOCATIONS || locationName === locationFilter
-      const experienceMatch = experienceFilter === ANY_EXPERIENCE || experienceName === experienceFilter
-      const formatMatch = formatFilter === ANY_FORMAT || formatName === formatFilter
+      const locationMatch = locationFilter === allLocations || locationName === locationFilter
+      const experienceMatch = experienceFilter === anyExperience || experienceName === experienceFilter
+      const formatMatch = formatFilter === anyFormat || formatName === formatFilter
       return searchMatch && locationMatch && experienceMatch && formatMatch
     })
-  }, [experienceFilter, formatFilter, jobs, locationFilter, searchQuery])
+  }, [allLocations, anyExperience, anyFormat, experienceFilter, formatFilter, jobs, locationFilter, searchQuery])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -148,7 +151,7 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
   const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
-  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Jobs banner'
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || (language === 'uk' ? '\u0411\u0430\u043d\u0435\u0440 \u0432\u0430\u043a\u0430\u043d\u0441\u0456\u0439' : 'Jobs banner')
   const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
@@ -157,13 +160,12 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
         title={
           heroTitle || (
             <>
-              Build your career <br className="hidden md:block" /> in performance marketing
+              {t.jobs.heroTitle}
             </>
           )
         }
         description={
-          heroDescription
-          || 'Join a team working with real traffic, real budgets, and real impact. We are looking for specialists ready to grow fast.'
+          heroDescription || t.jobs.heroDescription
         }
       />
 
@@ -196,7 +198,7 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
           <div className="flex w-full flex-col gap-6">
             {isLoading && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                Loading jobs...
+                {t.jobs.loading}
               </div>
             )}
 
@@ -208,21 +210,21 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
 
             {!isLoading && !error && filteredJobs.length === 0 && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                No jobs found.
+                {t.jobs.noResults}
               </div>
             )}
 
             {!isLoading && !error && paginatedJobs.length > 0 && (
               <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedJobs.map((job) => {
-                  const locationName = job.location?.name || 'Job'
+                  const locationName = job.location?.name || t.jobs.defaultLocation
                   const experienceName = job.experience?.name || ''
                   const formatName = job.format?.name || ''
 
                   return (
                     <div key={job.id} className="block">
                       <JobVacancyCard
-                        dateLabel={formatJobDate(job.createdAt)}
+                        dateLabel={formatJobDate(job.createdAt, language)}
                         badge={job.badge}
                         title={job.title}
                         location={locationName}
@@ -231,6 +233,7 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
                         salary={job.salary}
                         salaryInfo={job.salaryInfo}
                         detailsHref={job.slug ? `/jobs/${job.slug}` : '/jobs'}
+                        detailsLabel={t.common.moreDetails}
                       />
                     </div>
                   )
@@ -246,7 +249,7 @@ const JobsPageClient: React.FC<JobsPageClientProps> = ({ initialHeroV2 }) => {
                   total={filteredJobs.length}
                   currentPage={normalizedPage}
                   totalPages={totalPages}
-                  itemLabel="jobs"
+                  itemLabel={t.jobs.itemLabel}
                   onPageChange={setCurrentPage}
                 />
               </div>

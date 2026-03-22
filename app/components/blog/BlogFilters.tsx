@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react';
 import MobileCategorySelector from '@/app/components/shared/MobileCategorySelector';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 interface BlogFiltersProps {
     categories: string[];
@@ -16,6 +19,8 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
     searchQuery,
     onSearchChange
 }) => {
+    const { messages: t } = useLanguage();
+
     return (
         <div className="flex flex-col gap-4 w-full">
             <div className="w-full flex flex-col gap-4 lg:hidden">
@@ -28,7 +33,7 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
                             type="text"
                             value={searchQuery}
                             onChange={(e) => onSearchChange(e.target.value)}
-                            placeholder="Search"
+                            placeholder={t.blog.filtersSearchPlaceholder}
                             className="bg-transparent border-none outline-none text-white placeholder-white w-full font-poppins text-[16px] leading-[26px] font-medium"
                         />
                     </div>
@@ -37,7 +42,7 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
                     type="button"
                     className="h-[50px] w-full inline-flex items-center justify-center gap-[12px] bg-[#F29F04] text-[#0D0D0D] rounded-[80px] px-[24px] font-medium text-[16px] leading-[26px] hover:brightness-110 transition-all font-poppins"
                 >
-                    Search
+                    {t.blog.filtersSearchButton}
                 </button>
                 <MobileCategorySelector
                     value={activeCategory}
@@ -56,12 +61,12 @@ const BlogFilters: React.FC<BlogFiltersProps> = ({
                         type="text"
                         value={searchQuery}
                         onChange={(e) => onSearchChange(e.target.value)}
-                        placeholder="Search"
+                        placeholder={t.blog.filtersSearchPlaceholder}
                         className="flex-1 bg-transparent border-none outline-none text-white text-[16px] font-medium font-poppins placeholder:text-[#9E9E9E]"
                     />
                 </div>
                 <button type="button" className="w-[200px] h-[58px] rounded-[80px] bg-[#F29F04] text-[#0D0D0D] font-medium text-[16px] flex items-center justify-center transition-all hover:opacity-90 font-poppins">
-                    Search
+                    {t.blog.filtersSearchButton}
                 </button>
             </div>
 

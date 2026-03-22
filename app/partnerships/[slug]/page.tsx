@@ -7,6 +7,7 @@ import PartnershipDetailHero from '@/app/components/partnerships/PartnershipDeta
 import PartnershipProgramCard from '@/app/components/partnerships/PartnershipProgramCard'
 import RichText from '@/app/components/blog/RichText'
 import type { PartnershipItem } from '@/app/types/partnerships'
+import { getServerI18n } from '@/lib/i18n/server'
 
 const withBackendUrl = (url: string | undefined | null, backendUrl: string): string | null => {
   if (!url) return null
@@ -41,6 +42,7 @@ const renderPartnershipLogo = (partnership: PartnershipItem, backendUrl: string)
 const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
   const backendUrl = getBackendUrl()
+  const { language, messages: t } = await getServerI18n()
 
   const [partnership, allPartnerships] = await Promise.all([getPartnershipBySlug(slug), getPartnerships()])
 
@@ -91,6 +93,8 @@ const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: strin
           verticalLabel={verticalLabel || null}
           paymentModels={paymentModels}
           rating={currentPartnership.rating}
+          backLabel={t.partnerships.backToPartnerships}
+          websiteLabel={t.common.goToWebsite}
         />
 
         <div className="flex items-start gap-6 self-stretch xl:gap-11">
@@ -173,7 +177,7 @@ const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: strin
       {similarPartnerships.length > 0 ? (
         <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center justify-center gap-[64px] overflow-hidden px-5 pt-[120px]">
           <h2 className="self-stretch bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999] bg-clip-text text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-            Similar Partnerships
+            {t.partnerships.similarTitle}
           </h2>
 
           <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -200,6 +204,11 @@ const PartnershipDetailPage = async ({ params }: { params: Promise<{ slug: strin
                   minPayment={item.minPayment}
                   offers={(item.offers || []).map((offer) => offer.offer).filter(Boolean)}
                   detailsHref={item.slug ? `/partnerships/${item.slug}` : `/partnerships/${toSlug(item.title)}`}
+                  foundedLabel={language === 'uk' ? 'Засновано' : 'Founded'}
+                  modelsLabel={language === 'uk' ? 'Моделі' : 'Models'}
+                  geoLabel={language === 'uk' ? 'Гео' : 'Geo'}
+                  minPaymentLabel={language === 'uk' ? 'Мінімальна виплата' : 'Minimum payment'}
+                  detailsLabel={t.common.moreDetails}
                 />
               )
             })}

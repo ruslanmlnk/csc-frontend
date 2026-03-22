@@ -6,6 +6,8 @@ import type { ForumThreadsColumnSection } from '@/app/components/forum/ForumThre
 import type { ForumSidebarThread } from '@/app/components/forum/ForumSidebar'
 import { backendRequest } from '@/lib/backend/client'
 import { getPageGlobalData } from '@/lib/backend/pageGlobals'
+import { formatDateValue } from '@/lib/i18n'
+import { getServerI18n } from '@/lib/i18n/server'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -119,27 +121,31 @@ const parsePinnedThreadIds = (value: unknown): string[] => {
   return orderedIds
 }
 
-const formatDateLabel = (value: string | null): string => {
+const formatDateLabel = (
+  value: string | null,
+  language: 'en' | 'uk',
+  unknownDateLabel: string,
+): string => {
   if (!value) {
-    return 'Unknown date'
+    return unknownDateLabel
   }
 
   const parsed = new Date(value)
   if (Number.isNaN(parsed.getTime())) {
-    return 'Unknown date'
+    return unknownDateLabel
   }
 
-  return parsed.toLocaleDateString('en-US', {
+  return formatDateValue(parsed, language, {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
   })
 }
 
-const resolveAuthorName = (value: unknown): string => {
+const resolveAuthorName = (value: unknown, fallbackAuthorName: string): string => {
   const user = asRecord(value)
   if (!user) {
-    return 'SCS Agency'
+    return fallbackAuthorName
   }
 
   const name = asString(user.name)
@@ -152,7 +158,7 @@ const resolveAuthorName = (value: unknown): string => {
     return email.split('@')[0]
   }
 
-  return 'SCS Agency'
+  return fallbackAuthorName
 }
 
 const parseForumCategories = (payload: unknown): ForumCategoryItem[] => {
@@ -177,7 +183,16 @@ const parseForumCategories = (payload: unknown): ForumCategoryItem[] => {
   }, [])
 }
 
-const parseForumSubCategories = (payload: unknown): ForumSubCategoryItem[] => {
+const parseForumSubCategories = (
+  payload: unknown,
+  options: {
+    defaultDescription: string
+    defaultAuthorName: string
+    defaultCategoryName: string
+    unknownDateLabel: string
+    language: 'en' | 'uk'
+  },
+): ForumSubCategoryItem[] => {
   const root = asRecord(payload)
   const docs = Array.isArray(root?.docs) ? root.docs : []
 
@@ -202,17 +217,25 @@ const parseForumSubCategories = (payload: unknown): ForumSubCategoryItem[] => {
       name,
       slug: asString(record.slug) || toSlug(name),
       categoryId,
-      description: asString(record.description) || 'We read, delve into, discuss',
-      textAboveDate: asString(record.textAboveDate) || 'SCS Agency',
-      dateLabel: formatDateLabel(asString(record.date)),
-      categoryName: asString(categoryObject?.name) || 'General',
+      description: asString(record.description) || options.defaultDescription,
+      textAboveDate: asString(record.textAboveDate) || options.defaultAuthorName,
+      dateLabel: formatDateLabel(asString(record.date), options.language, options.unknownDateLabel),
+      categoryName: asString(categoryObject?.name) || options.defaultCategoryName,
     })
 
     return acc
   }, [])
 }
 
-const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
+const parseForumThreads = (
+  payload: unknown,
+  options: {
+    untitledThreadLabel: string
+    defaultAuthorName: string
+    unknownDateLabel: string
+    language: 'en' | 'uk'
+  },
+): ForumThreadItem[] => {
   const root = asRecord(payload)
   const docs = Array.isArray(root?.docs) ? root.docs : []
 
@@ -241,9 +264,9 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
       id,
       subCategoryId,
       subCategorySlug,
-      title: asString(record.title) || 'Untitled thread',
-      authorName: resolveAuthorName(record.author),
-      dateLabel: formatDateLabel(createdAtRaw),
+      title: asString(record.title) || options.untitledThreadLabel,
+      authorName: resolveAuthorName(record.author, options.defaultAuthorName),
+      dateLabel: formatDateLabel(createdAtRaw, options.language, options.unknownDateLabel),
       orderId: asNumber(record.orderId) || 0,
       createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,
     })
@@ -261,18 +284,19 @@ const parseForumThreads = (payload: unknown): ForumThreadItem[] => {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
+  const { messages: t } = await getServerI18n()
   const globalData = await getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG)
   const seo = globalData.seo
 
   if (!seo) {
-    return { title: 'Forum' }
+    return { title: t.navigation.forum }
   }
 
   return {
-    title: seo.title || 'Forum',
+    title: seo.title || t.navigation.forum,
     description: seo.description || undefined,
     openGraph: {
-      title: seo.title || 'Forum',
+      title: seo.title || t.navigation.forum,
       description: seo.description || undefined,
       images: seo.ogImage?.url ? [{ url: seo.ogImage.url }] : [],
     },
@@ -280,6 +304,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ForumPage() {
+  const { language, messages: t } = await getServerI18n()
   const [categoriesRes, subCategoriesRes, threadsRes, forumPageGlobal] = await Promise.all([
     backendRequest<Record<string, unknown>>('/api/forum-categories?limit=200&sort=name', {
       cache: 'no-store',
@@ -294,8 +319,23 @@ export default async function ForumPage() {
   ])
 
   const forumCategories = categoriesRes.ok ? parseForumCategories(categoriesRes.data) : []
-  const forumSubCategories = subCategoriesRes.ok ? parseForumSubCategories(subCategoriesRes.data) : []
-  const forumThreads = threadsRes.ok ? parseForumThreads(threadsRes.data) : []
+  const forumSubCategories = subCategoriesRes.ok
+    ? parseForumSubCategories(subCategoriesRes.data, {
+        defaultDescription: t.forum.defaultThreadDescription,
+        defaultAuthorName: t.forum.defaultAuthorName,
+        defaultCategoryName: t.common.general,
+        unknownDateLabel: t.common.unknownDate,
+        language,
+      })
+    : []
+  const forumThreads = threadsRes.ok
+    ? parseForumThreads(threadsRes.data, {
+        untitledThreadLabel: t.forum.untitledThread,
+        defaultAuthorName: t.forum.defaultAuthorName,
+        unknownDateLabel: t.common.unknownDate,
+        language,
+      })
+    : []
 
   const latestThreadBySubCategory = new Map<string, ForumThreadItem>()
   for (const thread of forumThreads) {
@@ -343,7 +383,7 @@ export default async function ForumPage() {
       ? sectionsFromCategories
       : [
           {
-            title: forumSubCategories[0]?.categoryName || 'General',
+            title: forumSubCategories[0]?.categoryName || t.common.general,
             threads: forumSubCategories.map((subCategory) => {
               const latestThread = latestThreadBySubCategory.get(subCategory.id)
 
@@ -376,10 +416,10 @@ export default async function ForumPage() {
   const heroTitle = forumPageGlobal.heroV2?.title?.trim()
   const heroDescription = forumPageGlobal.heroV2?.description?.trim()
   const heroBannerImage = forumPageGlobal.heroV2?.banner?.image?.url || FORUM_BANNER_IMAGE
-  const heroBannerAlt = forumPageGlobal.heroV2?.banner?.caption?.trim() || 'Community Banner'
+  const heroBannerAlt = forumPageGlobal.heroV2?.banner?.caption?.trim() || t.forum.communityBannerAlt
   const heroBannerHref = forumPageGlobal.heroV2?.banner?.link?.trim()
   const sidebarBannerImage = forumPageGlobal.sidebarBanner?.image?.url || SIDEBAR_BANNER_IMAGE
-  const sidebarBannerAlt = forumPageGlobal.sidebarBanner?.caption?.trim() || 'Advertisement'
+  const sidebarBannerAlt = forumPageGlobal.sidebarBanner?.caption?.trim() || t.blog.promoBannerAlt
   const sidebarBannerHref = forumPageGlobal.sidebarBanner?.link?.trim()
 
   return (
@@ -396,14 +436,14 @@ export default async function ForumPage() {
         }
         description={
           heroDescription
-          || 'A space to share experience, ask questions, and discuss traffic sources, platforms, strategies, and real-world affiliate cases'
+          || t.forum.heroDescription
         }
       />
 
       <div className="relative z-10 flex flex-col items-center">
         <ForumFiltersSection
-          searchPlaceholder="Search thread"
-          searchButtonLabel="Search"
+          searchPlaceholder={t.forum.searchThreadPlaceholder}
+          searchButtonLabel={t.common.search}
           bannerImage={heroBannerImage}
           bannerAlt={heroBannerAlt}
           bannerHref={heroBannerHref}
@@ -411,7 +451,7 @@ export default async function ForumPage() {
         <ForumContentSection
           sections={sections}
           sidebar={{
-            title: 'Popular threads',
+            title: t.forum.popularThreads,
             popularThreads,
             bannerImage: sidebarBannerImage,
             bannerAlt: sidebarBannerAlt,

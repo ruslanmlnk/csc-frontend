@@ -13,9 +13,15 @@ type RelatedArticleItem = {
 
 type ArticleRelatedProps = {
   articles: RelatedArticleItem[]
+  title?: string
+  language?: 'en' | 'uk'
 }
 
-const ArticleRelated: React.FC<ArticleRelatedProps> = ({ articles }) => {
+const ArticleRelated: React.FC<ArticleRelatedProps> = ({
+  articles,
+  title = 'Related Article',
+  language = 'en',
+}) => {
   if (!articles || articles.length === 0) {
     return null
   }
@@ -23,7 +29,7 @@ const ArticleRelated: React.FC<ArticleRelatedProps> = ({ articles }) => {
   return (
     <div className="flex flex-col gap-16 mt-10">
       <h2 className="text-center text-[56px] font-medium leading-[72px] tracking-[-2.24px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999] font-poppins">
-        Related Article
+        {title}
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {articles.map((a) => (
@@ -31,7 +37,7 @@ const ArticleRelated: React.FC<ArticleRelatedProps> = ({ articles }) => {
             <BlogCard
               post={{
                 id: a.id,
-                date: new Date(a.publishedDate).toLocaleDateString('en-US', {
+                date: new Date(a.publishedDate).toLocaleDateString(language === 'uk' ? 'uk-UA' : 'en-US', {
                   month: 'short',
                   day: '2-digit',
                   year: 'numeric',

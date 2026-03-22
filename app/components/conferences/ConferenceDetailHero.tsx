@@ -9,6 +9,8 @@ interface ConferenceDetailHeroProps {
   dateLabel?: string | null
   locationLabel?: string | null
   verticalLabel?: string | null
+  backLabel?: string
+  websiteLabel?: string
 }
 
 const ConferenceDetailHero: React.FC<ConferenceDetailHeroProps> = ({
@@ -18,6 +20,8 @@ const ConferenceDetailHero: React.FC<ConferenceDetailHeroProps> = ({
   dateLabel,
   locationLabel,
   verticalLabel,
+  backLabel = 'Back to Conferences',
+  websiteLabel = 'Go to the website',
 }) => {
   const calendarIcon = (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -41,7 +45,7 @@ const ConferenceDetailHero: React.FC<ConferenceDetailHeroProps> = ({
             </svg>
           </div>
           <span className="font-poppins text-[24px] font-normal leading-[32px] text-[#FCFCFC]">
-            Back to Conferences
+            {backLabel}
           </span>
         </Link>
       </div>
@@ -53,12 +57,12 @@ const ConferenceDetailHero: React.FC<ConferenceDetailHeroProps> = ({
               href={websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="order-1 flex shrink-0 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 transition-colors hover:bg-[#d88d03] md:order-2 md:h-[50px]"
-            >
-              <span className="text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]">
-                Go to the website
-              </span>
-            </a>
+            className="order-1 flex shrink-0 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 transition-colors hover:bg-[#d88d03] md:order-2 md:h-[50px]"
+          >
+            <span className="text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]">
+                {websiteLabel}
+            </span>
+          </a>
           ) : null}
 
           <div className="order-2 flex min-w-0 flex-col items-start gap-6 md:order-1 md:flex-row md:items-center">

@@ -4,6 +4,8 @@ import React, { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import JobVacancyCard from '@/app/components/jobs/JobVacancyCard'
 import type { JobItem } from '@/app/types/jobs'
+import { formatDateValue } from '@/lib/i18n'
+import { useLanguage } from './i18n/LanguageProvider'
 
 type JobsApiResponse = {
   jobs?: JobItem[]
@@ -12,19 +14,20 @@ type JobsApiResponse = {
 
 const MAX_VISIBLE_VACANCIES = 3
 
-const formatJobDate = (value?: string): string => {
+const formatJobDate = (value: string | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
 
-  const day = date.toLocaleDateString('en-GB', { day: '2-digit' })
-  const month = date.toLocaleDateString('en-GB', { month: 'short' })
-  const year = date.toLocaleDateString('en-GB', { year: 'numeric' })
+  const day = formatDateValue(date, language, { day: '2-digit' })
+  const month = formatDateValue(date, language, { month: 'short' })
+  const year = formatDateValue(date, language, { year: 'numeric' })
   return `${day} ${month}, ${year}`
 }
 
 const Vacancies: React.FC = () => {
+  const { language, messages: t } = useLanguage()
   const [vacancies, setVacancies] = useState<JobItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -41,7 +44,7 @@ const Vacancies: React.FC = () => {
         const payload = (await response.json().catch(() => null)) as JobsApiResponse | null
 
         if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to load jobs.')
+          throw new Error(payload?.error || t.home.vacanciesError)
         }
 
         if (!active) {
@@ -55,7 +58,7 @@ const Vacancies: React.FC = () => {
           return
         }
         setVacancies([])
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load jobs.')
+        setError(loadError instanceof Error ? loadError.message : t.home.vacanciesError)
       } finally {
         if (active) {
           setIsLoading(false)
@@ -68,7 +71,7 @@ const Vacancies: React.FC = () => {
     return () => {
       active = false
     }
-  }, [])
+  }, [t.home.vacanciesError])
 
   const visibleVacancies = useMemo(() => vacancies.slice(0, MAX_VISIBLE_VACANCIES), [vacancies])
 
@@ -76,19 +79,19 @@ const Vacancies: React.FC = () => {
     <section className="mx-auto flex w-full max-w-[1280px] flex-col items-center overflow-hidden px-5">
       <div className="mb-16 flex w-full items-center justify-between">
         <h2 className="bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)] bg-clip-text font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-          Vacancies
+          {t.home.vacanciesTitle}
         </h2>
         <Link
           href="/jobs"
           className="hidden md:flex items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
         >
-          See More
+          {t.home.usefulServicesSeeMore}
         </Link>
       </div>
 
       {isLoading && (
         <div className="mb-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          Loading vacancies...
+          {t.home.vacanciesLoading}
         </div>
       )}
 
@@ -100,7 +103,7 @@ const Vacancies: React.FC = () => {
 
       {!isLoading && !error && visibleVacancies.length === 0 && (
         <div className="mb-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          No vacancies found.
+          {t.home.vacanciesEmpty}
         </div>
       )}
 
@@ -109,15 +112,16 @@ const Vacancies: React.FC = () => {
           {visibleVacancies.map((vacancy) => (
             <JobVacancyCard
               key={vacancy.id}
-              dateLabel={formatJobDate(vacancy.createdAt)}
+              dateLabel={formatJobDate(vacancy.createdAt, language)}
               badge={vacancy.badge}
               title={vacancy.title}
-              location={vacancy.location?.name || 'Job'}
+              location={vacancy.location?.name || t.jobs.defaultLocation}
               workFormat={vacancy.format?.name || ''}
               experience={vacancy.experience?.name || ''}
               salary={vacancy.salary}
               salaryInfo={vacancy.salaryInfo}
               detailsHref={vacancy.slug ? `/jobs/${vacancy.slug}` : '/jobs'}
+              detailsLabel={t.common.moreDetails}
             />
           ))}
         </div>
@@ -127,7 +131,7 @@ const Vacancies: React.FC = () => {
         href="/jobs"
         className="mt-8 flex md:hidden items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
       >
-        See More
+        {t.home.usefulServicesSeeMore}
       </Link>
     </section>
   )

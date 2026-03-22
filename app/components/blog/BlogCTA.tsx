@@ -1,7 +1,12 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
+import { useLanguage } from '../i18n/LanguageProvider';
 
 const BlogCTA: React.FC = () => {
+    const { messages: t } = useLanguage();
+
     return (
         <section className="w-full overflow-hidden px-5 pb-20">
             <div className="relative mx-auto flex w-full max-w-[1340px] flex-col items-center justify-center gap-16 overflow-hidden rounded-[40px] border border-[rgba(74,74,74,0.7)] bg-[#1A1A1A] p-10 lg:min-h-[480px] lg:flex-row lg:gap-6">
@@ -75,25 +80,25 @@ const BlogCTA: React.FC = () => {
                         <div className="flex min-w-0 flex-1 flex-col gap-1">
                             <div className="flex w-full items-start justify-between gap-2 lg:w-[255.621px]">
                                 <div className="min-w-0">
-                                    <p className="font-poppins text-[14px] font-normal leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">Bought ETH</p>
-                                    <p className="font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">-$812.10</p>
+                                    <p className="font-poppins text-[14px] font-normal leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">{t.blog.ctaTransactionTitle}</p>
+                                    <p className="font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">{t.blog.ctaTransactionAmount}</p>
                                 </div>
-                                <p className="whitespace-nowrap font-poppins text-[14px] font-medium leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">+0.65 ETH</p>
+                                <p className="whitespace-nowrap font-poppins text-[14px] font-medium leading-[22.75px] text-[#FCFCFC] lg:text-[16px] lg:leading-[26px]">{t.blog.ctaTransactionGain}</p>
                             </div>
-                            <p className="text-right font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">30 March 2025, 3.30 PM</p>
+                            <p className="text-right font-poppins text-[12.25px] font-normal leading-[14px] text-[#A7A7CC] lg:text-[14px] lg:leading-[16px]">{t.blog.ctaTransactionDate}</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="z-10 order-1 flex w-full max-w-[796px] flex-1 flex-col items-start justify-center gap-6 lg:order-2">
                     <h2 className="bg-gradient-to-b from-white to-[#999] bg-clip-text text-transparent font-poppins text-[40px] font-medium leading-[48px] tracking-[-0.8px] md:text-[56px] md:leading-[72px] md:tracking-[-2.24px]">
-                        Let&apos;s build scalable traffic systems together!
+                        {t.blog.ctaTitle}
                     </h2>
                     <p className="max-w-[552px] text-[#BDBDBD] text-[20px] leading-[32px] font-normal font-poppins">
-                        Partner with a team focused on performance, data, and long-term results - not experiments
+                        {t.blog.ctaDescription}
                     </p>
                     <button className="flex h-[50px] w-[172px] items-center justify-center rounded-[80px] bg-[#F29F04] px-5 py-3 text-[14px] font-medium leading-4 text-[#0D0D0D] font-poppins transition-opacity hover:opacity-90 md:w-[180px] md:px-6 md:text-[16px] md:leading-[26px]">
-                        Get in touch
+                        {t.blog.ctaButton}
                     </button>
                 </div>
             </div>

@@ -8,6 +8,7 @@ interface JobDetailHeroProps {
   location: string
   workFormat: string
   experience: string
+  backLabel?: string
 }
 
 const userIcon = (
@@ -52,6 +53,7 @@ const JobDetailHero: React.FC<JobDetailHeroProps> = ({
   location,
   workFormat,
   experience,
+  backLabel = 'Back to Jobs',
 }) => {
   return (
     <section className="flex w-full flex-col items-start gap-20">
@@ -65,7 +67,7 @@ const JobDetailHero: React.FC<JobDetailHeroProps> = ({
               />
             </svg>
           </div>
-          <span className="font-poppins text-[24px] font-normal leading-[32px] text-[#FCFCFC]">Back to Jobs</span>
+          <span className="font-poppins text-[24px] font-normal leading-[32px] text-[#FCFCFC]">{backLabel}</span>
         </Link>
       </div>
 

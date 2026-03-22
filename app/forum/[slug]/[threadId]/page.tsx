@@ -7,8 +7,9 @@ import ForumThreadReply from '@/app/components/forum/ForumThreadReply';
 import ForumPagination from '@/app/components/forum/ForumPagination';
 import ForumThreadCommentInput from '@/app/components/forum/ForumThreadCommentInput';
 import { useParams, useRouter } from 'next/navigation';
-import { forumThreadPageData } from './data';
 import { createEmptyForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
+import { formatDateValue } from '@/lib/i18n';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -79,11 +80,11 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
     return `${normalizedBase}${normalizedPath}`;
 };
 
-const resolveUserName = (user: unknown): string => {
+const resolveUserName = (user: unknown, unknownUserLabel: string): string => {
     const userObject = asRecord(user);
 
     if (!userObject) {
-        return 'Unknown user';
+        return unknownUserLabel;
     }
 
     const name = userObject.name;
@@ -96,7 +97,7 @@ const resolveUserName = (user: unknown): string => {
         return email.split('@')[0];
     }
 
-    return 'Unknown user';
+    return unknownUserLabel;
 };
 
 const resolveUserAvatar = (user: unknown): string => {
@@ -125,17 +126,21 @@ const resolveUserAvatar = (user: unknown): string => {
     return DEFAULT_AVATAR;
 };
 
-const formatThreadDate = (value?: string): string => {
+const formatThreadDate = (
+    value: string | undefined,
+    language: 'en' | 'uk',
+    unknownDateLabel: string,
+): string => {
     if (!value) {
-        return 'Unknown date';
+        return unknownDateLabel;
     }
 
     const parsed = new Date(value);
     if (Number.isNaN(parsed.getTime())) {
-        return 'Unknown date';
+        return unknownDateLabel;
     }
 
-    return parsed.toLocaleDateString('en-US', {
+    return formatDateValue(parsed, language, {
         month: 'short',
         day: '2-digit',
         year: 'numeric',
@@ -197,6 +202,7 @@ const extractThreadComments = (thread: UnknownRecord | null): UnknownRecord[] =>
 };
 
 export default function ForumThreadPage() {
+    const { language, messages: t } = useLanguage();
     const params = useParams();
     const router = useRouter();
     const slugParam = params.slug;
@@ -241,7 +247,7 @@ export default function ForumThreadPage() {
     useEffect(() => {
         if (!threadId) {
             setThread(null);
-            setError('Thread ID is missing.');
+            setError(t.forum.threadIdMissing);
             setIsLoading(false);
             return;
         }
@@ -263,13 +269,13 @@ export default function ForumThreadPage() {
                     const payloadObject = asRecord(threadPayload);
                     const message = typeof payloadObject?.error === 'string'
                         ? payloadObject.error
-                        : 'Unable to load thread.';
+                        : t.forum.unableToLoadThread;
                     throw new Error(message);
                 }
 
                 const resolvedThread = resolveThreadDocument(threadPayload);
                 if (!resolvedThread) {
-                    throw new Error('Invalid thread payload.');
+                    throw new Error(t.forum.invalidThreadPayload);
                 }
 
                 if (active) {
@@ -281,7 +287,7 @@ export default function ForumThreadPage() {
                     setError(
                         threadError instanceof Error
                             ? threadError.message
-                            : 'Unable to load thread.',
+                            : t.forum.unableToLoadThread,
                     );
                 }
             } finally {
@@ -296,20 +302,22 @@ export default function ForumThreadPage() {
         return () => {
             active = false;
         };
-    }, [threadId]);
+    }, [t.forum.invalidThreadPayload, t.forum.threadIdMissing, t.forum.unableToLoadThread, threadId]);
 
     const subCategory = resolveThreadSubCategory(thread?.category);
-    const categoryTitle = subCategory.title || forumThreadPageData.hero.title;
+    const categoryTitle = subCategory.title || t.forum.categoryFallback;
     const threadTitle = typeof thread?.title === 'string' && thread.title.trim()
         ? thread.title
-        : forumThreadPageData.originalPost.threadTitle;
-    const threadContent = thread?.content ?? forumThreadPageData.originalPost.content;
+        : t.forum.untitledThread;
+    const threadContent = thread?.content ?? createEmptyForumRichText();
     const threadDate = formatThreadDate(
         typeof thread?.createdAt === 'string' ? thread.createdAt : undefined,
+        language,
+        t.common.unknownDate,
     );
 
     const author = thread?.author;
-    const authorName = resolveUserName(author);
+    const authorName = resolveUserName(author, t.common.unknownUser);
     const authorAvatar = resolveUserAvatar(author);
     const authorProfileHref = toPublicProfileHref(author);
     const isThreadLocked = thread?.isLocked === true;
@@ -331,10 +339,10 @@ export default function ForumThreadPage() {
 
                 return {
                     id: toEntityId(comment.id) || `${index}`,
-                    authorName: resolveUserName(commentUser),
+                    authorName: resolveUserName(commentUser, t.common.unknownUser),
                     authorAvatar: resolveUserAvatar(commentUser),
                     authorProfileHref: toPublicProfileHref(commentAuthorId),
-                    date: formatThreadDate(createdAt),
+                    date: formatThreadDate(createdAt, language, t.common.unknownDate),
                     content,
                 };
             })
@@ -346,7 +354,7 @@ export default function ForumThreadPage() {
                 date: string;
                 content: unknown;
             } => Boolean(reply));
-    }, [thread]);
+    }, [language, t.common.unknownDate, t.common.unknownUser, thread]);
 
     const totalResponses = thread ? 1 + replies.length : 0;
     const fallbackSlug = subCategory.slug || toCategorySlug(categoryTitle);
@@ -400,7 +408,7 @@ export default function ForumThreadPage() {
         }
 
         if (isThreadLocked) {
-            setPublishError('This thread is locked. New comments are disabled.');
+            setPublishError(t.forum.threadLocked);
             return;
         }
 
@@ -427,7 +435,7 @@ export default function ForumThreadPage() {
                 const payloadObject = asRecord(payload);
                 const message = typeof payloadObject?.error === 'string'
                     ? payloadObject.error
-                    : 'Unable to publish comment.';
+                    : t.forum.unableToPublishComment;
                 throw new Error(message);
             }
 
@@ -448,7 +456,7 @@ export default function ForumThreadPage() {
             setPublishError(
                 commentError instanceof Error
                     ? commentError.message
-                    : 'Unable to publish comment.',
+                    : t.forum.unableToPublishComment,
             );
         } finally {
             setIsPublishingComment(false);
@@ -461,8 +469,8 @@ export default function ForumThreadPage() {
                 <ForumThreadHero
                     title={categoryTitle}
                     backLink={backLink}
-                    backText={forumThreadPageData.hero.backText}
-                    addCommentLabel={forumThreadPageData.hero.addCommentLabel}
+                    backText={t.forum.backToForum}
+                    addCommentLabel={t.forum.addComment}
                     onAddCommentClick={handleAddCommentClick}
                 />
 
@@ -470,7 +478,7 @@ export default function ForumThreadPage() {
                     <div className="flex flex-col gap-4 w-full">
                         {isLoading && (
                             <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
-                                Loading thread...
+                                {t.forum.loadingThread}
                             </div>
                         )}
 
@@ -485,7 +493,7 @@ export default function ForumThreadPage() {
                                 <ForumThreadOriginalPost
                                     threadTitle={threadTitle}
                                     authorName={authorName}
-                                    authorRole={forumThreadPageData.originalPost.authorRole}
+                                    authorRole={t.forum.authorRole}
                                     date={threadDate}
                                     authorAvatar={authorAvatar}
                                     authorProfileHref={authorProfileHref}
@@ -514,7 +522,7 @@ export default function ForumThreadPage() {
                                 total={Math.max(totalResponses, 1)}
                                 currentPage={1}
                                 totalPages={1}
-                                itemLabel="responses"
+                                itemLabel={t.forum.responsesLabel}
                                 onPageChange={() => undefined}
                             />
 
@@ -522,27 +530,27 @@ export default function ForumThreadPage() {
                                 <div id="thread-comment-section" className="w-full">
                                     {isAuthenticated === false ? (
                                         <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px] flex flex-col gap-4">
-                                            <div>You need to log in to leave a comment.</div>
+                                            <div>{t.forum.loginToComment}</div>
                                             <div>
                                                 <button
                                                     type="button"
                                                     onClick={() => router.push('/login')}
                                                     className="h-[50px] inline-flex items-center justify-center gap-[12px] rounded-[80px] border border-[#FCC660] px-[24px] text-[#FCC660] text-[16px] font-medium leading-[26px] hover:bg-[#FCC660]/10 transition-all"
                                                 >
-                                                    Log In
+                                                    {t.common.logIn}
                                                 </button>
                                             </div>
                                         </div>
                                     ) : isAuthenticated === null ? (
                                         <div className="w-full rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] p-6 text-[#BDBDBD] text-[16px] leading-[26px]">
-                                            Checking access...
+                                            {t.common.checkingAccess}
                                         </div>
                                     ) : (
                                         <ForumThreadCommentInput
-                                            title={forumThreadPageData.commentInput.title}
-                                            placeholder={forumThreadPageData.commentInput.placeholder}
-                                            cancelLabel={forumThreadPageData.commentInput.cancelLabel}
-                                            publishLabel={forumThreadPageData.commentInput.publishLabel}
+                                            title={t.forum.commentSectionTitle}
+                                            placeholder={t.forum.commentPlaceholder}
+                                            cancelLabel={t.common.cancel}
+                                            publishLabel={t.common.publish}
                                             value={newComment}
                                             editorKey={commentEditorKey}
                                             onChange={(value) => {

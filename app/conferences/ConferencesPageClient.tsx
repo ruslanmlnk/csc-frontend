@@ -9,6 +9,7 @@ import ConferenceFilters from '@/app/components/conferences/ConferenceFilters'
 import { formatConferenceDate } from '@/app/components/conferences/formatConferenceDate'
 import type { ConferenceItem } from '@/app/types/conferences'
 import type { PageHeroV2 } from '@/lib/backend/pageGlobals'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 type ConferencesApiResponse = {
   conferences?: ConferenceItem[]
@@ -46,6 +47,7 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
 const ALL_VALUE = '__all__'
 
 const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHeroV2 }) => {
+  const { language, messages: t } = useLanguage()
   const [conferences, setConferences] = useState<ConferenceItem[]>([])
   const [locationOptions, setLocationOptions] = useState<string[]>([])
   const [verticalOptions, setVerticalOptions] = useState<string[]>([])
@@ -73,11 +75,11 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
         const filtersData = (await filtersResponse.json().catch(() => null)) as ConferenceFiltersApiResponse | null
 
         if (!conferencesResponse.ok) {
-          throw new Error(conferencesData?.error || 'Unable to load conferences.')
+          throw new Error(conferencesData?.error || t.conferences.loading)
         }
 
         if (!filtersResponse.ok) {
-          throw new Error(filtersData?.error || 'Unable to load conference filters.')
+          throw new Error(filtersData?.error || t.conferences.loading)
         }
 
         if (!active) {
@@ -95,7 +97,7 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
         if (!active) {
           return
         }
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load conferences.')
+        setError(loadError instanceof Error ? loadError.message : t.conferences.loading)
         setConferences([])
         setLocationOptions([])
         setVerticalOptions([])
@@ -111,29 +113,29 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
     return () => {
       active = false
     }
-  }, [])
+  }, [t.conferences.loading])
 
   const dateOptions = useMemo(
     () =>
       Array.from(
         new Set(
           conferences
-            .map((conference) => formatConferenceDate(conference.conferenceDate))
+            .map((conference) => formatConferenceDate(conference.conferenceDate, language))
             .filter((value): value is string => Boolean(value)),
         ),
       ),
-    [conferences],
+    [conferences, language],
   )
 
   const filteredConferences = useMemo(() => {
     return conferences.filter((conference) => {
-      const conferenceDateLabel = formatConferenceDate(conference.conferenceDate)
+      const conferenceDateLabel = formatConferenceDate(conference.conferenceDate, language)
       const dateMatch = dateFilter === ALL_VALUE || conferenceDateLabel === dateFilter
       const locationMatch = locationFilter === ALL_VALUE || (conference.location?.name || '').trim() === locationFilter
       const verticalMatch = verticalFilter === ALL_VALUE || (conference.vertical?.name || '').trim() === verticalFilter
       return dateMatch && locationMatch && verticalMatch
     })
-  }, [conferences, dateFilter, locationFilter, verticalFilter])
+  }, [conferences, dateFilter, language, locationFilter, verticalFilter])
 
   useEffect(() => {
     setCurrentPage(1)
@@ -148,7 +150,7 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
   const heroTitle = initialHeroV2?.title?.trim()
   const heroDescription = initialHeroV2?.description?.trim()
   const heroBannerSrc = initialHeroV2?.banner?.image?.url || promoBannerSrc
-  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || 'Promo banner'
+  const heroBannerAlt = initialHeroV2?.banner?.caption?.trim() || (language === 'uk' ? '\u0411\u0430\u043d\u0435\u0440 \u043a\u043e\u043d\u0444\u0435\u0440\u0435\u043d\u0446\u0456\u0439' : 'Conferences banner')
   const heroBannerHref = initialHeroV2?.banner?.link?.trim()
 
   return (
@@ -157,13 +159,12 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
         title={
           heroTitle || (
             <>
-              Sharing experience <br className="hidden md:block" /> with the industry
+              {t.conferences.heroTitle}
             </>
           )
         }
         description={
-          heroDescription
-          || 'We participate in and speak at major affiliate and marketing conferences, sharing insights, strategies, and real case studies from active campaigns'
+          heroDescription || t.conferences.heroDescription
         }
       />
 
@@ -193,7 +194,7 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
           <div className="flex w-full flex-col gap-6">
             {isLoading && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                Loading conferences...
+                {t.conferences.loading}
               </div>
             )}
 
@@ -205,7 +206,7 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
 
             {!isLoading && !error && filteredConferences.length === 0 && (
               <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-                No conferences found.
+                {t.conferences.noResults}
               </div>
             )}
 
@@ -221,9 +222,10 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
                       title={conference.title}
                       imageSrc={mainImageUrl}
                       location={conference.location?.name}
-                      dateLabel={formatConferenceDate(conference.conferenceDate)}
+                      dateLabel={formatConferenceDate(conference.conferenceDate, language)}
                       topicsLabel={conference.vertical?.name}
                       detailsHref={detailsHref}
+                      detailsLabel={t.common.moreDetails}
                     />
                   )
                 })}
@@ -238,7 +240,7 @@ const ConferencesPageClient: React.FC<ConferencesPageClientProps> = ({ initialHe
                   total={filteredConferences.length}
                   currentPage={normalizedPage}
                   totalPages={totalPages}
-                  itemLabel="conferences"
+                  itemLabel={t.conferences.itemLabel}
                   onPageChange={setCurrentPage}
                 />
               </div>

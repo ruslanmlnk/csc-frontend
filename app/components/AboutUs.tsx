@@ -1,6 +1,9 @@
+"use client";
+
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useLanguage } from './i18n/LanguageProvider';
 
 interface AboutUsProps {
     data?: {
@@ -12,10 +15,11 @@ interface AboutUsProps {
 }
 
 const AboutUs: React.FC<AboutUsProps> = ({ data }) => {
-    const badgeText = data?.badgeText?.trim() || 'What we do';
-    const title = data?.title?.trim() || 'Performance marketing built on data';
+    const { messages: t } = useLanguage();
+    const badgeText = data?.badgeText?.trim() || t.home.aboutBadge;
+    const title = data?.title?.trim() || t.home.aboutTitle;
     const description = data?.description?.trim()
-        || 'ClickStorm is a performance-driven agency working at the intersection of traffic arbitrage, CPA marketing, and analytics. We launch, test, and scale traffic across multiple sources while keeping full control over metrics, budgets, and profitability.';
+        || t.home.aboutDescription;
     const buttonHref = data?.buttonLink?.trim() || '/services';
     const isExternalLink = /^https?:\/\//i.test(buttonHref);
     const buttonClasses = 'flex w-[172px] lg:w-[180px] h-[50px] py-[12px] px-[20px] lg:px-[24px] justify-center items-center gap-[12px] rounded-[80px] bg-[#F29F04] transition-all hover:brightness-110 active:scale-95';
@@ -64,11 +68,11 @@ const AboutUs: React.FC<AboutUsProps> = ({ data }) => {
                         </div>
                         <div className="flex-1 flex justify-between items-start">
                             <div className="flex flex-col">
-                                <span className="text-[#FCFCFC] font-poppins text-[9.459px] lg:text-[16px] font-medium leading-[15.372px] lg:leading-[26px]">Converted ETH</span>
-                                <span className="text-[#FDD892] font-poppins text-[9.459px] lg:text-[16px] font-normal leading-[15.372px] lg:leading-[26px]">-0.7 ETH</span>
+                                <span className="text-[#FCFCFC] font-poppins text-[9.459px] lg:text-[16px] font-medium leading-[15.372px] lg:leading-[26px]">{t.home.convertedEthTitle}</span>
+                                <span className="text-[#FDD892] font-poppins text-[9.459px] lg:text-[16px] font-normal leading-[15.372px] lg:leading-[26px]">{t.home.convertedEthAmount}</span>
                             </div>
                             <div className="flex flex-col items-end">
-                                <span className="text-[#FCFCFC] font-poppins text-[9.459px] lg:text-[16px] font-medium leading-[15.372px] lg:leading-[26px]">+0.052 BTC</span>
+                                <span className="text-[#FCFCFC] font-poppins text-[9.459px] lg:text-[16px] font-medium leading-[15.372px] lg:leading-[26px]">{t.home.convertedEthGain}</span>
                             </div>
                         </div>
                     </div>
@@ -88,11 +92,11 @@ const AboutUs: React.FC<AboutUsProps> = ({ data }) => {
                         </div>
                         <div className="flex-1 flex justify-between items-center text-white">
                             <div className="flex flex-col">
-                                <span className="font-poppins text-[11.824px] lg:text-[20px] font-medium leading-[18.919px] lg:leading-[32px]">Solana</span>
-                                <span className="text-[#BDBDBD] font-poppins text-[9.459px] lg:text-[16px] font-normal leading-[15.372px] lg:leading-[26px]">34.5 SOL</span>
+                                <span className="font-poppins text-[11.824px] lg:text-[20px] font-medium leading-[18.919px] lg:leading-[32px]">{t.home.solanaTitle}</span>
+                                <span className="text-[#BDBDBD] font-poppins text-[9.459px] lg:text-[16px] font-normal leading-[15.372px] lg:leading-[26px]">{t.home.solanaAmount}</span>
                             </div>
                             <div className="flex flex-col items-end">
-                                <span className="font-poppins text-[11.824px] lg:text-[20px] font-medium leading-[18.919px] lg:leading-[32px]">$1560.60</span>
+                                <span className="font-poppins text-[11.824px] lg:text-[20px] font-medium leading-[18.919px] lg:leading-[32px]">{t.home.solanaPrice}</span>
                                 <span className="text-[#20A12B] font-poppins text-[11.824px] lg:text-[20px] font-normal leading-[18.919px] lg:leading-[32px]">+0.64%</span>
                             </div>
                         </div>
@@ -134,13 +138,13 @@ const AboutUs: React.FC<AboutUsProps> = ({ data }) => {
                             className={buttonClasses}
                         >
                             <span className="text-[#0D0D0D] text-center font-poppins text-[14px] lg:text-[16px] font-medium leading-[16px] lg:leading-[26px]">
-                                Learn More
+                                {t.home.learnMore}
                             </span>
                         </a>
                     ) : (
                         <Link href={buttonHref} className={buttonClasses}>
                             <span className="text-[#0D0D0D] text-center font-poppins text-[14px] lg:text-[16px] font-medium leading-[16px] lg:leading-[26px]">
-                                Learn More
+                                {t.home.learnMore}
                             </span>
                         </Link>
                     )}

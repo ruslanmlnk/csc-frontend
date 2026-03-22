@@ -11,6 +11,8 @@ import { getThreadComments } from '@/lib/backend/comments';
 import { getProfilePageGlobals } from '@/lib/backend/profilePageGlobals';
 import { toTelegramHref } from '@/lib/socialLinks';
 import { getThreads } from '@/lib/backend/threads';
+import { formatDateValue } from '@/lib/i18n';
+import { getServerI18n } from '@/lib/i18n/server';
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -107,7 +109,10 @@ const toForumCategorySlug = (value?: string | null): string => {
     return normalized || 'general';
 };
 
-const resolveThreadSubCategory = (value: unknown): { title: string; slug: string } => {
+const resolveThreadSubCategory = (
+    value: unknown,
+    generalLabel: string,
+): { title: string; slug: string } => {
     if (typeof value === 'string' && value.trim()) {
         return {
             title: value,
@@ -125,7 +130,7 @@ const resolveThreadSubCategory = (value: unknown): { title: string; slug: string
 
     const categoryObject = asRecord(value);
     if (categoryObject) {
-        const name = asString(categoryObject.name) || 'General';
+        const name = asString(categoryObject.name) || generalLabel;
         const slug = asString(categoryObject.slug) || toForumCategorySlug(name);
 
         return {
@@ -135,17 +140,21 @@ const resolveThreadSubCategory = (value: unknown): { title: string; slug: string
     }
 
     return {
-        title: 'General',
-        slug: 'general',
+        title: generalLabel,
+        slug: toForumCategorySlug(generalLabel),
     };
 };
 
-const formatThreadDate = (value?: string): string => {
-    if (!value) return 'Unknown date';
+const formatThreadDate = (
+    value: string | undefined,
+    language: 'en' | 'uk',
+    unknownDateLabel: string,
+): string => {
+    if (!value) return unknownDateLabel;
     const parsed = new Date(value);
-    if (Number.isNaN(parsed.getTime())) return 'Unknown date';
+    if (Number.isNaN(parsed.getTime())) return unknownDateLabel;
 
-    return parsed.toLocaleDateString('en-US', {
+    return formatDateValue(parsed, language, {
         month: 'short',
         day: '2-digit',
         year: 'numeric',
@@ -255,7 +264,7 @@ const getPublicUser = async (rawUserId: string): Promise<PublicUser | null> => {
     };
 };
 
-const getPublicThreads = async (authorId: string): Promise<PublicThread[]> => {
+const getPublicThreads = async (authorId: string, generalLabel: string): Promise<PublicThread[]> => {
     const response = await getThreads({
         page: '1',
         limit: '100',
@@ -294,7 +303,7 @@ const getPublicThreads = async (authorId: string): Promise<PublicThread[]> => {
                 return null;
             }
 
-            const category = resolveThreadSubCategory(thread.category);
+            const category = resolveThreadSubCategory(thread.category, generalLabel);
 
             return {
                 id: threadId,
@@ -327,19 +336,20 @@ export default async function PublicProfilePage({
         notFound();
     }
 
+    const { language, messages: t } = await getServerI18n();
     const [threads, profilePageGlobals] = await Promise.all([
-        getPublicThreads(user.id),
+        getPublicThreads(user.id, t.common.general),
         getProfilePageGlobals(),
     ]);
-    const displayName = user.name || 'Member';
-    const bio = user.bio || 'Description not filled in';
+    const displayName = user.name || t.profile.member;
+    const bio = user.bio || t.profile.descriptionNotFilled;
     const avatarUrl = user.avatarUrl || DEFAULT_AVATAR;
     const instagramHandle = normalizeSocialHandle(user.instagram);
     const telegramHref = toTelegramHref(user.telegram);
     const tiktokHandle = normalizeSocialHandle(user.tiktok);
     const websiteHref = toWebsiteHref(user.website);
     const profileBannerSrc = profilePageGlobals.banner?.src || '/images/profile-banner.png';
-    const profileBannerAlt = profilePageGlobals.banner?.alt || 'Profile banner';
+    const profileBannerAlt = profilePageGlobals.banner?.alt || t.navigation.profile;
     const profileBannerHref = profilePageGlobals.banner?.href?.trim() || null;
     const isExternalProfileBannerHref = Boolean(profileBannerHref && /^https?:\/\//i.test(profileBannerHref));
 
@@ -373,7 +383,7 @@ export default async function PublicProfilePage({
                                         </a>
                                     ) : null}
                                     {websiteHref ? (
-                                        <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity text-[#F29F04]" aria-label="Website">
+                                        <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity text-[#F29F04]" aria-label={t.profile.website}>
                                             <Globe size={24} />
                                         </a>
                                     ) : null}
@@ -388,19 +398,19 @@ export default async function PublicProfilePage({
 
                 <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     <ProfileStatCard
-                        label="Team"
+                        label={t.profile.team}
                         value={user.company || undefined}
                         icon={<Users size={32} color="#212121" />}
                     />
                     <ProfileStatCard
-                        label="Position"
+                        label={t.profile.position}
                         value={user.position || undefined}
                         icon={<UserRound size={32} color="#212121" />}
                     />
                     <ProfileStatCard
-                        label="Directions"
+                        label={t.profile.directions}
                         value={user.directions || undefined}
-                        icon={<Image src="/images/profile-directions.png" width={32} height={32} alt="Directions" className="w-8 h-8 object-contain brightness-0" />}
+                        icon={<Image src="/images/profile-directions.png" width={32} height={32} alt={t.profile.directions} className="w-8 h-8 object-contain brightness-0" />}
                     />
                 </section>
 
@@ -421,14 +431,14 @@ export default async function PublicProfilePage({
                 </section>
 
                 <section className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">Threads</h2>
+                    <h2 className="text-white font-poppins text-[32px] font-medium leading-[40px] tracking-[-0.64px]">{t.profile.threads}</h2>
                     <span className="text-[#F29F04] font-poppins text-[20px] font-medium leading-[32px]">{threads.length}</span>
                 </section>
 
                 <section className="flex flex-col gap-4">
                     {threads.length === 0 ? (
                         <div className="rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[#BDBDBD] text-[16px] leading-[26px]">
-                            No threads yet.
+                            {t.profile.noThreadsYet}
                         </div>
                     ) : (
                         threads.map((thread) => {
@@ -438,9 +448,9 @@ export default async function PublicProfilePage({
                                 <Link key={thread.id} href={threadHref} className="block">
                                     <ForumCategoryThreadCard
                                         title={thread.title}
-                                        description={thread.categoryTitle || 'We read, delve into, discuss'}
+                                        description={thread.categoryTitle || t.forum.defaultThreadDescription}
                                         authorName={displayName}
-                                        date={formatThreadDate(thread.createdAt)}
+                                        date={formatThreadDate(thread.createdAt, language, t.common.unknownDate)}
                                         replyCount={thread.commentsCount}
                                         authorAvatar={avatarUrl}
                                     />

@@ -11,6 +11,8 @@ interface PartnershipDetailHeroProps {
   verticalLabel?: string | null
   paymentModels?: string[]
   rating: string
+  backLabel?: string
+  websiteLabel?: string
 }
 
 const calendarIcon = (
@@ -34,6 +36,8 @@ const PartnershipDetailHero: React.FC<PartnershipDetailHeroProps> = ({
   verticalLabel,
   paymentModels = [],
   rating,
+  backLabel = 'Back to Partnerships',
+  websiteLabel = 'Go to the website',
 }) => {
   return (
     <section className="flex w-full flex-col items-start gap-20">
@@ -44,7 +48,7 @@ const PartnershipDetailHero: React.FC<PartnershipDetailHeroProps> = ({
               <path d="M27.9998 16C27.9998 16.2652 27.8945 16.5196 27.7069 16.7071C27.5194 16.8947 27.265 17 26.9998 17H7.41356L14.7073 24.2925C14.8002 24.3854 14.8739 24.4957 14.9242 24.6171C14.9745 24.7385 15.0004 24.8686 15.0004 25C15.0004 25.1314 14.9745 25.2615 14.9242 25.3829C14.8739 25.5043 14.8002 25.6146 14.7073 25.7075C14.6144 25.8004 14.5041 25.8741 14.3827 25.9244C14.2613 25.9747 14.1312 26.0006 13.9998 26.0006C13.8684 26.0006 13.7383 25.9747 13.6169 25.9244C13.4955 25.8741 13.3852 25.8004 13.2923 25.7075L4.29231 16.7075C4.19933 16.6146 4.12557 16.5043 4.07525 16.3829C4.02493 16.2615 3.99902 16.1314 3.99902 16C3.99902 15.8686 4.02493 15.7385 4.07525 15.6171C4.12557 15.4957 4.19933 15.3854 4.29231 15.2925L13.2923 6.29251C13.4799 6.10487 13.7344 5.99945 13.9998 5.99945C14.2652 5.99945 14.5197 6.10487 14.7073 6.29251C14.895 6.48015 15.0004 6.73464 15.0004 7.00001C15.0004 7.26537 14.895 7.51987 14.7073 7.70751L7.41356 15H26.9998C27.265 15 27.5194 15.1054 27.7069 15.2929C27.8945 15.4804 27.9998 15.7348 27.9998 16Z" fill="#FCFCFC" />
             </svg>
           </div>
-          <span className="font-poppins text-[24px] font-normal leading-[32px] text-[#FCFCFC]">Back to Partnerships</span>
+          <span className="font-poppins text-[24px] font-normal leading-[32px] text-[#FCFCFC]">{backLabel}</span>
         </Link>
       </div>
 
@@ -55,12 +59,12 @@ const PartnershipDetailHero: React.FC<PartnershipDetailHeroProps> = ({
               href={websiteUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="order-1 flex shrink-0 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 transition-colors hover:bg-[#d88d03] md:order-2 md:h-[50px]"
-            >
-              <span className="text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]">
-                Go to the website
-              </span>
-            </a>
+            className="order-1 flex shrink-0 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 transition-colors hover:bg-[#d88d03] md:order-2 md:h-[50px]"
+          >
+            <span className="text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]">
+                {websiteLabel}
+            </span>
+          </a>
           ) : null}
 
           <div className="order-2 flex min-w-0 flex-wrap items-center content-center gap-6 md:order-1 md:flex-nowrap">

@@ -1,5 +1,8 @@
+"use client";
+
 import React from 'react'
 import Image from 'next/image'
+import { useLanguage } from './i18n/LanguageProvider'
 
 type CoreValueCardInput = {
   id?: string | null
@@ -26,39 +29,6 @@ type CoreValueCard = {
   iconUrl?: string
 }
 
-const FALLBACK_CARDS: CoreValueCard[] = [
-  {
-    id: 'expertise',
-    title: 'Expertise',
-    description: 'Strategies created by specialists working with live traffic every day',
-  },
-  {
-    id: 'data-first',
-    title: 'Data-first approach',
-    description: 'Tracking and metrics guide every step, from testing to scaling',
-  },
-  {
-    id: 'speed-testing',
-    title: 'Speed & testing',
-    description: 'Rapid testing helps identify winners and cut losses early',
-  },
-  {
-    id: 'scalability',
-    title: 'Scalability',
-    description: 'We build systems ready for safe and predictable scaling',
-  },
-  {
-    id: 'transparency',
-    title: 'Transparency',
-    description: 'Clear KPIs and full visibility across all performance metrics',
-  },
-  {
-    id: 'long-term',
-    title: 'Long-term mindset',
-    description: 'Focused on sustainable growth, not short-term spikes',
-  },
-]
-
 const toText = (value: string | null | undefined): string => value?.trim() || ''
 
 const withBackendUrl = (url: string | undefined, backendUrl: string): string | undefined => {
@@ -77,8 +47,41 @@ const DEFAULT_ICON = (
 )
 
 const CoreValues: React.FC<CoreValuesProps> = ({ data, backendUrl = '' }) => {
-  const badgeText = toText(data?.badgeText) || 'Core Values'
-  const sectionTitle = toText(data?.title) || 'The Values that Drive Everything We Do'
+  const { messages: t } = useLanguage()
+  const fallbackCards: CoreValueCard[] = [
+    {
+      id: 'expertise',
+      title: t.home.coreValues.expertiseTitle,
+      description: t.home.coreValues.expertiseDescription,
+    },
+    {
+      id: 'data-first',
+      title: t.home.coreValues.dataFirstTitle,
+      description: t.home.coreValues.dataFirstDescription,
+    },
+    {
+      id: 'speed-testing',
+      title: t.home.coreValues.speedTestingTitle,
+      description: t.home.coreValues.speedTestingDescription,
+    },
+    {
+      id: 'scalability',
+      title: t.home.coreValues.scalabilityTitle,
+      description: t.home.coreValues.scalabilityDescription,
+    },
+    {
+      id: 'transparency',
+      title: t.home.coreValues.transparencyTitle,
+      description: t.home.coreValues.transparencyDescription,
+    },
+    {
+      id: 'long-term',
+      title: t.home.coreValues.longTermTitle,
+      description: t.home.coreValues.longTermDescription,
+    },
+  ]
+  const badgeText = toText(data?.badgeText) || t.home.coreValuesBadge
+  const sectionTitle = toText(data?.title) || t.home.coreValuesTitle
 
   const cardsFromCms = (data?.cards || [])
     .map((card, index): CoreValueCard => {
@@ -95,7 +98,7 @@ const CoreValues: React.FC<CoreValuesProps> = ({ data, backendUrl = '' }) => {
     })
     .filter((card) => card.title.length > 0 || card.description.length > 0)
 
-  const cards = cardsFromCms.length > 0 ? cardsFromCms : FALLBACK_CARDS
+  const cards = cardsFromCms.length > 0 ? cardsFromCms : fallbackCards
   const rows: CoreValueCard[][] = []
 
   for (let i = 0; i < cards.length; i += 3) {
@@ -135,7 +138,7 @@ const CoreValues: React.FC<CoreValuesProps> = ({ data, backendUrl = '' }) => {
                   {value.iconUrl ? (
                     <Image
                       src={value.iconUrl}
-                      alt={`${value.title || 'Core value'} icon`}
+                      alt={`${value.title || t.home.coreValuesBadge} icon`}
                       width={40}
                       height={40}
                       className="h-10 w-10 object-contain"
@@ -146,7 +149,7 @@ const CoreValues: React.FC<CoreValuesProps> = ({ data, backendUrl = '' }) => {
                 </div>
                 <div className="flex flex-col justify-center items-start gap-[12px] self-stretch">
                   <div className="self-stretch text-white font-['Poppins'] text-[24px] font-semibold leading-[32px]">
-                    {value.title || 'Core Value'}
+                    {value.title || t.home.coreValuesBadge}
                   </div>
                   <div className="self-stretch text-[#BDBDBD] font-['Poppins'] text-[16px] font-normal leading-[26px]">
                     {value.description}

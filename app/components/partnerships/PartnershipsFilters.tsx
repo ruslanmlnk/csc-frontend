@@ -1,5 +1,6 @@
 import React from 'react'
 import MobileCategorySelector from '@/app/components/shared/MobileCategorySelector'
+import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 
 interface PartnershipsFiltersProps {
   searchValue: string
@@ -24,6 +25,8 @@ const SearchPill: React.FC<{
   onChange: (value: string) => void
   onSubmit: () => void
 }> = ({ value, onChange, onSubmit }) => {
+  const { messages: t } = useLanguage()
+
   return (
     <div className="flex h-[58px] items-center gap-4 rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-2 pr-4">
       <div className="flex h-full w-full items-center gap-[10px] rounded-[80px] px-4">
@@ -37,7 +40,7 @@ const SearchPill: React.FC<{
           onKeyDown={(event) => {
             if (event.key === 'Enter') onSubmit()
           }}
-          placeholder="Search"
+          placeholder={t.partnerships.searchPlaceholder}
           className="w-full bg-transparent border-none outline-none font-poppins text-[16px] font-medium leading-[26px] text-[#FCFCFC] placeholder:text-[#FCFCFC]"
         />
       </div>
@@ -62,6 +65,8 @@ const PartnershipsFilters: React.FC<PartnershipsFiltersProps> = ({
   activeCategory,
   onCategoryChange,
 }) => {
+  const { messages: t } = useLanguage()
+
   return (
     <div className="flex w-full flex-col items-start gap-6">
       <div className="grid w-full grid-cols-1 gap-[10px] md:grid-cols-2 xl:flex xl:items-start xl:gap-[10px]">
@@ -100,7 +105,7 @@ const PartnershipsFilters: React.FC<PartnershipsFiltersProps> = ({
           onClick={onSearchSubmit}
           className="h-[58px] w-full rounded-[80px] bg-[#F29F04] px-6 font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-colors hover:bg-[#df9303] xl:w-[200px] xl:flex-none"
         >
-          Search
+          {t.common.search}
         </button>
       </div>
 

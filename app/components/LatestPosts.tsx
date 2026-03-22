@@ -5,6 +5,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import BlogCard from './BlogCard'
 import MobileCategorySelector from '@/app/components/shared/MobileCategorySelector'
+import { formatDateValue } from '@/lib/i18n'
+import { useLanguage } from './i18n/LanguageProvider'
 
 type BlogApiArticle = {
   id: string | number
@@ -38,7 +40,6 @@ type LatestPostItem = {
 }
 
 const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
-const ALL_ARTICLES_LABEL = 'All Articles'
 const MAX_VISIBLE_POSTS = 3
 
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
@@ -51,13 +52,13 @@ const toAbsoluteMediaUrl = (url?: string | null): string | null => {
   return `${normalizedBase}${normalizedPath}`
 }
 
-const formatPublishedDate = (value?: string | null): string => {
+const formatPublishedDate = (value: string | null | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const parsedDate = new Date(value)
   if (Number.isNaN(parsedDate.getTime())) return ''
 
-  return parsedDate.toLocaleDateString('en-US', {
+  return formatDateValue(parsedDate, language, {
     month: 'short',
     day: '2-digit',
     year: 'numeric',
@@ -75,9 +76,11 @@ interface LatestPostsProps {
 }
 
 const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
+  const { language, messages: t } = useLanguage()
+  const allArticlesLabel = t.blog.allArticles
   const [posts, setPosts] = useState<LatestPostItem[]>([])
-  const [categories, setCategories] = useState<string[]>([ALL_ARTICLES_LABEL])
-  const [activeCategory, setActiveCategory] = useState(ALL_ARTICLES_LABEL)
+  const [categories, setCategories] = useState<string[]>([allArticlesLabel])
+  const [activeCategory, setActiveCategory] = useState<string>(allArticlesLabel)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -93,7 +96,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
         const payload = (await response.json().catch(() => null)) as BlogApiResponse | null
 
         if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to load latest posts.')
+          throw new Error(payload?.error || t.home.latestPostsError)
         }
 
         if (!active) {
@@ -110,8 +113,8 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
             return {
               id: String(article.id),
               title,
-              date: formatPublishedDate(article.publishedDate),
-              category: article.category?.name?.trim() || 'Uncategorized',
+              date: formatPublishedDate(article.publishedDate, language),
+              category: article.category?.name?.trim() || t.common.general,
               image: toAbsoluteMediaUrl(article.cardPoster?.url || article.image?.url) || '/images/blog-post-1.png',
               slug: article.slug || null,
               publishedDate: article.publishedDate || null,
@@ -125,19 +128,19 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
           })
 
         const uniqueCategories = Array.from(new Set(mappedPosts.map((post) => post.category)))
-        const nextCategories = [ALL_ARTICLES_LABEL, ...uniqueCategories]
+        const nextCategories = [allArticlesLabel, ...uniqueCategories]
 
         setPosts(mappedPosts)
         setCategories(nextCategories)
-        setActiveCategory((prev) => (nextCategories.includes(prev) ? prev : ALL_ARTICLES_LABEL))
+        setActiveCategory((prev) => (nextCategories.includes(prev) ? prev : allArticlesLabel))
       } catch (loadError) {
         if (!active) {
           return
         }
         setPosts([])
-        setCategories([ALL_ARTICLES_LABEL])
-        setActiveCategory(ALL_ARTICLES_LABEL)
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load latest posts.')
+        setCategories([allArticlesLabel])
+        setActiveCategory(allArticlesLabel)
+        setError(loadError instanceof Error ? loadError.message : t.home.latestPostsError)
       } finally {
         if (active) {
           setIsLoading(false)
@@ -150,22 +153,22 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
     return () => {
       active = false
     }
-  }, [])
+  }, [allArticlesLabel, language, t.common.general, t.home.latestPostsError])
 
   const filteredPosts = useMemo(() => {
-    if (activeCategory === ALL_ARTICLES_LABEL) {
+    if (activeCategory === allArticlesLabel) {
       return posts
     }
 
     return posts.filter((post) => post.category === activeCategory)
-  }, [activeCategory, posts])
+  }, [activeCategory, allArticlesLabel, posts])
 
   const visiblePosts = filteredPosts.slice(0, MAX_VISIBLE_POSTS)
 
   return (
     <section className="mx-auto flex w-full max-w-[1280px] flex-col items-center overflow-hidden px-5 py-[120px]">
       <h2 className="bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)] bg-clip-text text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-        Latest Post
+        {t.home.latestPostsTitle}
       </h2>
 
       <div className="mt-7 w-full lg:hidden">
@@ -194,7 +197,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
 
       {isLoading && (
         <div className="mt-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          Loading latest posts...
+          {t.home.latestPostsLoading}
         </div>
       )}
 
@@ -206,7 +209,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
 
       {!isLoading && !error && visiblePosts.length === 0 && (
         <div className="mt-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          No posts found for this category.
+          {t.home.latestPostsEmpty}
         </div>
       )}
 
@@ -224,7 +227,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
         href="/blog"
         className="mt-16 flex items-center justify-center gap-[16px] rounded-[80px] border border-[#FCC660] px-[24px] py-[11px] font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
       >
-        See More Posts
+        {t.home.seeMorePosts}
       </Link>
 
       {banner?.image?.url && (
@@ -234,7 +237,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
               <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
                 <Image
                   src={banner.image.url}
-                  alt={banner.caption || 'Join Us Banner'}
+                  alt={banner.caption || t.home.latestPostsTitle}
                   fill
                   className="object-cover"
                 />
@@ -242,7 +245,7 @@ const LatestPosts: React.FC<LatestPostsProps> = ({ banner }) => {
             ) : (
               <Image
                 src={banner.image.url}
-                alt={banner.caption || 'Join Us Banner'}
+                alt={banner.caption || t.home.latestPostsTitle}
                 fill
                 className="object-cover"
               />

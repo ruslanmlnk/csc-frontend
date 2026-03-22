@@ -7,6 +7,8 @@ import type { JobItem } from '@/app/types/jobs'
 import RichText from '@/app/components/blog/RichText'
 import JobDetailHero from '@/app/components/jobs/JobDetailHero'
 import JobVacancyCard from '@/app/components/jobs/JobVacancyCard'
+import { formatDateValue } from '@/lib/i18n'
+import { getServerI18n } from '@/lib/i18n/server'
 
 const promoBannerSrc =
   'https://api.builder.io/api/v1/image/assets/TEMP/967edd6176067f34102e7dfd586756631f490fa3?width=2480'
@@ -17,21 +19,22 @@ const withBackendUrl = (url: string | undefined | null, backendUrl: string): str
   return url.startsWith('/') ? `${backendUrl}${url}` : `${backendUrl}/${url}`
 }
 
-const formatJobDate = (value?: string): string => {
+const formatJobDate = (value: string | undefined, language: 'en' | 'uk'): string => {
   if (!value) return ''
 
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
 
-  const day = date.toLocaleDateString('en-GB', { day: '2-digit' })
-  const month = date.toLocaleDateString('en-GB', { month: 'short' })
-  const year = date.toLocaleDateString('en-GB', { year: 'numeric' })
+  const day = formatDateValue(date, language, { day: '2-digit' })
+  const month = formatDateValue(date, language, { month: 'short' })
+  const year = formatDateValue(date, language, { year: 'numeric' })
   return `${day} ${month}, ${year}`
 }
 
 const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) => {
   const { slug } = await params
   const backendUrl = getBackendUrl()
+  const { language, messages: t } = await getServerI18n()
 
   const [job, allJobs] = await Promise.all([getJobBySlug(slug), getJobs()])
 
@@ -40,9 +43,9 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
   }
 
   const currentJob = job as JobItem
-  const locationName = currentJob.location?.name || 'Job'
-  const workFormat = currentJob.format?.name || 'Not specified'
-  const experience = currentJob.experience?.name || 'Not specified'
+  const locationName = currentJob.location?.name || t.jobs.defaultLocation
+  const workFormat = currentJob.format?.name || t.jobs.notSpecified
+  const experience = currentJob.experience?.name || t.jobs.notSpecified
   const sidebarBannerImageUrl = withBackendUrl(currentJob.sidebarBanner?.image?.url, backendUrl) || promoBannerSrc
   const sidebarBannerHref = currentJob.sidebarBanner?.link?.trim() || null
   const sidebarBannerAlt = currentJob.sidebarBanner?.caption?.trim() || 'Jobs sidebar banner'
@@ -72,6 +75,7 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
           location={locationName}
           workFormat={workFormat}
           experience={experience}
+          backLabel={t.jobs.backToJobs}
         />
 
         <div className="flex items-start gap-6 self-stretch xl:gap-11">
@@ -82,7 +86,7 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
                   <RichText content={currentJob.content} backendUrl={backendUrl} variant="article" />
                 </div>
               ) : (
-                <p className="!mb-0">No description provided.</p>
+                <p className="!mb-0">{t.common.noDescriptionProvided}</p>
               )}
             </div>
 
@@ -154,22 +158,23 @@ const JobDetailPage = async ({ params }: { params: Promise<{ slug: string }> }) 
       {similarJobs.length > 0 ? (
         <div className="mx-auto flex w-full max-w-[1280px] flex-col items-center justify-center gap-[64px] overflow-hidden px-5 pb-20 pt-[120px]">
           <h2 className="self-stretch bg-gradient-to-b from-[#FFF] via-[#FFF] to-[#999] bg-clip-text text-center font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-            Similar Jobs
+            {t.jobs.similarTitle}
           </h2>
 
           <div className="grid w-full grid-cols-1 gap-[24px] md:grid-cols-2 xl:grid-cols-3">
             {similarJobs.map((item) => (
               <JobVacancyCard
                 key={item.id}
-                dateLabel={formatJobDate(item.createdAt)}
+                dateLabel={formatJobDate(item.createdAt, language)}
                 badge={item.badge}
                 title={item.title}
-                location={item.location?.name || 'Job'}
+                location={item.location?.name || t.jobs.defaultLocation}
                 workFormat={item.format?.name || ''}
                 experience={item.experience?.name || ''}
                 salary={item.salary}
                 salaryInfo={item.salaryInfo}
                 detailsHref={item.slug ? `/jobs/${item.slug}` : '/jobs'}
+                detailsLabel={t.common.moreDetails}
               />
             ))}
           </div>

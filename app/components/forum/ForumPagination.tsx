@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 interface ForumPaginationProps {
     showingFrom: number;
@@ -19,6 +20,7 @@ const ForumPagination: React.FC<ForumPaginationProps> = ({
     onPageChange,
     itemLabel = 'threads',
 }) => {
+    const { language } = useLanguage();
     const getVisiblePages = (): number[] => {
         if (totalPages <= 3) {
             return Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -40,7 +42,9 @@ const ForumPagination: React.FC<ForumPaginationProps> = ({
     return (
         <div className="w-full self-stretch rounded-[40px] border-2 border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-[23.2px] py-[19.2px] flex flex-col gap-4 md:flex-row md:items-center md:justify-between md:px-[38.4px] md:py-[30.4px]">
             <div className="text-[#A5A5A5] font-poppins text-[18px] font-normal leading-[28px] md:text-[24px] md:leading-[32px]">
-                Showing {showingFrom}-{showingTo} of {total} {itemLabel}
+                {language === 'uk'
+                    ? `Показано ${showingFrom}-${showingTo} з ${total} ${itemLabel}`
+                    : `Showing ${showingFrom}-${showingTo} of ${total} ${itemLabel}`}
             </div>
 
             <div className="flex items-center gap-[10px]">

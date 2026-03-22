@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import PartnershipProgramCard from '@/app/components/partnerships/PartnershipProgramCard'
 import type { PartnershipItem } from '@/app/types/partnerships'
+import { useLanguage } from './i18n/LanguageProvider'
 
 type PartnershipsApiResponse = {
   partnerships?: PartnershipItem[]
@@ -35,6 +36,7 @@ interface PartnershipProgramsProps {
 }
 
 const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => {
+  const { language, messages: t } = useLanguage()
   const [programs, setPrograms] = useState<PartnershipItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
@@ -51,7 +53,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
         const payload = (await response.json().catch(() => null)) as PartnershipsApiResponse | null
 
         if (!response.ok) {
-          throw new Error(payload?.error || 'Unable to load partnerships.')
+          throw new Error(payload?.error || t.home.partnershipsError)
         }
 
         if (!active) {
@@ -65,7 +67,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
           return
         }
         setPrograms([])
-        setError(loadError instanceof Error ? loadError.message : 'Unable to load partnerships.')
+        setError(loadError instanceof Error ? loadError.message : t.home.partnershipsError)
       } finally {
         if (active) {
           setIsLoading(false)
@@ -78,7 +80,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
     return () => {
       active = false
     }
-  }, [])
+  }, [t.home.partnershipsError])
 
   const visiblePrograms = useMemo(() => programs.slice(0, MAX_VISIBLE_PROGRAMS), [programs])
 
@@ -86,19 +88,19 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
     <section className="mx-auto flex w-full max-w-[1280px] flex-col items-center overflow-hidden px-5 py-[120px]">
       <div className="mb-16 flex w-full items-center justify-between">
         <h2 className="bg-[linear-gradient(180deg,#FFF_25.5%,#999_118.5%)] bg-clip-text font-poppins text-[56px] font-medium leading-[72px] tracking-[-2.24px] text-transparent">
-          Partnerships Programs
+          {t.home.partnershipsTitle}
         </h2>
         <Link
           href="/partnerships"
           className="hidden md:flex items-center justify-center gap-4 rounded-[80px] border border-[#FCC660] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95"
         >
-          See More
+          {t.home.usefulServicesSeeMore}
         </Link>
       </div>
 
       {isLoading && (
         <div className="mb-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          Loading partnerships...
+          {t.home.partnershipsLoading}
         </div>
       )}
 
@@ -110,7 +112,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
 
       {!isLoading && !error && visiblePrograms.length === 0 && (
         <div className="mb-16 w-full rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] px-6 py-5 text-[16px] leading-[26px] text-[#BDBDBD]">
-          No partnership programs found.
+          {t.home.partnershipsEmpty}
         </div>
       )}
 
@@ -141,6 +143,11 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
                 minPayment={program.minPayment || '-'}
                 offers={offers}
                 detailsHref={program.slug ? `/partnerships/${program.slug}` : '/partnerships'}
+                foundedLabel={language === 'uk' ? '\u0417\u0430\u0441\u043d\u043e\u0432\u0430\u043d\u043e' : 'Founded'}
+                modelsLabel={language === 'uk' ? '\u041c\u043e\u0434\u0435\u043b\u0456' : 'Models'}
+                geoLabel={language === 'uk' ? '\u0413\u0435\u043e' : 'Geo'}
+                minPaymentLabel={language === 'uk' ? '\u041c\u0456\u043d\u0456\u043c\u0430\u043b\u044c\u043d\u0430 \u0432\u0438\u043f\u043b\u0430\u0442\u0430' : 'Minimum payment'}
+                detailsLabel={t.common.moreDetails}
               />
             )
           })}
@@ -151,7 +158,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
         href="/partnerships"
         className="mt-8 flex w-full max-w-fit items-center justify-center gap-4 self-center rounded-[80px] border border-[#FCC660] px-6 py-3 font-poppins text-[16px] font-medium leading-[26px] text-[#FCC660] transition-all hover:bg-[#FCC660]/10 active:scale-95 md:hidden"
       >
-        See More
+        {t.home.usefulServicesSeeMore}
       </Link>
 
       {banner?.image?.url && (
@@ -161,7 +168,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
               <Link href={banner.link} target={banner.link.startsWith('http') ? '_blank' : undefined}>
                 <Image
                   src={banner.image.url}
-                  alt={banner.caption || 'Partnership Banner'}
+                  alt={banner.caption || t.home.partnershipsTitle}
                   fill
                   sizes="1240px"
                   className="object-cover"
@@ -170,7 +177,7 @@ const PartnershipPrograms: React.FC<PartnershipProgramsProps> = ({ banner }) => 
             ) : (
               <Image
                 src={banner.image.url}
-                alt={banner.caption || 'Partnership Banner'}
+                alt={banner.caption || t.home.partnershipsTitle}
                 fill
                 sizes="1240px"
                 className="object-cover"

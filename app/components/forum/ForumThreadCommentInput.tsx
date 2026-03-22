@@ -1,6 +1,7 @@
 import React from 'react';
 import ForumRichTextEditor from './ForumRichTextEditor';
 import { hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
+import { useLanguage } from '@/app/components/i18n/LanguageProvider';
 
 interface ForumThreadCommentInputProps {
     title: string;
@@ -29,6 +30,7 @@ const ForumThreadCommentInput: React.FC<ForumThreadCommentInputProps> = ({
     isPublishing = false,
     error,
 }) => {
+    const { messages: t } = useLanguage();
     const isPublishDisabled = isPublishing || !hasVisibleForumRichTextContent(value);
 
     return (
@@ -72,7 +74,7 @@ const ForumThreadCommentInput: React.FC<ForumThreadCommentInputProps> = ({
                         className="flex w-[200px] py-3 px-6 justify-center items-center gap-3 self-stretch rounded-[80px] bg-[#F29F04] text-[#0D0D0D] text-center font-poppins text-[16px] font-medium leading-[26px] transition-colors hover:bg-[#F29F04]/80 disabled:cursor-not-allowed disabled:bg-[#7A5510] disabled:text-[#151515] disabled:hover:bg-[#7A5510]"
                         disabled={isPublishDisabled}
                     >
-                        {isPublishing ? 'Publishing...' : publishLabel}
+                        {isPublishing ? t.common.publishing : publishLabel}
                     </button>
                 </div>
             </div>

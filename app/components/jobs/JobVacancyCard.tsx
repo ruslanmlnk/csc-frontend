@@ -13,6 +13,7 @@ interface JobVacancyCardProps {
   salaryInfo: string
   badge?: JobVacancyBadge
   detailsHref?: string
+  detailsLabel?: string
 }
 
 const getBadgeVisuals = (badge?: JobVacancyBadge) => {
@@ -43,6 +44,7 @@ const JobVacancyCard: React.FC<JobVacancyCardProps> = ({
   salaryInfo,
   badge,
   detailsHref,
+  detailsLabel = 'More details',
 }) => {
   const badgeVisuals = getBadgeVisuals(badge)
 
@@ -102,14 +104,14 @@ const JobVacancyCard: React.FC<JobVacancyCardProps> = ({
             href={detailsHref}
             className="flex h-[50px] w-full items-center justify-center gap-[12px] self-stretch rounded-[80px] bg-[#F29F04] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-all hover:brightness-110 active:scale-95"
           >
-            More details
+            {detailsLabel}
           </Link>
         ) : (
           <button
             type="button"
             className="flex h-[50px] w-full items-center justify-center gap-[12px] self-stretch rounded-[80px] bg-[#F29F04] px-[24px] py-[12px] font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-all hover:brightness-110 active:scale-95"
           >
-            More details
+            {detailsLabel}
           </button>
         )}
       </div>

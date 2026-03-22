@@ -9,6 +9,7 @@ interface ConferenceCardProps {
   dateLabel?: string | null
   topicsLabel?: string | null
   detailsHref: string
+  detailsLabel?: string
 }
 
 const ConferenceCard: React.FC<ConferenceCardProps> = ({
@@ -18,6 +19,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
   dateLabel,
   topicsLabel,
   detailsHref,
+  detailsLabel = 'More details',
 }) => {
   return (
     <article className="flex flex-col items-start justify-center gap-8 rounded-[40px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] py-[31.2px] pl-[15.2px] pr-[31.2px]">
@@ -78,7 +80,7 @@ const ConferenceCard: React.FC<ConferenceCardProps> = ({
           href={detailsHref}
           className="flex h-[50px] w-full items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D] transition-all hover:brightness-110 active:scale-95"
         >
-          More details
+          {detailsLabel}
         </Link>
       </div>
     </article>

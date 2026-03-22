@@ -8,6 +8,8 @@ interface ServiceDetailHeroProps {
     price: string;
     handle?: string | null;
     category: string;
+    backLabel?: string;
+    websiteLabel?: string;
 }
 
 const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
@@ -17,6 +19,8 @@ const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
     price,
     handle,
     category,
+    backLabel = 'Back to Services',
+    websiteLabel = 'Go to the website',
 }) => {
     return (
         <section className="flex w-full flex-col items-start gap-20">
@@ -29,7 +33,7 @@ const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
                         </svg>
                     </div>
                     <span className="text-[#FCFCFC] font-poppins text-[24px] font-normal leading-[32px]">
-                        Back to Services
+                        {backLabel}
                     </span>
                 </Link>
             </div>
@@ -45,7 +49,7 @@ const ServiceDetailHero: React.FC<ServiceDetailHeroProps> = ({
                             className="order-1 flex shrink-0 items-center justify-center gap-3 rounded-[80px] bg-[#F29F04] px-6 py-3 transition-colors hover:bg-[#d88d03] md:order-2 md:h-[50px]"
                         >
                             <span className="text-center font-poppins text-[16px] font-medium leading-[26px] text-[#0D0D0D]">
-                                Go to the website
+                                {websiteLabel}
                             </span>
                         </a>
                     ) : null}

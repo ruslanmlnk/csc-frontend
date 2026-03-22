@@ -15,6 +15,12 @@ type ArticleSidebarProps = {
   tags?: Tag[]
   categories?: string[]
   latestPosts?: SidebarLatestPost[]
+  searchPlaceholder?: string
+  searchAriaLabel?: string
+  categoriesTitle?: string
+  latestPostsTitle?: string
+  popularTagsTitle?: string
+  sidebarBannerAlt?: string
   banner?: {
     src: string
     alt: string
@@ -48,7 +54,18 @@ const buildBlogFilterHref = (filters: {
 const DEFAULT_SIDEBAR_BANNER =
   'https://api.builder.io/api/v1/image/assets/TEMP/3e844bee26ad8ec77ac05689c0767ff3c1e8fc96?width=760'
 
-const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, latestPosts, banner }) => {
+const ArticleSidebar: React.FC<ArticleSidebarProps> = ({
+  tags,
+  categories,
+  latestPosts,
+  searchPlaceholder = 'Search',
+  searchAriaLabel = 'Search blog',
+  categoriesTitle = 'Categories',
+  latestPostsTitle = 'Latest Post',
+  popularTagsTitle = 'Popular Tags',
+  sidebarBannerAlt = 'Sidebar Promo',
+  banner,
+}) => {
   const hasLatestPosts = (latestPosts?.length || 0) > 0
   const normalizedBannerHref = banner?.href?.trim()
   const isExternalBannerHref = Boolean(normalizedBannerHref && /^https?:\/\//i.test(normalizedBannerHref))
@@ -61,12 +78,12 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
             href={normalizedBannerHref}
             target={isExternalBannerHref ? '_blank' : undefined}
             rel={isExternalBannerHref ? 'noopener noreferrer' : undefined}
-            aria-label={banner?.alt || 'Sidebar Promo'}
+            aria-label={banner?.alt || sidebarBannerAlt}
             className="relative block w-full aspect-[380/727] rounded-[20px] overflow-hidden"
           >
             <Image
               src={banner.src}
-              alt={banner?.alt || 'Sidebar Promo'}
+              alt={banner?.alt || sidebarBannerAlt}
               fill
               className="object-cover"
             />
@@ -75,7 +92,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
           <div className="relative w-full aspect-[380/727] rounded-[20px] overflow-hidden">
             <Image
               src={banner.src}
-              alt={banner?.alt || 'Sidebar Promo'}
+              alt={banner?.alt || sidebarBannerAlt}
               fill
               className="object-cover"
             />
@@ -87,7 +104,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
         <form action="/blog" method="get" className="flex items-center h-[50px] px-4 gap-2 rounded-[80px] border border-[#FCFCFC]">
           <button
             type="submit"
-            aria-label="Search blog"
+            aria-label={searchAriaLabel}
             className="inline-flex items-center justify-center"
           >
             <Search className="w-6 h-6 text-[#9E9E9E]" />
@@ -95,14 +112,14 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
           <input
             type="text"
             name="search"
-            placeholder="Search"
+            placeholder={searchPlaceholder}
             className="flex-1 bg-transparent border-none outline-none text-white text-[16px] placeholder:text-[#9E9E9E]"
           />
         </form>
 
         <div className="flex w-full flex-col items-start gap-6">
           <h3 className="self-stretch text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-            Categories
+            {categoriesTitle}
           </h3>
           <div className="flex w-full flex-wrap items-center content-center gap-4">
             {(categories || []).map((categoryName) => (
@@ -120,7 +137,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
         {hasLatestPosts ? (
           <div className="flex w-full flex-col items-start gap-6">
             <h3 className="self-stretch text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-              Latest Post
+              {latestPostsTitle}
             </h3>
             <div className="flex w-full flex-col items-start gap-8">
               {(latestPosts || []).map((post) => (
@@ -144,7 +161,7 @@ const ArticleSidebar: React.FC<ArticleSidebarProps> = ({ tags, categories, lates
 
         <div className="flex flex-col gap-6">
           <h3 className="text-[32px] font-medium leading-[40px] tracking-[-0.64px] bg-clip-text text-transparent bg-gradient-to-b from-white to-[#999]">
-            Popular Tags
+            {popularTagsTitle}
           </h3>
           <div className="flex flex-col">
             {(tags || []).map((t, idx, arr) => (
