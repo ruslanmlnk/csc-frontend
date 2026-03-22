@@ -1,8 +1,10 @@
 import LoginPageClient from './LoginPageClient'
 import { getAuthPageGlobals } from '@/lib/backend/authPageGlobals'
+import { getServerLanguage } from '@/lib/i18n/server'
 
 const LoginPage = async () => {
-  const { leftBanner, rightBanner } = await getAuthPageGlobals('login-page')
+  const language = await getServerLanguage()
+  const { leftBanner, rightBanner } = await getAuthPageGlobals('login-page', language)
 
   return <LoginPageClient leftBanner={leftBanner} rightBanner={rightBanner} />
 }

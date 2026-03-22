@@ -1,5 +1,6 @@
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendUrl } from '@/lib/auth-server'
+import type { SiteLanguage } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -115,9 +116,13 @@ const resolveMediaUrl = (value: unknown): string | null => {
   return normalizeMediaUrl(asString(recordValue?.url))
 }
 
-export const getPageGlobalData = async (slug: string): Promise<PageGlobalData> => {
+export const getPageGlobalData = async (
+  slug: string,
+  locale?: SiteLanguage,
+): Promise<PageGlobalData> => {
   const { ok, data } = await backendRequest<PageGlobalResponse>(`/api/globals/${slug}?depth=2`, {
     cache: 'no-store',
+    locale,
   })
 
   if (!ok || !data) {

@@ -1,5 +1,6 @@
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendUrl } from '@/lib/auth-server'
+import type { SiteLanguage } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -83,9 +84,13 @@ const resolveBanner = (value: BannerRelationRaw): AuthPageBanner | null => {
   }
 }
 
-export const getAuthPageGlobals = async (slug: 'login-page' | 'register-page'): Promise<AuthPageGlobals> => {
+export const getAuthPageGlobals = async (
+  slug: 'login-page' | 'register-page',
+  locale?: SiteLanguage,
+): Promise<AuthPageGlobals> => {
   const { ok, data } = await backendRequest<AuthPageGlobalResponse>(`/api/globals/${slug}?depth=2`, {
     cache: 'no-store',
+    locale,
   })
 
   if (!ok || !data) {

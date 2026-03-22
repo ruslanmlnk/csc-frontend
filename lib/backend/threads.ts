@@ -1,4 +1,5 @@
 import { backendRequest } from './client'
+import type { SiteLanguage } from '@/lib/i18n'
 
 export type CreateThreadInput = {
   title: string
@@ -13,10 +14,19 @@ type GetThreadsParams = {
   authorId?: string
   categoryId?: string
   depth?: string
+  locale?: SiteLanguage
   sort?: string
 }
 
-export const getThreads = ({ page, limit, authorId, categoryId, depth, sort }: GetThreadsParams) => {
+export const getThreads = ({
+  page,
+  limit,
+  authorId,
+  categoryId,
+  depth,
+  locale,
+  sort,
+}: GetThreadsParams) => {
   const params = new URLSearchParams({
     page,
     limit,
@@ -37,14 +47,20 @@ export const getThreads = ({ page, limit, authorId, categoryId, depth, sort }: G
 
   return backendRequest<Record<string, unknown>>(`/api/threads?${params.toString()}`, {
     cache: 'no-store',
+    locale,
   })
 }
 
-export const getThreadById = (threadId: string, depth: string = '3') =>
+export const getThreadById = (
+  threadId: string,
+  depth: string = '3',
+  locale?: SiteLanguage,
+) =>
   backendRequest<Record<string, unknown>>(
     `/api/threads/${encodeURIComponent(threadId)}?depth=${encodeURIComponent(depth)}`,
     {
       cache: 'no-store',
+      locale,
     },
   )
 

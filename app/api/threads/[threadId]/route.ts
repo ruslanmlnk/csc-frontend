@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { getThreadById } from '@/lib/backend/threads'
 import { getThreadComments } from '@/lib/backend/comments'
+import { getLanguageFromCookieString } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -29,14 +30,15 @@ export async function GET(
 ) {
   const params = await context.params
   const threadId = params.threadId
+  const locale = getLanguageFromCookieString(_request.headers.get('cookie'))
 
   if (!threadId) {
     return NextResponse.json({ error: 'Thread ID is required.' }, { status: 400 })
   }
 
   const [threadResult, commentsResult] = await Promise.all([
-    getThreadById(threadId),
-    getThreadComments(threadId),
+    getThreadById(threadId, '3', locale),
+    getThreadComments(threadId, '100', '2', locale),
   ])
 
   if (!threadResult.ok) {

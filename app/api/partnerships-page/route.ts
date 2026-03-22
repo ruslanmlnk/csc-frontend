@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { getLanguageFromCookieString } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -25,11 +26,14 @@ const asString = (value: unknown): string | null => {
   return null
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const locale = getLanguageFromCookieString(request.headers.get('cookie'))
+
   const { ok, status, data } = await backendRequest<Record<string, unknown>>(
     '/api/globals/partnerships-page?depth=0',
     {
       cache: 'no-store',
+      locale,
     },
   )
 

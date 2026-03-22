@@ -4,6 +4,7 @@ import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { createThread, getThreads } from '@/lib/backend/threads'
 import { clearAuthCookie } from '@/lib/auth-server'
 import { hasVisibleForumRichTextContent } from '@/lib/forumRichText'
+import { getLanguageFromCookieString } from '@/lib/i18n'
 
 type ThreadPayload = {
   title: string
@@ -14,6 +15,7 @@ type ThreadPayload = {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
+  const locale = getLanguageFromCookieString(request.headers.get('cookie'))
   const page = searchParams.get('page') || '1'
   const limit = searchParams.get('limit') || '12'
   const authorId = searchParams.get('authorId') || undefined
@@ -21,7 +23,15 @@ export async function GET(request: Request) {
   const depth = searchParams.get('depth') || undefined
   const sort = searchParams.get('sort') || undefined
 
-  const { ok, status, data } = await getThreads({ page, limit, authorId, categoryId, depth, sort })
+  const { ok, status, data } = await getThreads({
+    page,
+    limit,
+    authorId,
+    categoryId,
+    depth,
+    locale,
+    sort,
+  })
 
   if (!ok) {
     return NextResponse.json({ error: getBackendErrorMessage(data, 'Unable to load threads.') }, { status })

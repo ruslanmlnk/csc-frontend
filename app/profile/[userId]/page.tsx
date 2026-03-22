@@ -200,8 +200,8 @@ const toWebsiteHref = (value: string | null): string | null => {
     }
 };
 
-const getCommentsCount = async (threadId: string): Promise<number> => {
-    const response = await getThreadComments(threadId, '1', '0');
+const getCommentsCount = async (threadId: string, language: 'en' | 'uk'): Promise<number> => {
+    const response = await getThreadComments(threadId, '1', '0', language);
     if (!response.ok || !response.data) {
         return 0;
     }
@@ -218,7 +218,10 @@ const getCommentsCount = async (threadId: string): Promise<number> => {
     return Array.isArray(payload.docs) ? payload.docs.length : 0;
 };
 
-const getPublicUser = async (rawUserId: string): Promise<PublicUser | null> => {
+const getPublicUser = async (
+    rawUserId: string,
+    language: 'en' | 'uk',
+): Promise<PublicUser | null> => {
     const userId = rawUserId.trim();
     if (!userId) {
         return null;
@@ -226,7 +229,7 @@ const getPublicUser = async (rawUserId: string): Promise<PublicUser | null> => {
 
     const response = await backendRequest<Record<string, unknown>>(
         `/api/users/${encodeURIComponent(userId)}?depth=1`,
-        { cache: 'no-store' },
+        { cache: 'no-store', locale: language },
     );
 
     if (!response.ok || !response.data) {
@@ -264,12 +267,17 @@ const getPublicUser = async (rawUserId: string): Promise<PublicUser | null> => {
     };
 };
 
-const getPublicThreads = async (authorId: string, generalLabel: string): Promise<PublicThread[]> => {
+const getPublicThreads = async (
+    authorId: string,
+    generalLabel: string,
+    language: 'en' | 'uk',
+): Promise<PublicThread[]> => {
     const response = await getThreads({
         page: '1',
         limit: '100',
         authorId,
         depth: '1',
+        locale: language,
         sort: '-createdAt',
     });
 
@@ -311,7 +319,7 @@ const getPublicThreads = async (authorId: string, generalLabel: string): Promise
                 categoryTitle: category.title,
                 categorySlug: category.slug,
                 createdAt: asString(thread.createdAt) || undefined,
-                commentsCount: await getCommentsCount(threadId),
+                commentsCount: await getCommentsCount(threadId, language),
             };
         }),
     );
@@ -331,15 +339,15 @@ export default async function PublicProfilePage({
         notFound();
     }
 
-    const user = await getPublicUser(userId);
+    const { language, messages: t } = await getServerI18n();
+    const user = await getPublicUser(userId, language);
     if (!user) {
         notFound();
     }
 
-    const { language, messages: t } = await getServerI18n();
     const [threads, profilePageGlobals] = await Promise.all([
-        getPublicThreads(user.id, t.common.general),
-        getProfilePageGlobals(),
+        getPublicThreads(user.id, t.common.general, language),
+        getProfilePageGlobals(language),
     ]);
     const displayName = user.name || t.profile.member;
     const bio = user.bio || t.profile.descriptionNotFilled;

@@ -1,5 +1,6 @@
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendUrl } from '@/lib/auth-server'
+import type { SiteLanguage } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -78,9 +79,10 @@ const resolveBanner = (value: BannerRelationRaw): ProfilePageBanner | null => {
   }
 }
 
-export const getProfilePageGlobals = async (): Promise<ProfilePageGlobals> => {
+export const getProfilePageGlobals = async (locale?: SiteLanguage): Promise<ProfilePageGlobals> => {
   const { ok, data } = await backendRequest<ProfilePageGlobalResponse>('/api/globals/profile?depth=2', {
     cache: 'no-store',
+    locale,
   })
 
   if (!ok || !data) {

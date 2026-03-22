@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import ConferencesPageClient from './ConferencesPageClient'
 import { getPageGlobalData } from '@/lib/backend/pageGlobals'
+import { getServerLanguage } from '@/lib/i18n/server'
 
 const GLOBAL_SLUG = 'conferences-page'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const globalData = await getPageGlobalData(GLOBAL_SLUG)
+  const language = await getServerLanguage()
+  const globalData = await getPageGlobalData(GLOBAL_SLUG, language)
   const seo = globalData.seo
 
   if (!seo) {
@@ -24,7 +26,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const ConferencesPage = async () => {
-  const globalData = await getPageGlobalData(GLOBAL_SLUG)
+  const language = await getServerLanguage()
+  const globalData = await getPageGlobalData(GLOBAL_SLUG, language)
   return <ConferencesPageClient initialHeroV2={globalData.heroV2} />
 }
 

@@ -1,4 +1,5 @@
 import { backendRequest } from './client'
+import type { SiteLanguage } from '@/lib/i18n'
 
 export type CreateCommentInput = {
   thread: string | number
@@ -9,6 +10,7 @@ export const getThreadComments = (
   threadId: string,
   limit: string = '100',
   depth: string = '2',
+  locale?: SiteLanguage,
 ) => {
   const params = new URLSearchParams({
     limit,
@@ -20,6 +22,7 @@ export const getThreadComments = (
 
   return backendRequest<Record<string, unknown>>(`/api/comments?${params.toString()}`, {
     cache: 'no-store',
+    locale,
   })
 }
 

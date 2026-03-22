@@ -284,8 +284,8 @@ const parseForumThreads = (
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { messages: t } = await getServerI18n()
-  const globalData = await getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG)
+  const { language, messages: t } = await getServerI18n()
+  const globalData = await getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG, language)
   const seo = globalData.seo
 
   if (!seo) {
@@ -308,14 +308,17 @@ export default async function ForumPage() {
   const [categoriesRes, subCategoriesRes, threadsRes, forumPageGlobal] = await Promise.all([
     backendRequest<Record<string, unknown>>('/api/forum-categories?limit=200&sort=name', {
       cache: 'no-store',
+      locale: language,
     }),
     backendRequest<Record<string, unknown>>('/api/forum-sub-categories?limit=500&sort=name&depth=1', {
       cache: 'no-store',
+      locale: language,
     }),
     backendRequest<Record<string, unknown>>('/api/threads?limit=500&sort=-orderId,-createdAt&depth=2', {
       cache: 'no-store',
+      locale: language,
     }),
-    getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG),
+    getPageGlobalData(FORUM_PAGE_GLOBAL_SLUG, language),
   ])
 
   const forumCategories = categoriesRes.ok ? parseForumCategories(categoriesRes.data) : []

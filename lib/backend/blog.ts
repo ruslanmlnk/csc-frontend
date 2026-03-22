@@ -2,6 +2,7 @@ import { client, getPayloadGraphQLLocale } from './graphql'
 import { gql } from 'graphql-request'
 import { backendRequest } from './client'
 import { Article, Banner, BlogPageData, Category } from '@/app/types/blog'
+import type { SiteLanguage } from '@/lib/i18n'
 
 const getArticlesQuery = (locale: 'en' | 'uk') => gql`
   query GetArticles {
@@ -216,9 +217,10 @@ export async function getCategories() {
   return data.Categories.docs
 }
 
-export async function getBlogPageData(): Promise<BlogPageData> {
+export async function getBlogPageData(locale?: SiteLanguage): Promise<BlogPageData> {
   const { ok, data } = await backendRequest<BlogGlobalResponse>('/api/globals/blog?depth=2', {
     cache: 'no-store',
+    locale,
   })
 
   if (!ok || !data) {

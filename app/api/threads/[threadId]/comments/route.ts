@@ -5,6 +5,7 @@ import { getBackendErrorMessage } from '@/lib/backend/errors'
 import { clearAuthCookie } from '@/lib/auth-server'
 import { getThreadById } from '@/lib/backend/threads'
 import { hasVisibleForumRichTextContent } from '@/lib/forumRichText'
+import { getLanguageFromCookieString } from '@/lib/i18n'
 
 type CommentPayload = {
   comment?: unknown
@@ -27,6 +28,7 @@ const asRecord = (value: unknown): UnknownRecord | null => {
 export async function GET(_request: Request, context: RouteContext) {
   const params = await context.params
   const threadId = params.threadId
+  const locale = getLanguageFromCookieString(_request.headers.get('cookie'))
 
   if (!threadId) {
     return NextResponse.json({ error: 'Thread ID is required.' }, { status: 400 })
@@ -36,7 +38,7 @@ export async function GET(_request: Request, context: RouteContext) {
   const limit = searchParams.get('limit') || '100'
   const depth = searchParams.get('depth') || '2'
 
-  const { ok, status, data } = await getThreadComments(threadId, limit, depth)
+  const { ok, status, data } = await getThreadComments(threadId, limit, depth, locale)
 
   if (!ok) {
     return NextResponse.json(
@@ -51,6 +53,7 @@ export async function GET(_request: Request, context: RouteContext) {
 export async function POST(request: Request, context: RouteContext) {
   const params = await context.params
   const threadId = params.threadId
+  const locale = getLanguageFromCookieString(request.headers.get('cookie'))
 
   if (!threadId) {
     return NextResponse.json({ error: 'Thread ID is required.' }, { status: 400 })
@@ -72,7 +75,7 @@ export async function POST(request: Request, context: RouteContext) {
   const numericThreadId = Number(threadId)
   const threadRef = Number.isNaN(numericThreadId) ? threadId : numericThreadId
 
-  const threadResult = await getThreadById(threadId, '1')
+  const threadResult = await getThreadById(threadId, '1', locale)
   if (threadResult.ok) {
     const threadPayload = asRecord(threadResult.data)
     const threadDoc = asRecord(threadPayload?.doc) || threadPayload

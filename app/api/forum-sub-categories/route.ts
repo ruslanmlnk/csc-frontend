@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { backendRequest } from '@/lib/backend/client'
 import { getBackendErrorMessage } from '@/lib/backend/errors'
+import { getLanguageFromCookieString } from '@/lib/i18n'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -60,6 +61,7 @@ const encodeWhereValue = (value: string) => value.replace(/"/g, '\\"')
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const slug = normalizeSlug(searchParams.get('slug'))
+  const locale = getLanguageFromCookieString(request.headers.get('cookie'))
 
   const queryDepth = slug ? 2 : 1
   const query = slug
@@ -70,6 +72,7 @@ export async function GET(request: Request) {
 
   const { ok, status, data } = await backendRequest<Record<string, unknown>>(query, {
     cache: 'no-store',
+    locale,
   })
 
   if (!ok) {

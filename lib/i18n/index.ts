@@ -13,6 +13,26 @@ export const resolveLanguage = (value?: string | null): SiteLanguage => {
   return SITE_LANGUAGES.includes(value as SiteLanguage) ? (value as SiteLanguage) : DEFAULT_LANGUAGE
 }
 
+export const getLanguageFromCookieString = (cookieHeader?: string | null): SiteLanguage => {
+  if (!cookieHeader) {
+    return DEFAULT_LANGUAGE
+  }
+
+  const chunks = cookieHeader.split(';')
+
+  for (const chunk of chunks) {
+    const [rawKey, ...rawValueParts] = chunk.split('=')
+    if (rawKey?.trim() !== LANGUAGE_COOKIE_NAME) {
+      continue
+    }
+
+    const rawValue = rawValueParts.join('=').trim()
+    return resolveLanguage(rawValue ? decodeURIComponent(rawValue) : null)
+  }
+
+  return DEFAULT_LANGUAGE
+}
+
 export const getLocaleForLanguage = (language: SiteLanguage): string =>
   language === 'uk' ? 'uk-UA' : 'en-US'
 
