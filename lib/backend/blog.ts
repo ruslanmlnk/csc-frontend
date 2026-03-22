@@ -1,11 +1,11 @@
-import { client } from './graphql'
+import { client, getPayloadGraphQLLocale } from './graphql'
 import { gql } from 'graphql-request'
 import { backendRequest } from './client'
 import { Article, Banner, BlogPageData, Category } from '@/app/types/blog'
 
-export const GET_ARTICLES = gql`
+const getArticlesQuery = (locale: 'en' | 'uk') => gql`
   query GetArticles {
-    Articles(limit: 100) {
+    Articles(locale: ${locale}, fallbackLocale: en, limit: 100) {
       docs {
         id
         title
@@ -31,9 +31,9 @@ export const GET_ARTICLES = gql`
   }
 `
 
-export const GET_ARTICLE_BY_SLUG = gql`
+const getArticleBySlugQuery = (locale: 'en' | 'uk') => gql`
   query GetArticleBySlug($slug: String!) {
-    Articles(where: { slug: { equals: $slug } }, limit: 1) {
+    Articles(locale: ${locale}, fallbackLocale: en, where: { slug: { equals: $slug } }, limit: 1) {
       docs {
         id
         title
@@ -103,9 +103,9 @@ export const GET_ARTICLE_BY_SLUG = gql`
   }
 `
 
-export const GET_CATEGORIES = gql`
+const getCategoriesQuery = (locale: 'en' | 'uk') => gql`
   query GetCategories {
-    Categories(limit: 100) {
+    Categories(locale: ${locale}, fallbackLocale: en, limit: 100) {
       docs {
         id
         name
@@ -183,12 +183,14 @@ const resolveBanner = (value: unknown): Banner | null => {
 }
 
 export async function getArticles() {
-  const data = await client.request<ArticlesResponse>(GET_ARTICLES)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<ArticlesResponse>(getArticlesQuery(locale))
   return data.Articles.docs
 }
 
 export async function getArticleBySlug(slug: string) {
-  const data = await client.request<ArticlesResponse>(GET_ARTICLE_BY_SLUG, { slug })
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<ArticlesResponse>(getArticleBySlugQuery(locale), { slug })
   return data.Articles.docs[0] || null
 }
 
@@ -209,7 +211,8 @@ export async function incrementArticleViews(slug: string): Promise<number | null
 }
 
 export async function getCategories() {
-  const data = await client.request<CategoriesResponse>(GET_CATEGORIES)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<CategoriesResponse>(getCategoriesQuery(locale))
   return data.Categories.docs
 }
 

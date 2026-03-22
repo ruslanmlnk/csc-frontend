@@ -1,4 +1,5 @@
 import { getBackendUrl } from '@/lib/auth-server'
+import { getServerLanguage } from '@/lib/i18n/server'
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
@@ -19,6 +20,25 @@ export interface BackendResult<T> {
 
 const normalizePath = (path: string): string => (path.startsWith('/') ? path : `/${path}`)
 
+const buildRequestURL = async (path: string, method: HttpMethod): Promise<string> => {
+  const baseURL = getBackendUrl()
+  const url = new URL(`${baseURL}${normalizePath(path)}`)
+
+  if (method === 'GET') {
+    const locale = await getServerLanguage()
+
+    if (!url.searchParams.has('locale')) {
+      url.searchParams.set('locale', locale)
+    }
+
+    if (!url.searchParams.has('fallback-locale')) {
+      url.searchParams.set('fallback-locale', 'en')
+    }
+  }
+
+  return url.toString()
+}
+
 export async function backendRequest<T>(
   path: string,
   options: BackendRequestOptions = {},
@@ -37,7 +57,7 @@ export async function backendRequest<T>(
     body = JSON.stringify(data)
   }
 
-  const response = await fetch(`${getBackendUrl()}${normalizePath(path)}`, {
+  const response = await fetch(await buildRequestURL(path, method), {
     ...rest,
     method,
     headers,

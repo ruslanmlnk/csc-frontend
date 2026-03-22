@@ -1,10 +1,10 @@
 import { gql } from 'graphql-request'
-import { client } from './graphql'
+import { client, getPayloadGraphQLLocale } from './graphql'
 import type { JobFilterOption, JobItem } from '@/app/types/jobs'
 
-export const GET_JOBS = gql`
+const getJobsQuery = (locale: 'en' | 'uk') => gql`
   query GetJobs {
-    Jobs(limit: 200, sort: "-createdAt", where: { status: { equals: published } }) {
+    Jobs(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "-createdAt", where: { status: { equals: published } }) {
       docs {
         id
         title
@@ -35,9 +35,9 @@ export const GET_JOBS = gql`
   }
 `
 
-export const GET_JOB_BY_SLUG = gql`
+const getJobBySlugQuery = (locale: 'en' | 'uk') => gql`
   query GetJobBySlug($slug: String!) {
-    Jobs(limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
+    Jobs(locale: ${locale}, fallbackLocale: en, limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
       docs {
         id
         title
@@ -77,23 +77,23 @@ export const GET_JOB_BY_SLUG = gql`
   }
 `
 
-export const GET_JOB_FILTERS = gql`
+const getJobFiltersQuery = (locale: 'en' | 'uk') => gql`
   query GetJobFilters {
-    JobLocations(limit: 200, sort: "name") {
+    JobLocations(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "name") {
       docs {
         id
         name
         slug
       }
     }
-    JobExperiences(limit: 200, sort: "name") {
+    JobExperiences(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "name") {
       docs {
         id
         name
         slug
       }
     }
-    JobFormats(limit: 200, sort: "name") {
+    JobFormats(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "name") {
       docs {
         id
         name
@@ -122,17 +122,20 @@ type JobFiltersResponse = {
 }
 
 export async function getJobs() {
-  const data = await client.request<JobsResponse>(GET_JOBS)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<JobsResponse>(getJobsQuery(locale))
   return data.Jobs.docs
 }
 
 export async function getJobBySlug(slug: string) {
-  const data = await client.request<JobsResponse>(GET_JOB_BY_SLUG, { slug })
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<JobsResponse>(getJobBySlugQuery(locale), { slug })
   return data.Jobs.docs[0] || null
 }
 
 export async function getJobFilters() {
-  const data = await client.request<JobFiltersResponse>(GET_JOB_FILTERS)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<JobFiltersResponse>(getJobFiltersQuery(locale))
 
   return {
     locations: data.JobLocations.docs,

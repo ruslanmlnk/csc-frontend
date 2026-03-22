@@ -7,7 +7,7 @@ import UsefulServices from './components/UsefulServices';
 import PartnershipPrograms from './components/PartnershipPrograms';
 import Vacancies from './components/Vacancies';
 import ContactForm from './components/ContactForm';
-import { client } from './lib/graphql';
+import { client, getPayloadGraphQLLocale } from '@/lib/backend/graphql';
 import { gql } from 'graphql-request';
 import { Metadata } from 'next';
 import { getBackendUrl } from '@/lib/auth-server';
@@ -68,9 +68,9 @@ type HomeQueryResponse = {
   } | null;
 };
 
-const HOME_QUERY = gql`
+const getHomeQuery = (locale: 'en' | 'uk') => gql`
   query {
-    Home {
+    Home(locale: ${locale}, fallbackLocale: en) {
       hero {
         title
         description
@@ -137,7 +137,8 @@ const HOME_QUERY = gql`
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
-    const data = await client.request<HomeQueryResponse>(HOME_QUERY);
+    const locale = await getPayloadGraphQLLocale();
+    const data = await client.request<HomeQueryResponse>(getHomeQuery(locale));
     const seo = data?.Home?.seo;
 
     if (!seo) return { title: 'CSC Agency' };
@@ -160,7 +161,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic';
 
 const Home: React.FC = async () => {
-  const data = await client.request<HomeQueryResponse>(HOME_QUERY).catch(() => null);
+  const locale = await getPayloadGraphQLLocale();
+  const data = await client.request<HomeQueryResponse>(getHomeQuery(locale)).catch(() => null);
   const hero = data?.Home?.hero
     ? {
       valueProposition: data.Home.hero.valueProposition ?? undefined,

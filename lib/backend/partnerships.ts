@@ -1,10 +1,10 @@
 import { gql } from 'graphql-request'
-import { client } from './graphql'
+import { client, getPayloadGraphQLLocale } from './graphql'
 import { PartnershipCategory, PartnershipItem } from '@/app/types/partnerships'
 
-export const GET_PARTNERSHIP_CATEGORIES = gql`
+const getPartnershipCategoriesQuery = (locale: 'en' | 'uk') => gql`
   query GetPartnershipCategories {
-    PartnershipCategories(limit: 200, sort: "name") {
+    PartnershipCategories(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "name") {
       docs {
         id
         name
@@ -14,9 +14,9 @@ export const GET_PARTNERSHIP_CATEGORIES = gql`
   }
 `
 
-export const GET_PARTNERSHIPS = gql`
+const getPartnershipsQuery = (locale: 'en' | 'uk') => gql`
   query GetPartnerships {
-    Partnerships(limit: 200, sort: "-updatedAt", where: { status: { equals: published } }) {
+    Partnerships(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "-updatedAt", where: { status: { equals: published } }) {
       docs {
         id
         title
@@ -61,9 +61,9 @@ export const GET_PARTNERSHIPS = gql`
   }
 `
 
-export const GET_PARTNERSHIP_BY_SLUG = gql`
+const getPartnershipBySlugQuery = (locale: 'en' | 'uk') => gql`
   query GetPartnershipBySlug($slug: String!) {
-    Partnerships(limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
+    Partnerships(locale: ${locale}, fallbackLocale: en, limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
       docs {
         id
         title
@@ -122,16 +122,19 @@ type PartnershipsResponse = {
 }
 
 export async function getPartnershipCategories() {
-  const data = await client.request<PartnershipCategoriesResponse>(GET_PARTNERSHIP_CATEGORIES)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<PartnershipCategoriesResponse>(getPartnershipCategoriesQuery(locale))
   return data.PartnershipCategories.docs
 }
 
 export async function getPartnerships() {
-  const data = await client.request<PartnershipsResponse>(GET_PARTNERSHIPS)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<PartnershipsResponse>(getPartnershipsQuery(locale))
   return data.Partnerships.docs
 }
 
 export async function getPartnershipBySlug(slug: string) {
-  const data = await client.request<PartnershipsResponse>(GET_PARTNERSHIP_BY_SLUG, { slug })
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<PartnershipsResponse>(getPartnershipBySlugQuery(locale), { slug })
   return data.Partnerships.docs[0] || null
 }

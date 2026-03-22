@@ -1,10 +1,10 @@
 import { gql } from 'graphql-request'
-import { client } from './graphql'
+import { client, getPayloadGraphQLLocale } from './graphql'
 import { ServiceCategory, ServiceItem } from '@/app/types/services'
 
-export const GET_SERVICE_CATEGORIES = gql`
+const getServiceCategoriesQuery = (locale: 'en' | 'uk') => gql`
   query GetServiceCategories {
-    ServiceCategories(limit: 100, sort: "name") {
+    ServiceCategories(locale: ${locale}, fallbackLocale: en, limit: 100, sort: "name") {
       docs {
         id
         name
@@ -14,9 +14,9 @@ export const GET_SERVICE_CATEGORIES = gql`
   }
 `
 
-export const GET_SERVICES = gql`
+const getServicesQuery = (locale: 'en' | 'uk') => gql`
   query GetServices {
-    Services(limit: 200, sort: "-updatedAt", where: { status: { equals: published } }) {
+    Services(locale: ${locale}, fallbackLocale: en, limit: 200, sort: "-updatedAt", where: { status: { equals: published } }) {
       docs {
         id
         title
@@ -57,9 +57,9 @@ export const GET_SERVICES = gql`
   }
 `
 
-export const GET_SERVICE_BY_SLUG = gql`
+const getServiceBySlugQuery = (locale: 'en' | 'uk') => gql`
   query GetServiceBySlug($slug: String!) {
-    Services(limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
+    Services(locale: ${locale}, fallbackLocale: en, limit: 1, where: { slug: { equals: $slug }, status: { equals: published } }) {
       docs {
         id
         title
@@ -114,16 +114,19 @@ type ServicesResponse = {
 }
 
 export async function getServiceCategories() {
-  const data = await client.request<ServiceCategoriesResponse>(GET_SERVICE_CATEGORIES)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<ServiceCategoriesResponse>(getServiceCategoriesQuery(locale))
   return data.ServiceCategories.docs
 }
 
 export async function getServices() {
-  const data = await client.request<ServicesResponse>(GET_SERVICES)
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<ServicesResponse>(getServicesQuery(locale))
   return data.Services.docs
 }
 
 export async function getServiceBySlug(slug: string) {
-  const data = await client.request<ServicesResponse>(GET_SERVICE_BY_SLUG, { slug })
+  const locale = await getPayloadGraphQLLocale()
+  const data = await client.request<ServicesResponse>(getServiceBySlugQuery(locale), { slug })
   return data.Services.docs[0] || null
 }
