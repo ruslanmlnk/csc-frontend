@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, type FormEvent } from 'react';
+import React, { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import ForumRichTextEditor from '@/app/components/forum/ForumRichTextEditor';
 import { createEmptyForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument } from '@/lib/forumRichText';
 import { useLanguage } from '@/app/components/i18n/LanguageProvider';
@@ -27,24 +27,33 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     initialSubCategoryId,
     initialSubCategorySlug,
 }) => {
-    const { messages: t } = useLanguage();
+    const { language, messages: t } = useLanguage();
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('');
     const [content, setContent] = useState<ForumRichTextDocument>(createEmptyForumRichText());
     const [editorKey, setEditorKey] = useState(0);
-    const [selectedPlatform, setSelectedPlatform] = useState('Facebook');
+    const [tags, setTags] = useState<string[]>([]);
+    const [tagInput, setTagInput] = useState('');
     const [subCategories, setSubCategories] = useState<CategoryOption[]>([]);
     const [isSubCategoriesLoading, setIsSubCategoriesLoading] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const initialCategoryAppliedRef = useRef(false);
+    const tagsLabel = language === 'uk' ? 'Теги' : 'Tags';
+    const tagsPlaceholder = language === 'uk'
+        ? 'Введіть тег і натисніть Enter'
+        : 'Type a tag and press Enter';
+    const tagsHint = language === 'uk'
+        ? 'Додавайте власні теги через Enter або кому.'
+        : 'Add your own tags with Enter or comma.';
 
     const resetForm = () => {
         setTitle('');
         setCategory('');
         setContent(createEmptyForumRichText());
         setEditorKey((value) => value + 1);
-        setSelectedPlatform('Facebook');
+        setTags([]);
+        setTagInput('');
         setSubmitError('');
     };
 
@@ -145,6 +154,59 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
         initialCategoryAppliedRef.current = true;
     }, [isOpen, initialSubCategoryId, initialSubCategorySlug, subCategories, isSubCategoriesLoading]);
 
+    const normalizeTag = (value: string) => value.trim().replace(/\s+/g, ' ').replace(/,+$/g, '');
+
+    const appendTag = (value: string) => {
+        const normalizedTag = normalizeTag(value);
+        if (!normalizedTag) {
+            return false;
+        }
+
+        let wasAdded = false;
+
+        setTags((current) => {
+            const alreadyExists = current.some((item) => item.toLowerCase() === normalizedTag.toLowerCase());
+            if (alreadyExists) {
+                return current;
+            }
+
+            wasAdded = true;
+            return [...current, normalizedTag];
+        });
+
+        return wasAdded;
+    };
+
+    const resolveSubmitTags = () => {
+        const normalizedInputTag = normalizeTag(tagInput);
+        if (!normalizedInputTag) {
+            return tags;
+        }
+
+        const alreadyExists = tags.some((item) => item.toLowerCase() === normalizedInputTag.toLowerCase());
+        if (alreadyExists) {
+            return tags;
+        }
+
+        return [...tags, normalizedInputTag];
+    };
+
+    const handleTagKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+        if (event.key !== 'Enter' && event.key !== ',') {
+            return;
+        }
+
+        event.preventDefault();
+
+        if (appendTag(tagInput)) {
+            setTagInput('');
+        }
+    };
+
+    const handleRemoveTag = (tagToRemove: string) => {
+        setTags((current) => current.filter((item) => item !== tagToRemove));
+    };
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setSubmitError('');
@@ -157,6 +219,14 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
         setIsSubmitting(true);
 
         try {
+            const nextTags = resolveSubmitTags();
+
+            if (nextTags !== tags) {
+                setTags(nextTags);
+            }
+
+            setTagInput('');
+
             const response = await fetch('/api/threads', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -164,7 +234,7 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                     title: title.trim(),
                     category,
                     content,
-                    tags: [selectedPlatform.toLowerCase()],
+                    tags: nextTags,
                 }),
             });
 
@@ -188,8 +258,6 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
     };
 
     if (!isOpen) return null;
-
-    const platforms = ['Facebook', 'Keitaro', 'TikTok'];
 
     return (
         <div
@@ -268,27 +336,47 @@ const CreateThreadModal: React.FC<CreateThreadModalProps> = ({
                         </div>
                     </div>
 
-                    {/* Tag Platform */}
+                    {/* Tags */}
                     <div className="flex flex-col gap-4">
                         <label className="text-[#9E9E9E] font-poppins text-[16px] leading-[26px]">
-                            {t.forum.tagPlatform}
+                            {tagsLabel}
                         </label>
-                        <div className="flex p-[8px_16px_8px_8px] items-center gap-[16px] rounded-[80px] border border-[rgba(74,74,74,0.70)] bg-[#262626] w-fit">
-                            {platforms.map((p) => (
-                                <button
-                                    key={p}
-                                    type="button"
-                                    onClick={() => setSelectedPlatform(p)}
-                                    disabled={isSubmitting}
-                                    className={`flex px-4 py-2 justify-center items-center rounded-[80px] transition-all font-poppins text-[16px] leading-[26px] ${selectedPlatform === p
-                                            ? 'bg-[#F29F04] text-[#070707] font-medium'
-                                            : 'text-[#FCFCFC] font-normal hover:bg-white/5'
-                                        }`}
+                        <div className="flex min-h-[64px] w-full flex-wrap items-center gap-3 rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#262626] px-4 py-3">
+                            {tags.map((tag) => (
+                                <span
+                                    key={tag}
+                                    className="inline-flex items-center gap-2 rounded-[80px] bg-[#F29F04] px-4 py-2 font-poppins text-[16px] font-medium leading-[26px] text-[#070707]"
                                 >
-                                    {p}
-                                </button>
+                                    {tag}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveTag(tag)}
+                                        disabled={isSubmitting}
+                                        aria-label={`${language === 'uk' ? 'Видалити тег' : 'Remove tag'} ${tag}`}
+                                        className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#070707]/10 text-[#070707] transition hover:bg-[#070707]/20 disabled:cursor-not-allowed"
+                                    >
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </span>
                             ))}
+                            <input
+                                type="text"
+                                value={tagInput}
+                                onChange={(event) => setTagInput(event.target.value)}
+                                onKeyDown={handleTagKeyDown}
+                                onBlur={() => {
+                                    if (appendTag(tagInput)) {
+                                        setTagInput('');
+                                    }
+                                }}
+                                placeholder={tagsPlaceholder}
+                                disabled={isSubmitting}
+                                className="min-w-[220px] flex-1 bg-transparent font-poppins text-[16px] leading-[26px] text-white outline-none placeholder-[#A5A5A5]"
+                            />
                         </div>
+                        <p className="text-[14px] leading-[20px] text-[#757575] font-poppins">
+                            {tagsHint}
+                        </p>
                     </div>
 
                     {/* Content */}
