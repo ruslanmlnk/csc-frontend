@@ -4,6 +4,9 @@ import Image from 'next/image';
 interface ForumFiltersSectionProps {
     searchPlaceholder: string;
     searchButtonLabel: string;
+    searchValue: string;
+    onSearchChange: (value: string) => void;
+    onSearchSubmit: () => void;
     bannerImage: string;
     bannerAlt?: string;
     bannerHref?: string;
@@ -12,6 +15,9 @@ interface ForumFiltersSectionProps {
 const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
     searchPlaceholder,
     searchButtonLabel,
+    searchValue,
+    onSearchChange,
+    onSearchSubmit,
     bannerImage,
     bannerAlt = 'Community Banner',
     bannerHref,
@@ -56,6 +62,14 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
                             </svg>
                             <input
                                 type="text"
+                                value={searchValue}
+                                onChange={(event) => onSearchChange(event.target.value)}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        onSearchSubmit();
+                                    }
+                                }}
                                 placeholder={searchPlaceholder}
                                 className="bg-transparent border-none outline-none text-white placeholder-white w-full font-poppins text-[16px] leading-[26px] font-normal lg:font-medium"
                             />
@@ -63,7 +77,11 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
                     </div>
 
                     <div className="min-w-0 flex flex-col gap-[10px] lg:h-[58px] lg:col-span-2">
-                        <button className="h-[50px] lg:h-full w-full inline-flex items-center justify-center gap-[12px] bg-[#F29F04] text-[#0D0D0D] rounded-[80px] px-[24px] font-medium text-[16px] leading-[26px] hover:brightness-110 transition-all">
+                        <button
+                            type="button"
+                            onClick={onSearchSubmit}
+                            className="h-[50px] lg:h-full w-full inline-flex items-center justify-center gap-[12px] bg-[#F29F04] text-[#0D0D0D] rounded-[80px] px-[24px] font-medium text-[16px] leading-[26px] hover:brightness-110 transition-all"
+                        >
                             {searchButtonLabel}
                         </button>
                     </div>

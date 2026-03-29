@@ -1,9 +1,5 @@
 import type { Metadata } from 'next'
-import ForumHero from '@/app/components/forum/ForumHero'
-import ForumFiltersSection from '@/app/components/forum/ForumFiltersSection'
-import ForumContentSection from '@/app/components/forum/ForumContentSection'
-import type { ForumThreadsColumnSection } from '@/app/components/forum/ForumThreadsColumn'
-import type { ForumSidebarThread } from '@/app/components/forum/ForumSidebar'
+import ForumPageClient from './ForumPageClient'
 import { backendRequest } from '@/lib/backend/client'
 import { getPageGlobalData } from '@/lib/backend/pageGlobals'
 import { formatDateValue } from '@/lib/i18n'
@@ -340,13 +336,6 @@ export default async function ForumPage() {
       })
     : []
 
-  const latestThreadBySubCategory = new Map<string, ForumThreadItem>()
-  for (const thread of forumThreads) {
-    if (!latestThreadBySubCategory.has(thread.subCategoryId)) {
-      latestThreadBySubCategory.set(thread.subCategoryId, thread)
-    }
-  }
-
   const subCategorySlugById = new Map(
     forumSubCategories.map((subCategory) => [subCategory.id, subCategory.slug]),
   )
@@ -357,53 +346,8 @@ export default async function ForumPage() {
     .map((threadId) => threadById.get(threadId))
     .filter((thread): thread is ForumThreadItem => Boolean(thread))
 
-  const sectionsFromCategories: ForumThreadsColumnSection[] = forumCategories
-    .map((category) => {
-      const subCategoryCards = forumSubCategories
-        .filter((subCategory) => subCategory.categoryId === category.id)
-        .map((subCategory) => {
-          const latestThread = latestThreadBySubCategory.get(subCategory.id)
-
-          return {
-            categoryTitle: subCategory.name,
-            categoryDescription: subCategory.description,
-            threadTitle: latestThread?.title || subCategory.name,
-            authorName: latestThread?.authorName || subCategory.textAboveDate,
-            date: latestThread?.dateLabel || subCategory.dateLabel,
-            href: `/forum/${encodeURIComponent(subCategory.slug)}`,
-          }
-        })
-
-      return {
-        title: category.name,
-        threads: subCategoryCards,
-      }
-    })
-    .filter((section) => section.threads.length > 0)
-
-  const sections: ForumThreadsColumnSection[] =
-    sectionsFromCategories.length > 0
-      ? sectionsFromCategories
-      : [
-          {
-            title: forumSubCategories[0]?.categoryName || t.common.general,
-            threads: forumSubCategories.map((subCategory) => {
-              const latestThread = latestThreadBySubCategory.get(subCategory.id)
-
-              return {
-                categoryTitle: subCategory.name,
-                categoryDescription: subCategory.description,
-                threadTitle: latestThread?.title || subCategory.name,
-                authorName: latestThread?.authorName || subCategory.textAboveDate,
-                date: latestThread?.dateLabel || subCategory.dateLabel,
-                href: `/forum/${encodeURIComponent(subCategory.slug)}`,
-              }
-            }),
-          },
-        ].filter((section) => section.threads.length > 0)
-
   const popularThreadsSource = pinnedThreads.length > 0 ? pinnedThreads : forumThreads
-  const popularThreads: ForumSidebarThread[] = popularThreadsSource.slice(0, 3).map((thread) => {
+  const popularThreads = popularThreadsSource.slice(0, 3).map((thread) => {
     const subCategorySlug = thread.subCategorySlug || subCategorySlugById.get(thread.subCategoryId)
     const href = subCategorySlug
       ? `/forum/${encodeURIComponent(subCategorySlug)}/${encodeURIComponent(thread.id)}`
@@ -426,42 +370,22 @@ export default async function ForumPage() {
   const sidebarBannerHref = forumPageGlobal.sidebarBanner?.link?.trim()
 
   return (
-    <main className="min-h-screen bg-[#0D0D0D] text-white overflow-x-hidden relative">
-      <ForumHero
-        title={
-          heroTitle || (
-            <>
-              Community
-              <br />
-              discussions
-            </>
-          )
-        }
-        description={
-          heroDescription
-          || t.forum.heroDescription
-        }
-      />
-
-      <div className="relative z-10 flex flex-col items-center">
-        <ForumFiltersSection
-          searchPlaceholder={t.forum.searchThreadPlaceholder}
-          searchButtonLabel={t.common.search}
-          bannerImage={heroBannerImage}
-          bannerAlt={heroBannerAlt}
-          bannerHref={heroBannerHref}
-        />
-        <ForumContentSection
-          sections={sections}
-          sidebar={{
-            title: t.forum.popularThreads,
-            popularThreads,
-            bannerImage: sidebarBannerImage,
-            bannerAlt: sidebarBannerAlt,
-            bannerHref: sidebarBannerHref,
-          }}
-        />
-      </div>
-    </main>
+    <ForumPageClient
+      categories={forumCategories}
+      subCategories={forumSubCategories}
+      threads={forumThreads}
+      heroTitle={heroTitle}
+      heroDescription={heroDescription}
+      heroBannerImage={heroBannerImage}
+      heroBannerAlt={heroBannerAlt}
+      heroBannerHref={heroBannerHref}
+      sidebar={{
+        title: t.forum.popularThreads,
+        popularThreads,
+        bannerImage: sidebarBannerImage,
+        bannerAlt: sidebarBannerAlt,
+        bannerHref: sidebarBannerHref,
+      }}
+    />
   )
 }
