@@ -54,8 +54,8 @@ const ARTICLE_HEADING_CLASSES: Record<HeadingTag, string> = {
 const ARTICLE_UNORDERED_LIST_CLASS = 'my-0 list-disc pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_ORDERED_LIST_CLASS = 'my-0 list-decimal pl-7 leading-[32px] marker:text-[#9E9E9E]'
 const ARTICLE_LIST_ITEM_CLASS = 'last:mb-0 text-[#9E9E9E] font-poppins text-[20px] font-normal leading-[32px] tracking-normal'
-const ARTICLE_HORIZONTAL_RULE_CLASS = 'w-full border-0 border-t border-[rgba(74,74,74,0.70)] my-0'
-const DEFAULT_HORIZONTAL_RULE_CLASS = 'w-full border-0 border-t border-[rgba(74,74,74,0.35)] my-0'
+const ARTICLE_HORIZONTAL_RULE_CLASS = 'mt-3 mb-0 -ml-2 w-[calc(100%+16px)] max-w-none border-0 border-t border-[rgba(74,74,74,0.70)]'
+const DEFAULT_HORIZONTAL_RULE_CLASS = 'mt-3 mb-0 -ml-1.5 w-[calc(100%+12px)] max-w-none border-0 border-t border-[rgba(74,74,74,0.35)]'
 const ARTICLE_IMAGE_SIZES = '(max-width: 860px) 100vw, 796px'
 const ARTICLE_TEXT_BANNER_STYLE: React.CSSProperties = {
     width: '100%',
