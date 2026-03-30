@@ -86,12 +86,15 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
           </p>
         )
       case 'link':
+        const linkFields = asRecord(node.fields)
+        const href = asString(linkFields?.url) || (typeof node.url === 'string' ? node.url : null) || '#'
+        const shouldOpenInNewTab = linkFields?.newTab === true || /^https?:\/\//i.test(href)
         return (
           <a
             key={key}
-            href={typeof node.url === 'string' ? node.url : '#'}
-            target={typeof node.url === 'string' && /^https?:\/\//i.test(node.url) ? '_blank' : undefined}
-            rel={typeof node.url === 'string' && /^https?:\/\//i.test(node.url) ? 'noopener noreferrer' : undefined}
+            href={href}
+            target={shouldOpenInNewTab ? '_blank' : undefined}
+            rel={shouldOpenInNewTab ? 'noopener noreferrer' : undefined}
             className="break-words text-[#F29F04] underline-offset-4 hover:underline"
           >
             {Array.isArray(node.children) ? renderNodes(node.children, `${key}-link`) : null}
@@ -118,10 +121,11 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
       case 'upload':
       case 'image':
         const valueRecord = asRecord(node.value)
+        const uploadFields = asRecord(node.fields)
         const src = toAbsoluteMediaUrl(
-          asString(node.src)
+          asString(valueRecord?.url)
+          || asString(node.src)
           || asString(node.url)
-          || asString(valueRecord?.url)
           || asString(valueRecord?.src),
         )
 
@@ -129,9 +133,24 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
           return null
         }
 
-        const alt = asString(node.altText) || asString(valueRecord?.altText) || 'Forum image'
-        const width = typeof node.width === 'number' && node.width > 0 ? node.width : 1400
-        const height = typeof node.height === 'number' && node.height > 0 ? node.height : 800
+        const alt =
+          asString(uploadFields?.alt)
+          || asString(node.altText)
+          || asString(valueRecord?.altText)
+          || asString(valueRecord?.alt)
+          || 'Forum image'
+        const width =
+          typeof valueRecord?.width === 'number' && valueRecord.width > 0
+            ? valueRecord.width
+            : typeof node.width === 'number' && node.width > 0
+              ? node.width
+              : 1400
+        const height =
+          typeof valueRecord?.height === 'number' && valueRecord.height > 0
+            ? valueRecord.height
+            : typeof node.height === 'number' && node.height > 0
+              ? node.height
+              : 800
 
         return (
           <figure

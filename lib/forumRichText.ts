@@ -4,7 +4,10 @@ export type ForumRichTextNode = {
   text?: string
   format?: number | ''
   url?: string
+  id?: string
+  fields?: Record<string, unknown>
   listType?: string
+  relationTo?: string
   src?: string
   altText?: string
   width?: number
@@ -41,6 +44,32 @@ const asString = (value: unknown): string | null => {
 
   const trimmed = value.trim()
   return trimmed.length > 0 ? trimmed : null
+}
+
+const normalizeDocumentId = (value: unknown): number | string | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return value
+  }
+
+  if (typeof value !== 'string') {
+    return null
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed
+}
+
+const createForumNodeId = (): string => {
+  const randomUUID = globalThis.crypto?.randomUUID?.()
+  if (typeof randomUUID === 'string' && randomUUID.length > 0) {
+    return randomUUID
+  }
+
+  return `forum-node-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 export const createEmptyForumRichText = (): ForumRichTextDocument => ({
@@ -93,8 +122,12 @@ const nodeHasVisibleContent = (node: ForumRichTextNode | null | undefined): bool
 
   if (node.type === 'upload' || node.type === 'image') {
     const valueRecord = asRecord(node.value)
+    const valueId = normalizeDocumentId(node.value)
     return Boolean(
-      asString(node.src)
+      valueId !== null
+      || normalizeDocumentId(valueRecord?.id) !== null
+      || normalizeDocumentId(node.id) !== null
+      || asString(node.src)
       || asString(node.url)
       || asString(valueRecord?.url)
       || asString(valueRecord?.src),
@@ -228,23 +261,16 @@ export const hasVisibleForumRichTextContent = (value: unknown): boolean => {
 }
 
 export const createForumUploadNode = (payload: {
-  url: string
+  id?: string | number | null
+  url?: string
   altText?: string
-  width?: number
-  height?: number
-  id?: string | number
+  relationTo?: string | null
 }): ForumRichTextNode => ({
   type: 'upload',
-  src: payload.url,
-  altText: payload.altText || 'Uploaded image',
-  width: payload.width,
-  height: payload.height,
-  version: 1,
-  value: {
-    id: payload.id,
-    url: payload.url,
-    altText: payload.altText || 'Uploaded image',
-    width: payload.width,
-    height: payload.height,
-  },
+  id: createForumNodeId(),
+  relationTo: asString(payload.relationTo) || 'media',
+  value: normalizeDocumentId(payload.id) ?? '',
+  fields: payload.altText ? { alt: payload.altText } : {},
+  format: '',
+  version: 3,
 })

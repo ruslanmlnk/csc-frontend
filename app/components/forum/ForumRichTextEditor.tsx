@@ -26,6 +26,8 @@ type InlineSerializeOptions = {
 
 const FORUM_EDITOR_EMOJIS = ['😀', '😂', '😍', '🤔', '🔥', '👍', '👏', '🎉', '🚀', '💡', '✅', '❤️']
 
+const FORUM_UPLOAD_RELATION = 'media'
+
 const createTextNode = (text: string, format: number): ForumRichTextNode => ({
   type: 'text',
   detail: 0,
@@ -83,6 +85,39 @@ const normalizeHref = (href: string): string => {
   return /^www\./i.test(trimmed) ? `https://${trimmed}` : `https://${trimmed}`
 }
 
+const createEditorNodeId = (): string =>
+  globalThis.crypto?.randomUUID?.()
+  || `forum-node-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+
+const parseDocumentId = (value: string | null | undefined): number | string | null => {
+  if (!value) {
+    return null
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return null
+  }
+
+  return /^\d+$/.test(trimmed) ? Number(trimmed) : trimmed
+}
+
+const createLinkNode = (children: ForumRichTextNode[], url: string): ForumRichTextNode => ({
+  type: 'link',
+  id: createEditorNodeId(),
+  fields: {
+    doc: null,
+    linkType: 'custom',
+    newTab: /^https?:\/\//i.test(url),
+    url,
+  },
+  children,
+  direction: null,
+  format: '',
+  indent: 0,
+  version: 3,
+})
+
 const getElementFormat = (element: HTMLElement, inherited: number): number => {
   let nextFormat = inherited
   const tagName = element.tagName.toLowerCase()
@@ -123,27 +158,25 @@ const serializeInlineNode = (node: ChildNode, options: InlineSerializeOptions): 
     }
 
     return [
-      {
-        type: 'link',
-        url: normalizeHref(href),
-        children,
-        version: 1,
-      },
+      createLinkNode(children, normalizeHref(href)),
     ]
   }
 
   if (tagName === 'img') {
     const src = node.getAttribute('src')?.trim()
-    if (!src) {
+    const mediaId = parseDocumentId(node.getAttribute('data-lexical-upload-id'))
+
+    if (!src || mediaId === null) {
       return []
     }
 
     return [
       createForumUploadNode({
-        url: src,
+        id: mediaId,
         altText: node.getAttribute('alt')?.trim() || 'Uploaded image',
-        width: parsePositiveNumber(node.getAttribute('width')),
-        height: parsePositiveNumber(node.getAttribute('height')),
+        relationTo:
+          node.getAttribute('data-lexical-upload-relation-to')?.trim()
+          || FORUM_UPLOAD_RELATION,
       }),
     ]
   }
@@ -169,31 +202,38 @@ const serializeBlockNode = (node: ChildNode): ForumRichTextNode[] => {
   if (tagName === 'figure' || tagName === 'img') {
     const imageElement = tagName === 'img' ? node : node.querySelector('img')
     const src = imageElement?.getAttribute('src')?.trim()
-    if (!src) {
+    const mediaId = parseDocumentId(imageElement?.getAttribute('data-lexical-upload-id'))
+
+    if (!src || mediaId === null) {
       return []
     }
 
     return [
       createForumUploadNode({
-        url: src,
+        id: mediaId,
         altText: imageElement?.getAttribute('alt')?.trim() || 'Uploaded image',
-        width: parsePositiveNumber(imageElement?.getAttribute('width')),
-        height: parsePositiveNumber(imageElement?.getAttribute('height')),
+        relationTo:
+          imageElement?.getAttribute('data-lexical-upload-relation-to')?.trim()
+          || FORUM_UPLOAD_RELATION,
       }),
     ]
   }
 
   if (tagName === 'ul' || tagName === 'ol') {
+    const orderedListStart = parsePositiveNumber(node.getAttribute('start')) || 1
+
     return [
       {
         type: 'list',
         listType: tagName === 'ol' ? 'number' : 'bullet',
         tag: tagName,
+        start: orderedListStart,
         children: Array.from(node.children)
           .filter((child) => child.tagName.toLowerCase() === 'li')
-          .map((item) => ({
+          .map((item, index) => ({
             type: 'listitem',
-            value: tagName === 'ol' ? Number(item.getAttribute('value') || 0) : undefined,
+            checked: false,
+            value: parsePositiveNumber(item.getAttribute('value')) || orderedListStart + index,
             children: [
               createParagraphNode(
                 Array.from(item.childNodes).flatMap((child) => serializeInlineNode(child, { format: 0 })),
@@ -464,6 +504,10 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     const image = document.createElement('img')
     image.src = payload.url
     image.alt = payload.altText
+    if (payload.id !== undefined && payload.id !== null) {
+      image.setAttribute('data-lexical-upload-id', String(payload.id))
+      image.setAttribute('data-lexical-upload-relation-to', FORUM_UPLOAD_RELATION)
+    }
     image.style.display = 'block'
     image.style.maxWidth = '100%'
     image.style.width = 'auto'
@@ -562,7 +606,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
       })
 
       const payload = (await response.json().catch(() => null)) as UploadedMediaResponse | null
-      if (!response.ok || !payload?.url) {
+      if (!response.ok || !payload?.url || payload.id === undefined || payload.id === null) {
         throw new Error(payload?.error || uploadErrorLabel)
       }
 

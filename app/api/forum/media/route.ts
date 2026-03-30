@@ -51,8 +51,11 @@ export async function POST(request: Request) {
   const id = doc?.id ?? payload?.id ?? null
   const url = doc?.url ?? payload?.url ?? null
 
-  if (!url) {
-    return NextResponse.json({ error: 'Upload succeeded, but no file URL was returned.' }, { status: 500 })
+  if (id === null || id === undefined || !url) {
+    return NextResponse.json(
+      { error: 'Upload succeeded, but media metadata is incomplete.' },
+      { status: 500 },
+    )
   }
 
   return NextResponse.json({
