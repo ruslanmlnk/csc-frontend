@@ -33,8 +33,15 @@ type ForumThreadItem = {
   dateLabel: string
   subCategoryId: string
   subCategorySlug?: string
+  tags: string[]
   orderId: number
   createdAtTimestamp: number
+}
+
+type ForumTagSuggestion = {
+  label: string
+  normalized: string
+  count: number
 }
 
 type SearchThreadCardItem = {
@@ -73,6 +80,13 @@ interface ForumPageClientProps {
 
 const SEARCH_DEBOUNCE_MS = 250
 const DEFAULT_AVATAR = '/logo.svg'
+const TAG_SUGGESTIONS_LIMIT = 8
+
+const normalizeTag = (value: string): string =>
+  value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
 
 const buildThreadHref = (subCategorySlug: string | undefined, threadId: string): string | undefined => {
   if (!subCategorySlug) {
@@ -120,9 +134,11 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
   heroBannerHref,
   sidebar,
 }) => {
-  const { messages: t } = useLanguage()
+  const { messages: t, language } = useLanguage()
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [tagInput, setTagInput] = useState('')
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [replyCountsByThreadId, setReplyCountsByThreadId] = useState<Record<string, number>>({})
 
@@ -158,6 +174,92 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
   const handleSearchSubmit = () => {
     setSearchQuery(searchInput.trim())
     setIsSearching(false)
+  }
+
+  const availableTagSuggestions = useMemo<ForumTagSuggestion[]>(() => {
+    const suggestionsByTag = new Map<string, ForumTagSuggestion>()
+
+    for (const thread of threads) {
+      const threadTagSet = new Set<string>()
+
+      for (const rawTag of thread.tags) {
+        const label = rawTag.trim()
+        const normalized = normalizeTag(label)
+
+        if (!normalized || threadTagSet.has(normalized)) {
+          continue
+        }
+
+        threadTagSet.add(normalized)
+
+        const existingSuggestion = suggestionsByTag.get(normalized)
+        if (existingSuggestion) {
+          existingSuggestion.count += 1
+          continue
+        }
+
+        suggestionsByTag.set(normalized, {
+          label,
+          normalized,
+          count: 1,
+        })
+      }
+    }
+
+    return Array.from(suggestionsByTag.values()).sort((a, b) => {
+      if (b.count !== a.count) {
+        return b.count - a.count
+      }
+
+      return a.label.localeCompare(b.label)
+    })
+  }, [threads])
+
+  const selectedTagSet = useMemo(
+    () => new Set(selectedTags.map((tag) => normalizeTag(tag))),
+    [selectedTags],
+  )
+
+  const tagSuggestions = useMemo<ForumTagSuggestion[]>(() => {
+    const normalizedInput = normalizeTag(tagInput)
+
+    return availableTagSuggestions
+      .filter((tag) => {
+        if (selectedTagSet.has(tag.normalized)) {
+          return false
+        }
+
+        if (!normalizedInput) {
+          return true
+        }
+
+        return tag.normalized.includes(normalizedInput)
+      })
+      .slice(0, TAG_SUGGESTIONS_LIMIT)
+  }, [availableTagSuggestions, selectedTagSet, tagInput])
+
+  const addSelectedTag = (tagValue: string) => {
+    const normalizedTag = normalizeTag(tagValue)
+    if (!normalizedTag) {
+      return
+    }
+
+    const resolvedSuggestion = availableTagSuggestions.find((tag) => tag.normalized === normalizedTag)
+    const nextTagLabel = resolvedSuggestion?.label || tagValue.trim()
+
+    setSelectedTags((current) => {
+      if (current.some((tag) => normalizeTag(tag) === normalizedTag)) {
+        return current
+      }
+
+      return [...current, nextTagLabel]
+    })
+    setTagInput('')
+  }
+
+  const removeSelectedTag = (tagValue: string) => {
+    const normalizedTag = normalizeTag(tagValue)
+    setSelectedTags((current) => current.filter((tag) => normalizeTag(tag) !== normalizedTag))
   }
 
   const orderedCategories = useMemo<ForumCategoryItem[]>(() => {
@@ -245,8 +347,9 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
 
   const searchedSectionsBase = useMemo<SearchThreadSection[]>(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase()
+    const hasSelectedTags = selectedTagSet.size > 0
 
-    if (!normalizedQuery) {
+    if (!normalizedQuery && !hasSelectedTags) {
       return []
     }
 
@@ -258,7 +361,11 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
 
             return (
               subCategory?.categoryId === category.id
-              && thread.title.toLowerCase().includes(normalizedQuery)
+              && (!normalizedQuery || thread.title.toLowerCase().includes(normalizedQuery))
+              && (
+                !hasSelectedTags
+                || thread.tags.some((tag) => selectedTagSet.has(normalizeTag(tag)))
+              )
             )
           })
           .map((thread) => {
@@ -292,6 +399,7 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
   }, [
     orderedCategories,
     searchQuery,
+    selectedTagSet,
     subCategoryById,
     t.common.unknownDate,
     t.forum.defaultAuthorName,
@@ -301,9 +409,11 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
   ])
 
   const hasActiveSearch = searchQuery.trim().length > 0
+  const hasActiveTagFilters = selectedTags.length > 0
+  const hasActiveFilters = hasActiveSearch || hasActiveTagFilters
 
   useEffect(() => {
-    if (!hasActiveSearch) {
+    if (!hasActiveFilters) {
       return
     }
 
@@ -352,7 +462,7 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
     return () => {
       isActive = false
     }
-  }, [hasActiveSearch, replyCountsByThreadId, searchedSectionsBase])
+  }, [hasActiveFilters, replyCountsByThreadId, searchedSectionsBase])
 
   const searchedSections = useMemo<SearchThreadSection[]>(
     () =>
@@ -366,7 +476,19 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
     [replyCountsByThreadId, searchedSectionsBase],
   )
 
-  const showNoResults = hasActiveSearch && !isSearching && searchedSections.length === 0
+  const activeFilterSummary = [
+    hasActiveSearch ? `${t.common.search}: ${searchQuery.trim()}` : null,
+    hasActiveTagFilters ? `${t.forum.tagPlatform}: ${selectedTags.join(', ')}` : null,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+  const tagPlaceholder =
+    language === 'uk'
+      ? '\u0428\u0443\u043a\u0430\u0442\u0438 \u0442\u0435\u0433'
+      : 'Search tag'
+
+  const showNoResults = hasActiveFilters && !isSearching && searchedSections.length === 0
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#0D0D0D] text-white">
@@ -390,6 +512,14 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
           searchValue={searchInput}
           onSearchChange={handleSearchChange}
           onSearchSubmit={handleSearchSubmit}
+          tagLabel={t.forum.tagPlatform}
+          tagPlaceholder={tagPlaceholder}
+          tagInputValue={tagInput}
+          selectedTags={selectedTags}
+          tagSuggestions={tagSuggestions}
+          onTagInputChange={setTagInput}
+          onTagAdd={addSelectedTag}
+          onTagRemove={removeSelectedTag}
           bannerImage={heroBannerImage}
           bannerAlt={heroBannerAlt}
           bannerHref={heroBannerHref}
@@ -418,16 +548,22 @@ const ForumPageClient: React.FC<ForumPageClientProps> = ({
                     {t.searchModal.noResultsTitle}
                   </h2>
                   <p className="font-poppins text-[16px] font-normal leading-[26px]">
-                    <span className="text-[#BDBDBD]">{t.searchModal.noResultsPrefix}</span>
-                    <span className="font-medium text-white">{searchQuery.trim()}</span>
-                    <span className="text-[#BDBDBD]">{t.searchModal.noResultsSuffix}</span>
+                    {activeFilterSummary ? (
+                      <span className="text-[#BDBDBD]">{activeFilterSummary}</span>
+                    ) : (
+                      <>
+                        <span className="text-[#BDBDBD]">{t.searchModal.noResultsPrefix}</span>
+                        <span className="font-medium text-white">{searchQuery.trim()}</span>
+                        <span className="text-[#BDBDBD]">{t.searchModal.noResultsSuffix}</span>
+                      </>
+                    )}
                   </p>
                   <p className="font-poppins text-[14px] font-normal leading-[20px] text-[#757575]">
                     {t.searchModal.noResultsHint}
                   </p>
                 </div>
               </div>
-            ) : hasActiveSearch ? (
+            ) : hasActiveFilters ? (
               <div className="flex flex-col gap-[24px] flex-1">
                 {searchedSections.map((section, sectionIndex) => (
                   <div key={`${section.title}-${sectionIndex}`} className="flex flex-col gap-[28px]">

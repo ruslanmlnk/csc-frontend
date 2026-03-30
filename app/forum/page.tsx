@@ -31,6 +31,7 @@ type ForumThreadItem = {
   dateLabel: string
   subCategoryId: string
   subCategorySlug?: string
+  tags: string[]
   orderId: number
   createdAtTimestamp: number
 }
@@ -139,6 +140,27 @@ const formatDateLabel = (
     day: '2-digit',
     year: 'numeric',
   })
+}
+
+const asStringArray = (value: unknown): string[] => {
+  if (!Array.isArray(value)) {
+    return []
+  }
+
+  const unique = new Set<string>()
+  const normalizedValues: string[] = []
+
+  for (const item of value) {
+    const nextValue = asString(item)?.trim()
+    if (!nextValue || unique.has(nextValue)) {
+      continue
+    }
+
+    unique.add(nextValue)
+    normalizedValues.push(nextValue)
+  }
+
+  return normalizedValues
 }
 
 const toAbsoluteMediaUrl = (url?: string | null): string | null => {
@@ -304,6 +326,7 @@ const parseForumThreads = (
       authorName: resolveAuthorName(record.author, options.defaultAuthorName),
       authorAvatar: resolveAuthorAvatar(record.author),
       dateLabel: formatDateLabel(createdAtRaw, options.language, options.unknownDateLabel),
+      tags: asStringArray(record.tags),
       orderId: asNumber(record.orderId) || 0,
       createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,
     })
