@@ -81,7 +81,7 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
         return <br key={key} />
       case 'paragraph':
         return (
-          <p key={key} className="m-0 break-words text-white font-poppins text-[20px] font-medium leading-[32px]">
+          <p key={key} className="m-0 break-words text-white font-poppins text-[20px] font-normal leading-[32px]">
             {Array.isArray(node.children) ? renderNodes(node.children, `${key}-p`) : null}
           </p>
         )
@@ -105,7 +105,7 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
         return (
           <ListTag
             key={key}
-            className={`m-0 pl-6 text-white font-poppins text-[20px] font-medium leading-[32px] ${
+            className={`m-0 pl-6 text-white font-poppins text-[20px] font-normal leading-[32px] ${
               node.listType === 'number' ? 'list-decimal' : 'list-disc'
             }`}
           >
@@ -155,15 +155,15 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
         return (
           <figure
             key={key}
-            className="m-0 flex justify-center overflow-hidden rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#202020] p-2"
+            className="m-0 inline-flex w-full max-w-[720px] self-start overflow-hidden rounded-[20px]"
           >
             <Image
               src={src}
               alt={alt}
               width={width}
               height={height}
-              sizes="(max-width: 860px) 100vw, 760px"
-              className="mx-auto h-auto max-h-[520px] w-auto max-w-full object-contain"
+              sizes="(max-width: 860px) 100vw, 720px"
+              className="block h-auto max-h-[420px] w-full rounded-[20px] object-contain"
             />
           </figure>
         )
@@ -189,7 +189,7 @@ const ForumRichTextRenderer: React.FC<ForumRichTextRendererProps> = ({ content }
 
   if (typeof content === 'string') {
     return (
-      <p className="m-0 whitespace-pre-line break-words text-white font-poppins text-[20px] font-medium leading-[32px]">
+      <p className="m-0 whitespace-pre-line break-words text-white font-poppins text-[20px] font-normal leading-[32px]">
         {content}
       </p>
     )
@@ -198,7 +198,7 @@ const ForumRichTextRenderer: React.FC<ForumRichTextRendererProps> = ({ content }
   if (!isForumRichTextDocument(content)) {
     const fallbackText = extractPlainTextFromForumRichText(content)
     return fallbackText ? (
-      <p className="m-0 whitespace-pre-line break-words text-white font-poppins text-[20px] font-medium leading-[32px]">
+      <p className="m-0 whitespace-pre-line break-words text-white font-poppins text-[20px] font-normal leading-[32px]">
         {fallbackText}
       </p>
     ) : null

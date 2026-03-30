@@ -27,6 +27,7 @@ type InlineSerializeOptions = {
 const FORUM_EDITOR_EMOJIS = ['😀', '😂', '😍', '🤔', '🔥', '👍', '👏', '🎉', '🚀', '💡', '✅', '❤️']
 
 const FORUM_UPLOAD_RELATION = 'media'
+const BLOCK_TAGS = new Set(['p', 'div', 'ul', 'ol', 'figure', 'img'])
 
 const createTextNode = (text: string, format: number): ForumRichTextNode => ({
   type: 'text',
@@ -121,12 +122,19 @@ const createLinkNode = (children: ForumRichTextNode[], url: string): ForumRichTe
 const getElementFormat = (element: HTMLElement, inherited: number): number => {
   let nextFormat = inherited
   const tagName = element.tagName.toLowerCase()
+  const fontWeight = element.style.fontWeight
+  const fontWeightNumber = Number(fontWeight)
+  const textDecoration = `${element.style.textDecoration} ${element.style.textDecorationLine}`.toLowerCase()
 
   if (tagName === 'strong' || tagName === 'b') nextFormat |= 1
   if (tagName === 'em' || tagName === 'i') nextFormat |= 2
   if (tagName === 's' || tagName === 'strike' || tagName === 'del') nextFormat |= 4
   if (tagName === 'u') nextFormat |= 8
   if (tagName === 'code') nextFormat |= 16
+  if (fontWeight === 'bold' || (!Number.isNaN(fontWeightNumber) && fontWeightNumber >= 600)) nextFormat |= 1
+  if (element.style.fontStyle === 'italic') nextFormat |= 2
+  if (textDecoration.includes('line-through')) nextFormat |= 4
+  if (textDecoration.includes('underline')) nextFormat |= 8
 
   return nextFormat
 }
@@ -250,6 +258,54 @@ const serializeBlockNode = (node: ChildNode): ForumRichTextNode[] => {
         version: 1,
       },
     ]
+  }
+
+  if (tagName === 'p' || tagName === 'div') {
+    const childNodes = Array.from(node.childNodes)
+    const hasNestedBlocks = childNodes.some((child) =>
+      child instanceof HTMLElement && BLOCK_TAGS.has(child.tagName.toLowerCase()),
+    )
+
+    if (hasNestedBlocks) {
+      const blocks: ForumRichTextNode[] = []
+      let inlineBuffer: ChildNode[] = []
+
+      const flushInlineBuffer = () => {
+        if (inlineBuffer.length === 0) {
+          return
+        }
+
+        const inlineChildren = inlineBuffer.flatMap((child) => serializeInlineNode(child, { format: 0 }))
+        inlineBuffer = []
+
+        if (inlineChildren.length === 0) {
+          return
+        }
+
+        if (inlineChildren.every((child) => child.type === 'linebreak')) {
+          blocks.push(createParagraphNode([]))
+          return
+        }
+
+        blocks.push(createParagraphNode(inlineChildren))
+      }
+
+      for (const child of childNodes) {
+        if (child instanceof HTMLElement && BLOCK_TAGS.has(child.tagName.toLowerCase())) {
+          flushInlineBuffer()
+          blocks.push(...serializeBlockNode(child))
+          continue
+        }
+
+        inlineBuffer.push(child)
+      }
+
+      flushInlineBuffer()
+
+      if (blocks.length > 0) {
+        return blocks
+      }
+    }
   }
 
   const inlineChildren = Array.from(node.childNodes).flatMap((child) => serializeInlineNode(child, { format: 0 }))
@@ -494,12 +550,10 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     figure.dataset.forumUpload = 'true'
     figure.style.display = 'inline-flex'
     figure.style.width = 'fit-content'
-    figure.style.maxWidth = 'min(100%, 420px)'
+    figure.style.maxWidth = 'min(100%, 520px)'
     figure.style.margin = '16px 0'
     figure.style.overflow = 'hidden'
     figure.style.borderRadius = '20px'
-    figure.style.border = '1px solid rgba(74, 74, 74, 0.70)'
-    figure.style.background = '#202020'
 
     const image = document.createElement('img')
     image.src = payload.url
@@ -720,7 +774,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
           }}
           onKeyUp={saveSelection}
           onMouseUp={saveSelection}
-          className="min-h-[150px] rounded-[30px] bg-[#262626] p-6 text-white font-poppins text-[18px] leading-[28px] outline-none [&_a]:text-[#F29F04] [&_a]:underline [&_figure]:my-4 [&_figure]:max-w-full [&_figure]:overflow-hidden [&_figure]:rounded-[20px] [&_figure]:border [&_figure]:border-[rgba(74,74,74,0.70)] [&_figure]:bg-[#202020] [&_img]:block [&_img]:h-auto [&_img]:max-h-[320px] [&_img]:max-w-full [&_img]:rounded-[20px] [&_img]:object-contain [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:min-h-[28px] [&_p]:break-words [&_p]:whitespace-pre-wrap [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
+          className="min-h-[150px] rounded-[30px] bg-[#262626] p-6 text-white font-poppins text-[18px] leading-[28px] outline-none [&_a]:text-[#F29F04] [&_a]:underline [&_figure]:my-4 [&_figure]:max-w-full [&_figure]:overflow-hidden [&_figure]:rounded-[20px] [&_img]:block [&_img]:h-auto [&_img]:max-h-[320px] [&_img]:max-w-full [&_img]:rounded-[20px] [&_img]:object-contain [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:min-h-[28px] [&_p]:break-words [&_p]:whitespace-pre-wrap [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
         />
       </div>
     </div>
