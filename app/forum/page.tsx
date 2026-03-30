@@ -27,6 +27,7 @@ type ForumThreadItem = {
   id: string
   title: string
   authorName: string
+  authorAvatar: string
   dateLabel: string
   subCategoryId: string
   subCategorySlug?: string
@@ -39,6 +40,8 @@ const FORUM_BANNER_IMAGE =
 const SIDEBAR_BANNER_IMAGE =
   'https://api.builder.io/api/v1/image/assets/TEMP/1df77007f20fb9ad313a0326ef07f148489cc4a4?width=794'
 const FORUM_PAGE_GLOBAL_SLUG = 'forum-page'
+const DEFAULT_AVATAR = '/logo.svg'
+const BACKEND_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3000'
 
 const asRecord = (value: unknown): UnknownRecord | null => {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -138,6 +141,23 @@ const formatDateLabel = (
   })
 }
 
+const toAbsoluteMediaUrl = (url?: string | null): string | null => {
+  if (!url) {
+    return null
+  }
+
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url
+  }
+
+  const normalizedBase = BACKEND_BASE_URL.endsWith('/')
+    ? BACKEND_BASE_URL.slice(0, -1)
+    : BACKEND_BASE_URL
+  const normalizedPath = url.startsWith('/') ? url : `/${url}`
+
+  return `${normalizedBase}${normalizedPath}`
+}
+
 const resolveAuthorName = (value: unknown, fallbackAuthorName: string): string => {
   const user = asRecord(value)
   if (!user) {
@@ -155,6 +175,26 @@ const resolveAuthorName = (value: unknown, fallbackAuthorName: string): string =
   }
 
   return fallbackAuthorName
+}
+
+const resolveAuthorAvatar = (value: unknown): string => {
+  const author = asRecord(value)
+  if (!author) {
+    return DEFAULT_AVATAR
+  }
+
+  const avatar = author.avatar
+  if (typeof avatar === 'string') {
+    return toAbsoluteMediaUrl(avatar) || DEFAULT_AVATAR
+  }
+
+  const avatarObject = asRecord(avatar)
+  if (!avatarObject) {
+    return DEFAULT_AVATAR
+  }
+
+  const avatarUrl = asString(avatarObject.url)
+  return toAbsoluteMediaUrl(avatarUrl) || DEFAULT_AVATAR
 }
 
 const parseForumCategories = (payload: unknown): ForumCategoryItem[] => {
@@ -262,6 +302,7 @@ const parseForumThreads = (
       subCategorySlug,
       title: asString(record.title) || options.untitledThreadLabel,
       authorName: resolveAuthorName(record.author, options.defaultAuthorName),
+      authorAvatar: resolveAuthorAvatar(record.author),
       dateLabel: formatDateLabel(createdAtRaw, options.language, options.unknownDateLabel),
       orderId: asNumber(record.orderId) || 0,
       createdAtTimestamp: Number.isFinite(createdAtTimestamp) ? createdAtTimestamp : 0,

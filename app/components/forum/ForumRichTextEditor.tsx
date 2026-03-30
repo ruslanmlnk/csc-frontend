@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useRef, useState } from 'react'
-import { Bold, ImagePlus, Italic, Link2, List, ListOrdered, Strikethrough, Underline } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
+import { Bold, ImagePlus, Italic, Link2, List, ListOrdered, Smile, Strikethrough, Underline } from 'lucide-react'
 import { useLanguage } from '@/app/components/i18n/LanguageProvider'
 import { createEmptyForumRichText, createForumUploadNode, extractPlainTextFromForumRichText, hasVisibleForumRichTextContent, type ForumRichTextDocument, type ForumRichTextNode } from '@/lib/forumRichText'
 
@@ -23,6 +23,8 @@ type UploadedMediaResponse = {
 type InlineSerializeOptions = {
   format: number
 }
+
+const FORUM_EDITOR_EMOJIS = ['😀', '😂', '😍', '🤔', '🔥', '👍', '👏', '🎉', '🚀', '💡', '✅', '❤️']
 
 const createTextNode = (text: string, format: number): ForumRichTextNode => ({
   type: 'text',
@@ -248,8 +250,11 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
   const { language } = useLanguage()
   const editorRef = useRef<HTMLDivElement | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const emojiPickerRef = useRef<HTMLDivElement | null>(null)
+  const savedSelectionRef = useRef<Range | null>(null)
   const [isEmpty, setIsEmpty] = useState(true)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false)
   const enterLinkUrlLabel = language === 'uk' ? '\u0412\u0432\u0435\u0434\u0456\u0442\u044c URL \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f' : 'Enter link URL'
   const uploadErrorLabel = language === 'uk' ? '\u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0437\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0438\u0442\u0438 \u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f.' : 'Unable to upload image.'
   const boldLabel = language === 'uk' ? '\u0416\u0438\u0440\u043d\u0438\u0439' : 'Bold'
@@ -260,7 +265,29 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
   const numberedListLabel = language === 'uk' ? '\u041d\u0443\u043c\u0435\u0440\u043e\u0432\u0430\u043d\u0438\u0439 \u0441\u043f\u0438\u0441\u043e\u043a' : 'Numbered List'
   const addLinkLabel = language === 'uk' ? '\u0414\u043e\u0434\u0430\u0442\u0438 \u043f\u043e\u0441\u0438\u043b\u0430\u043d\u043d\u044f' : 'Add Link'
   const addImageLabel = language === 'uk' ? '\u0414\u043e\u0434\u0430\u0442\u0438 \u0437\u043e\u0431\u0440\u0430\u0436\u0435\u043d\u043d\u044f' : 'Add Image'
+  const addEmojiLabel = language === 'uk' ? '\u0414\u043e\u0434\u0430\u0442\u0438 \u0435\u043c\u043e\u0434\u0437\u0456' : 'Add Emoji'
   const uploadingLabel = language === 'uk' ? '\u0417\u0430\u0432\u0430\u043d\u0442\u0430\u0436\u0435\u043d\u043d\u044f...' : 'Uploading...'
+
+  useEffect(() => {
+    if (!isEmojiPickerOpen) {
+      return
+    }
+
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node | null
+      if (target && emojiPickerRef.current?.contains(target)) {
+        return
+      }
+
+      setIsEmojiPickerOpen(false)
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [isEmojiPickerOpen])
 
   const syncEditorState = () => {
     if (!editorRef.current) {
@@ -279,6 +306,20 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     editorRef.current?.focus()
   }
 
+  const saveSelection = () => {
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0 || !editorRef.current) {
+      return
+    }
+
+    const range = selection.getRangeAt(0)
+    if (!editorRef.current.contains(range.commonAncestorContainer)) {
+      return
+    }
+
+    savedSelectionRef.current = range.cloneRange()
+  }
+
   const placeCaretInside = (element: HTMLElement) => {
     const selection = window.getSelection()
     if (!selection) {
@@ -290,6 +331,20 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     range.collapse(false)
     selection.removeAllRanges()
     selection.addRange(range)
+    savedSelectionRef.current = range.cloneRange()
+  }
+
+  const restoreSelection = () => {
+    const selection = window.getSelection()
+    const savedRange = savedSelectionRef.current
+
+    if (!selection || !savedRange) {
+      return false
+    }
+
+    selection.removeAllRanges()
+    selection.addRange(savedRange)
+    return true
   }
 
   const appendUploadedImageBlock = (payload: {
@@ -325,7 +380,39 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
 
   const runCommand = (command: string, value?: string) => {
     focusEditor()
+    restoreSelection()
     document.execCommand(command, false, value)
+    saveSelection()
+    syncEditorState()
+  }
+
+  const handleEmojiSelect = (emoji: string) => {
+    const editor = editorRef.current
+    if (!editor) {
+      return
+    }
+
+    focusEditor()
+    if (!restoreSelection()) {
+      placeCaretInside(editor)
+    }
+
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) {
+      return
+    }
+
+    const range = selection.getRangeAt(0)
+    const textNode = document.createTextNode(emoji)
+
+    range.deleteContents()
+    range.insertNode(textNode)
+    range.setStartAfter(textNode)
+    range.collapse(true)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    savedSelectionRef.current = range.cloneRange()
+    setIsEmojiPickerOpen(false)
     syncEditorState()
   }
 
@@ -400,6 +487,33 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
         <ToolbarButton label={numberedListLabel} onClick={() => runCommand('insertOrderedList')} disabled={disabled || isUploadingImage}>
           <ListOrdered size={16} />
         </ToolbarButton>
+        <div ref={emojiPickerRef} className="relative">
+          <ToolbarButton
+            label={addEmojiLabel}
+            onClick={() => setIsEmojiPickerOpen((current) => !current)}
+            disabled={disabled || isUploadingImage}
+          >
+            <Smile size={16} />
+          </ToolbarButton>
+          {isEmojiPickerOpen ? (
+            <div className="absolute left-0 top-12 z-20 w-[220px] rounded-[20px] border border-[rgba(74,74,74,0.70)] bg-[#202020] p-3 shadow-2xl">
+              <div className="grid grid-cols-4 gap-2">
+                {FORUM_EDITOR_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handleEmojiSelect(emoji)}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-[12px] text-[22px] transition-colors hover:bg-[#2C2C2C]"
+                    aria-label={`${addEmojiLabel}: ${emoji}`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </div>
         <ToolbarButton label={addLinkLabel} onClick={handleLinkAction} disabled={disabled || isUploadingImage}>
           <Link2 size={16} />
         </ToolbarButton>
@@ -431,7 +545,13 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
           contentEditable={!disabled}
           suppressContentEditableWarning
           onInput={syncEditorState}
-          onBlur={syncEditorState}
+          onBlur={() => {
+            saveSelection()
+            syncEditorState()
+          }}
+          onFocus={saveSelection}
+          onKeyUp={saveSelection}
+          onMouseUp={saveSelection}
           className="min-h-[150px] rounded-[30px] bg-[#262626] p-6 text-white font-poppins text-[18px] leading-[28px] outline-none [&_a]:text-[#F29F04] [&_a]:underline [&_figure]:my-4 [&_figure]:overflow-hidden [&_figure]:rounded-[20px] [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[20px] [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:min-h-[28px] [&_p]:break-words [&_p]:whitespace-pre-wrap [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
         />
       </div>
