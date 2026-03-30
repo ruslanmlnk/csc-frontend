@@ -50,6 +50,7 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
   bannerHref,
 }) => {
   const [isTagFieldFocused, setIsTagFieldFocused] = useState(false)
+  const [highlightedSuggestionIndex, setHighlightedSuggestionIndex] = useState(0)
   const tagFieldRef = useRef<HTMLDivElement | null>(null)
   const normalizedHref = bannerHref?.trim()
   const isExternalLink = Boolean(normalizedHref && /^https?:\/\//i.test(normalizedHref))
@@ -84,24 +85,34 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
     }
   }, [isTagFieldFocused])
 
-  const commitTagSelection = () => {
+  const activeSuggestionIndex =
+    tagSuggestions.length === 0
+      ? 0
+      : Math.min(highlightedSuggestionIndex, tagSuggestions.length - 1)
+
+  const commitTagSelection = (preferredIndex?: number) => {
     const trimmedValue = tagInputValue.trim()
-    if (!trimmedValue) {
+
+    if (!trimmedValue && tagSuggestions.length === 0) {
       return
     }
 
     const normalizedValue = normalizeTagValue(trimmedValue)
-    const exactSuggestion = tagSuggestions.find(
-      (tag) => normalizeTagValue(tag.label) === normalizedValue,
-    )
+    const activeSuggestion =
+      typeof preferredIndex === 'number' && tagSuggestions[preferredIndex]
+        ? tagSuggestions[preferredIndex]
+        : tagSuggestions[activeSuggestionIndex] || tagSuggestions[0]
+    const exactSuggestion = trimmedValue
+      ? tagSuggestions.find((tag) => normalizeTagValue(tag.label) === normalizedValue)
+      : null
 
     if (exactSuggestion) {
       onTagAdd(exactSuggestion.label)
       return
     }
 
-    if (tagSuggestions[0]) {
-      onTagAdd(tagSuggestions[0].label)
+    if (activeSuggestion) {
+      onTagAdd(activeSuggestion.label)
     }
   }
 
@@ -182,11 +193,55 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
                 type="text"
                 value={tagInputValue}
                 onChange={(event) => onTagInputChange(event.target.value)}
-                onFocus={() => setIsTagFieldFocused(true)}
+                onFocus={() => {
+                  setIsTagFieldFocused(true)
+                  setHighlightedSuggestionIndex(0)
+                }}
                 onKeyDown={(event) => {
+                  if (event.key === 'ArrowDown') {
+                    if (tagSuggestions.length === 0) {
+                      return
+                    }
+
+                    event.preventDefault()
+                    setIsTagFieldFocused(true)
+                    setHighlightedSuggestionIndex((current) =>
+                      current + 1 < tagSuggestions.length ? current + 1 : 0,
+                    )
+                    return
+                  }
+
+                  if (event.key === 'ArrowUp') {
+                    if (tagSuggestions.length === 0) {
+                      return
+                    }
+
+                    event.preventDefault()
+                    setIsTagFieldFocused(true)
+                    setHighlightedSuggestionIndex((current) =>
+                      current - 1 >= 0 ? current - 1 : tagSuggestions.length - 1,
+                    )
+                    return
+                  }
+
+                  if (event.key === 'Tab') {
+                    if (tagSuggestions.length === 0) {
+                      return
+                    }
+
+                    event.preventDefault()
+                    commitTagSelection()
+                    return
+                  }
+
                   if (event.key === 'Enter' || event.key === ',') {
                     event.preventDefault()
                     commitTagSelection()
+                    return
+                  }
+
+                  if (event.key === 'Escape') {
+                    setIsTagFieldFocused(false)
                     return
                   }
 
@@ -203,13 +258,18 @@ const ForumFiltersSection: React.FC<ForumFiltersSectionProps> = ({
           {showTagSuggestions ? (
             <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#1A1A1A] shadow-[0_18px_40px_rgba(0,0,0,0.35)]">
               <div className="flex flex-col py-2">
-                {tagSuggestions.map((tag) => (
+                {tagSuggestions.map((tag, index) => (
                   <button
                     key={tag.label}
                     type="button"
                     onMouseDown={(event) => event.preventDefault()}
+                    onMouseEnter={() => setHighlightedSuggestionIndex(index)}
                     onClick={() => onTagAdd(tag.label)}
-                    className="flex items-center justify-between gap-4 px-5 py-3 text-left transition-colors hover:bg-[#252525]"
+                    className={`flex items-center justify-between gap-4 px-5 py-3 text-left transition-colors ${
+                      activeSuggestionIndex === index
+                        ? 'bg-[#252525]'
+                        : 'hover:bg-[#252525]'
+                    }`}
                   >
                     <span className="font-poppins text-[15px] font-medium leading-[22px] text-white">
                       {tag.label}
