@@ -52,6 +52,21 @@ const createParagraphNode = (children: ForumRichTextNode[]): ForumRichTextNode =
   version: 1,
 })
 
+const createEmptyParagraphElement = (): HTMLParagraphElement => {
+  const paragraph = document.createElement('p')
+  paragraph.appendChild(document.createElement('br'))
+  return paragraph
+}
+
+const parsePositiveNumber = (value: string | null | undefined): number | undefined => {
+  if (!value) {
+    return undefined
+  }
+
+  const parsed = Number(value)
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+}
+
 const normalizeHref = (href: string): string => {
   const trimmed = href.trim()
 
@@ -127,6 +142,8 @@ const serializeInlineNode = (node: ChildNode, options: InlineSerializeOptions): 
       createForumUploadNode({
         url: src,
         altText: node.getAttribute('alt')?.trim() || 'Uploaded image',
+        width: parsePositiveNumber(node.getAttribute('width')),
+        height: parsePositiveNumber(node.getAttribute('height')),
       }),
     ]
   }
@@ -160,6 +177,8 @@ const serializeBlockNode = (node: ChildNode): ForumRichTextNode[] => {
       createForumUploadNode({
         url: src,
         altText: imageElement?.getAttribute('alt')?.trim() || 'Uploaded image',
+        width: parsePositiveNumber(imageElement?.getAttribute('width')),
+        height: parsePositiveNumber(imageElement?.getAttribute('height')),
       }),
     ]
   }
@@ -197,6 +216,13 @@ const serializeBlockNode = (node: ChildNode): ForumRichTextNode[] => {
 
   if (inlineChildren.length === 0 && tagName !== 'p' && tagName !== 'div') {
     return []
+  }
+
+  if (
+    (tagName === 'p' || tagName === 'div')
+    && inlineChildren.every((child) => child.type === 'linebreak')
+  ) {
+    return [createParagraphNode([])]
   }
 
   return [createParagraphNode(inlineChildren)]
@@ -289,7 +315,9 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     }
   }, [isEmojiPickerOpen])
 
-  const syncEditorState = () => {
+  const syncEditorState = (maintainCaret = false) => {
+    ensureEditorHasParagraph(maintainCaret)
+
     if (!editorRef.current) {
       return
     }
@@ -302,8 +330,42 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     onChange(documentValue, plainText)
   }
 
+  useEffect(() => {
+    const editor = editorRef.current
+    if (!editor || editor.childNodes.length > 0) {
+      return
+    }
+
+    editor.appendChild(createEmptyParagraphElement())
+  }, [])
+
   const focusEditor = () => {
     editorRef.current?.focus()
+  }
+
+  const isMeaningfulEditorNode = (node: ChildNode): boolean => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return (node.textContent ?? '').trim().length > 0
+    }
+
+    if (!(node instanceof HTMLElement)) {
+      return false
+    }
+
+    const tagName = node.tagName.toLowerCase()
+    if (tagName === 'br') {
+      return false
+    }
+
+    if (
+      (tagName === 'p' || tagName === 'div')
+      && (node.textContent ?? '').trim().length === 0
+      && !node.querySelector('img, figure, ul, ol')
+    ) {
+      return false
+    }
+
+    return true
   }
 
   const saveSelection = () => {
@@ -334,6 +396,35 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     savedSelectionRef.current = range.cloneRange()
   }
 
+  const ensureEditorHasParagraph = (placeCaret = false) => {
+    const editor = editorRef.current
+    if (!editor) {
+      return
+    }
+
+    const hasMeaningfulContent = Array.from(editor.childNodes).some((node) => isMeaningfulEditorNode(node))
+    if (hasMeaningfulContent) {
+      return
+    }
+
+    let paragraph =
+      editor.firstElementChild instanceof HTMLParagraphElement
+        ? editor.firstElementChild
+        : null
+
+    if (!paragraph || editor.childNodes.length !== 1) {
+      editor.replaceChildren(createEmptyParagraphElement())
+      paragraph =
+        editor.firstElementChild instanceof HTMLParagraphElement
+          ? editor.firstElementChild
+          : null
+    }
+
+    if (placeCaret && paragraph && document.activeElement === editor) {
+      placeCaretInside(paragraph)
+    }
+  }
+
   const restoreSelection = () => {
     const selection = window.getSelection()
     const savedRange = savedSelectionRef.current
@@ -361,21 +452,48 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
 
     const figure = document.createElement('figure')
     figure.dataset.forumUpload = 'true'
+    figure.style.display = 'inline-flex'
+    figure.style.width = 'fit-content'
+    figure.style.maxWidth = 'min(100%, 420px)'
+    figure.style.margin = '16px 0'
+    figure.style.overflow = 'hidden'
+    figure.style.borderRadius = '20px'
+    figure.style.border = '1px solid rgba(74, 74, 74, 0.70)'
+    figure.style.background = '#202020'
 
     const image = document.createElement('img')
     image.src = payload.url
     image.alt = payload.altText
+    image.style.display = 'block'
+    image.style.maxWidth = '100%'
+    image.style.width = 'auto'
+    image.style.height = 'auto'
+    image.style.maxHeight = '320px'
+    image.style.objectFit = 'contain'
+
+    if (payload.width) {
+      image.width = payload.width
+    }
+
+    if (payload.height) {
+      image.height = payload.height
+    }
+
     figure.appendChild(image)
 
-    const paragraph = document.createElement('p')
-    paragraph.appendChild(document.createElement('br'))
+    const paragraph = createEmptyParagraphElement()
 
-    editor.appendChild(figure)
-    editor.appendChild(paragraph)
+    const hasMeaningfulContent = Array.from(editor.childNodes).some((node) => isMeaningfulEditorNode(node))
+    if (hasMeaningfulContent) {
+      editor.appendChild(figure)
+      editor.appendChild(paragraph)
+    } else {
+      editor.replaceChildren(figure, paragraph)
+    }
 
     focusEditor()
     placeCaretInside(paragraph)
-    syncEditorState()
+    syncEditorState(true)
   }
 
   const runCommand = (command: string, value?: string) => {
@@ -383,7 +501,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     restoreSelection()
     document.execCommand(command, false, value)
     saveSelection()
-    syncEditorState()
+    syncEditorState(true)
   }
 
   const handleEmojiSelect = (emoji: string) => {
@@ -413,7 +531,7 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
     selection.addRange(range)
     savedSelectionRef.current = range.cloneRange()
     setIsEmojiPickerOpen(false)
-    syncEditorState()
+    syncEditorState(true)
   }
 
   const handleLinkAction = () => {
@@ -544,15 +662,21 @@ const ForumRichTextEditor: React.FC<ForumRichTextEditorProps> = ({
           ref={editorRef}
           contentEditable={!disabled}
           suppressContentEditableWarning
-          onInput={syncEditorState}
+          onInput={() => {
+            syncEditorState(true)
+            saveSelection()
+          }}
           onBlur={() => {
             saveSelection()
-            syncEditorState()
+            syncEditorState(false)
           }}
-          onFocus={saveSelection}
+          onFocus={() => {
+            ensureEditorHasParagraph(false)
+            saveSelection()
+          }}
           onKeyUp={saveSelection}
           onMouseUp={saveSelection}
-          className="min-h-[150px] rounded-[30px] bg-[#262626] p-6 text-white font-poppins text-[18px] leading-[28px] outline-none [&_a]:text-[#F29F04] [&_a]:underline [&_figure]:my-4 [&_figure]:overflow-hidden [&_figure]:rounded-[20px] [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-[20px] [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:min-h-[28px] [&_p]:break-words [&_p]:whitespace-pre-wrap [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
+          className="min-h-[150px] rounded-[30px] bg-[#262626] p-6 text-white font-poppins text-[18px] leading-[28px] outline-none [&_a]:text-[#F29F04] [&_a]:underline [&_figure]:my-4 [&_figure]:max-w-full [&_figure]:overflow-hidden [&_figure]:rounded-[20px] [&_figure]:border [&_figure]:border-[rgba(74,74,74,0.70)] [&_figure]:bg-[#202020] [&_img]:block [&_img]:h-auto [&_img]:max-h-[320px] [&_img]:max-w-full [&_img]:rounded-[20px] [&_img]:object-contain [&_ol]:my-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:min-h-[28px] [&_p]:break-words [&_p]:whitespace-pre-wrap [&_ul]:my-4 [&_ul]:list-disc [&_ul]:pl-6"
         />
       </div>
     </div>

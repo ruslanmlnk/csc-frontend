@@ -72,6 +72,16 @@ export const isForumRichTextDocument = (value: unknown): value is ForumRichTextD
   return Boolean(root && root.type === 'root' && Array.isArray(root.children))
 }
 
+const looksLikeSerializedJson = (value: string): boolean => {
+  const trimmed = value.trim()
+
+  return (
+    (trimmed.startsWith('{') && trimmed.endsWith('}'))
+    || (trimmed.startsWith('[') && trimmed.endsWith(']'))
+    || (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  )
+}
+
 const nodeHasVisibleContent = (node: ForumRichTextNode | null | undefined): boolean => {
   if (!node) {
     return false
@@ -133,7 +143,62 @@ const extractNodePlainText = (node: ForumRichTextNode | null | undefined): strin
   return ''
 }
 
+const extractDocumentPlainText = (value: ForumRichTextDocument): string =>
+  value.root.children
+    .map((child) => extractNodePlainText(child))
+    .join('')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+
+const tryParseSerializedForumRichText = (
+  value: string,
+  depth = 0,
+): ForumRichTextDocument | null => {
+  if (depth > 2 || !looksLikeSerializedJson(value)) {
+    return null
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown
+
+    if (typeof parsed === 'string') {
+      return tryParseSerializedForumRichText(parsed, depth + 1)
+    }
+
+    if (!isForumRichTextDocument(parsed)) {
+      return null
+    }
+
+    const nestedDocument = tryParseSerializedForumRichText(
+      extractDocumentPlainText(parsed),
+      depth + 1,
+    )
+
+    return nestedDocument || parsed
+  } catch {
+    return null
+  }
+}
+
+export const normalizeForumRichTextValue = (value: unknown): ForumRichTextDocument | null => {
+  if (typeof value === 'string') {
+    return tryParseSerializedForumRichText(value)
+  }
+
+  if (!isForumRichTextDocument(value)) {
+    return null
+  }
+
+  const nestedDocument = tryParseSerializedForumRichText(extractDocumentPlainText(value))
+  return nestedDocument || value
+}
+
 export const extractPlainTextFromForumRichText = (value: unknown): string => {
+  const normalizedDocument = normalizeForumRichTextValue(value)
+  if (normalizedDocument) {
+    return extractDocumentPlainText(normalizedDocument)
+  }
+
   if (typeof value === 'string') {
     return value
   }
@@ -142,14 +207,15 @@ export const extractPlainTextFromForumRichText = (value: unknown): string => {
     return ''
   }
 
-  return value.root.children
-    .map((child) => extractNodePlainText(child))
-    .join('')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  return extractDocumentPlainText(value)
 }
 
 export const hasVisibleForumRichTextContent = (value: unknown): boolean => {
+  const normalizedDocument = normalizeForumRichTextValue(value)
+  if (normalizedDocument) {
+    return normalizedDocument.root.children.some((child) => nodeHasVisibleContent(child))
+  }
+
   if (typeof value === 'string') {
     return value.trim().length > 0
   }

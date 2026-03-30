@@ -1,6 +1,11 @@
 import React, { Fragment } from 'react'
 import Image from 'next/image'
-import { extractPlainTextFromForumRichText, isForumRichTextDocument, type ForumRichTextNode } from '@/lib/forumRichText'
+import {
+  extractPlainTextFromForumRichText,
+  isForumRichTextDocument,
+  normalizeForumRichTextValue,
+  type ForumRichTextNode,
+} from '@/lib/forumRichText'
 
 type ForumRichTextRendererProps = {
   content: unknown
@@ -129,14 +134,17 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
         const height = typeof node.height === 'number' && node.height > 0 ? node.height : 800
 
         return (
-          <figure key={key} className="m-0 overflow-hidden rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#202020]">
+          <figure
+            key={key}
+            className="m-0 flex justify-center overflow-hidden rounded-[24px] border border-[rgba(74,74,74,0.70)] bg-[#202020] p-2"
+          >
             <Image
               src={src}
               alt={alt}
               width={width}
               height={height}
               sizes="(max-width: 860px) 100vw, 760px"
-              className="h-auto w-full object-cover"
+              className="mx-auto h-auto max-h-[520px] w-auto max-w-full object-contain"
             />
           </figure>
         )
@@ -150,6 +158,16 @@ const renderNodes = (nodes: ForumRichTextNode[], prefix: string): React.ReactNod
   })
 
 const ForumRichTextRenderer: React.FC<ForumRichTextRendererProps> = ({ content }) => {
+  const normalizedContent = normalizeForumRichTextValue(content)
+
+  if (normalizedContent) {
+    return (
+      <div className="flex flex-col gap-4">
+        {renderNodes(normalizedContent.root.children, 'forum-rich-text')}
+      </div>
+    )
+  }
+
   if (typeof content === 'string') {
     return (
       <p className="m-0 whitespace-pre-line break-words text-white font-poppins text-[20px] font-medium leading-[32px]">
@@ -167,11 +185,7 @@ const ForumRichTextRenderer: React.FC<ForumRichTextRendererProps> = ({ content }
     ) : null
   }
 
-  return (
-    <div className="flex flex-col gap-4">
-      {renderNodes(content.root.children, 'forum-rich-text')}
-    </div>
-  )
+  return null
 }
 
 export default ForumRichTextRenderer
