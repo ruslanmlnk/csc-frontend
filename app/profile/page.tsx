@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Plus, UserRound, Users, Loader2, Globe } from 'lucide-react';
 import CreateThreadModal from './CreateThreadModal';
 import { BackendUser } from '@/lib/backend/users';
-import { getProfilePageGlobals, type ProfilePageBanner } from '@/lib/backend/profilePageGlobals';
+import type { ProfilePageBanner } from '@/lib/backend/profilePageGlobals';
 import { toTelegramHref } from '@/lib/socialLinks';
 import GlowBackground from '@/app/components/layout/GlowBackground';
 import { InstagramIcon, TelegramIcon, TikTokIcon } from '@/app/components/profile/SocialIcons';
@@ -222,19 +222,34 @@ const ProfilePage: React.FC = () => {
     let active = true;
 
     const loadProfileBanner = async () => {
-      const { banner } = await getProfilePageGlobals();
+      try {
+        const response = await fetch(`/api/profile/page-globals?locale=${language}`, {
+          cache: 'no-store',
+        });
+        const data = (await response.json().catch(() => null)) as { banner?: ProfilePageBanner | null } | null;
 
-      if (active) {
-        setProfileBanner(banner);
+        if (!response.ok) {
+          throw new Error('Failed to load profile page globals');
+        }
+
+        if (active) {
+          setProfileBanner(data?.banner || null);
+        }
+      } catch (error) {
+        console.error('Failed to load profile banner', error);
+
+        if (active) {
+          setProfileBanner(null);
+        }
       }
     };
 
-    loadProfileBanner();
+    void loadProfileBanner();
 
     return () => {
       active = false;
     };
-  }, []);
+  }, [language]);
 
   const refreshUserThreads = useCallback(async () => {
     if (user?.id === undefined || user?.id === null) {
