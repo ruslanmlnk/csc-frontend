@@ -17,12 +17,11 @@ interface BlogCardProps {
 const BlogCard: React.FC<BlogCardProps> = ({ post }) => {
     return (
         <div className={`flex flex-col p-4 pb-8 gap-6 rounded-[40px] flex-1 border ${post.active ? 'border-2 border-[rgba(242,159,4,0.7)] bg-[#0D0D0D]' : 'border-[rgba(74,74,74,0.7)] bg-[#1A1A1A]'} transition-all duration-300 group cursor-pointer hover:border-[#FCC660]`}>
-            <div className={`relative w-full h-[300px] rounded-[40px] overflow-hidden border ${post.active ? 'border-none' : 'border-[rgba(74,74,74,0.7)]'}`}>
+            <div className={`relative w-full rounded-[40px] overflow-hidden border ${post.active ? 'border-none' : 'border-[rgba(74,74,74,0.7)]'}`}>
                 <Image
                     src={post.image}
                     alt={post.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-cover width-full group-hover:scale-105 transition-transform duration-500"
                 />
             </div>
             <div className="flex flex-col gap-4 px-4">
